@@ -83,6 +83,7 @@ host, video-search-1258344701.shiply-cdn.qq.com
 host, video-vip-1258344701.shiply-cdn.qq.com
 host, yoo.gtimg.com
 host-suffix, qqvideo.gtimg.com
+host-suffix, v.smtcdns.com
 host-suffix, ixiguavideo.com
 host-suffix, toutiao.com
 host-suffix, 2333333333333.com
@@ -129,13 +130,10 @@ host-suffix, bytedns2.com
 host-suffix, byteeffecttos.com
 host-suffix, bytefcdn.com
 host-suffix, bytefcdnrd.com
-host-suffix, bytegecko.com
-host-suffix, bytegoofy.com
 host-suffix, bytegslb.com
 host-suffix, bytelb.net
 host-suffix, bytelove.cn
 host-suffix, bytemaimg.com
-host-suffix, bytescm.com
 host-suffix, bytesfield.com
 host-suffix, bytesmanager.com
 host-suffix, bytesyscdn.com
@@ -238,7 +236,6 @@ host-suffix, huoshanxiaoshipin.net
 host-suffix, huoshanzhibo.cn
 host-suffix, huoshanzhibo.com
 host-suffix, huoshanzhibo.net
-host-suffix, ibytedapm.com
 host-suffix, icphoto.cn
 host-suffix, idouyinpic.com
 host-suffix, idouyinstatic.com
@@ -307,7 +304,6 @@ host-suffix, oceanengine.cn
 host-suffix, oceanengine.com
 host-suffix, oortgslb.com
 host-suffix, pacmantwo.com
-host-suffix, pangle.cn
 host-suffix, pipix.com
 host-suffix, qmoji.mobi
 host-suffix, qmoji.net
@@ -420,6 +416,11 @@ host-suffix, zjgslb.com
 host-suffix, zjurl.cn
 host-suffix, zlinkurl.cn
 host-suffix, zlinkurl.com
+host-suffix, bytegecko.com
+host-suffix, bytegoofy.com
+host-suffix, bytehwm.com
+host-suffix, bytescm.com
+host-suffix, ibytedapm.com
 host-suffix, 00y9334535.com
 host-suffix, 027g3nkf40.com
 host-suffix, 02a5ji7vso.com

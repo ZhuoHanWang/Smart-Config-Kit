@@ -83,6 +83,7 @@ DOMAIN,video-search-1258344701.shiply-cdn.qq.com
 DOMAIN,video-vip-1258344701.shiply-cdn.qq.com
 DOMAIN,yoo.gtimg.com
 DOMAIN-SUFFIX,qqvideo.gtimg.com
+DOMAIN-SUFFIX,v.smtcdns.com
 DOMAIN-SUFFIX,ixiguavideo.com
 DOMAIN-SUFFIX,toutiao.com
 DOMAIN-SUFFIX,2333333333333.com
@@ -129,13 +130,10 @@ DOMAIN-SUFFIX,bytedns2.com
 DOMAIN-SUFFIX,byteeffecttos.com
 DOMAIN-SUFFIX,bytefcdn.com
 DOMAIN-SUFFIX,bytefcdnrd.com
-DOMAIN-SUFFIX,bytegecko.com
-DOMAIN-SUFFIX,bytegoofy.com
 DOMAIN-SUFFIX,bytegslb.com
 DOMAIN-SUFFIX,bytelb.net
 DOMAIN-SUFFIX,bytelove.cn
 DOMAIN-SUFFIX,bytemaimg.com
-DOMAIN-SUFFIX,bytescm.com
 DOMAIN-SUFFIX,bytesfield.com
 DOMAIN-SUFFIX,bytesmanager.com
 DOMAIN-SUFFIX,bytesyscdn.com
@@ -238,7 +236,6 @@ DOMAIN-SUFFIX,huoshanxiaoshipin.net
 DOMAIN-SUFFIX,huoshanzhibo.cn
 DOMAIN-SUFFIX,huoshanzhibo.com
 DOMAIN-SUFFIX,huoshanzhibo.net
-DOMAIN-SUFFIX,ibytedapm.com
 DOMAIN-SUFFIX,icphoto.cn
 DOMAIN-SUFFIX,idouyinpic.com
 DOMAIN-SUFFIX,idouyinstatic.com
@@ -307,7 +304,6 @@ DOMAIN-SUFFIX,oceanengine.cn
 DOMAIN-SUFFIX,oceanengine.com
 DOMAIN-SUFFIX,oortgslb.com
 DOMAIN-SUFFIX,pacmantwo.com
-DOMAIN-SUFFIX,pangle.cn
 DOMAIN-SUFFIX,pipix.com
 DOMAIN-SUFFIX,qmoji.mobi
 DOMAIN-SUFFIX,qmoji.net
@@ -420,6 +416,11 @@ DOMAIN-SUFFIX,zjgslb.com
 DOMAIN-SUFFIX,zjurl.cn
 DOMAIN-SUFFIX,zlinkurl.cn
 DOMAIN-SUFFIX,zlinkurl.com
+DOMAIN-SUFFIX,bytegecko.com
+DOMAIN-SUFFIX,bytegoofy.com
+DOMAIN-SUFFIX,bytehwm.com
+DOMAIN-SUFFIX,bytescm.com
+DOMAIN-SUFFIX,ibytedapm.com
 DOMAIN-SUFFIX,00y9334535.com
 DOMAIN-SUFFIX,027g3nkf40.com
 DOMAIN-SUFFIX,02a5ji7vso.com

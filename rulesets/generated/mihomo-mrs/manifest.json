@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-27T23:08:36.371Z",
+  "generated_at": "2026-10-04T23:18:12.481Z",
   "source": "rulesets/source/routing-graph.js raw provider graph before Mihomo MRS normalization",
-  "mihomo_bin": "mihomo-v1.19.31",
+  "mihomo_bin": "mihomo-v1.19.32",
   "output_dir": "rulesets/generated/mihomo-mrs",
   "converted": [
     {
@@ -2794,13 +2794,13 @@
       "source_format": "text",
       "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/supplemental/clash/adfp-direct.list",
       "type_counts": {
-        "domain": 20
+        "domain": 22
       },
       "generated": [
         {
           "behavior": "domain",
           "file": "scki-adfp-direct.mrs",
-          "entries": 20
+          "entries": 22
         }
       ]
     },
@@ -3178,13 +3178,13 @@
       "source_format": "text",
       "source_url": "https://ruleset.skk.moe/Clash/domainset/reject_phishing.txt",
       "type_counts": {
-        "domain": 142635
+        "domain": 138676
       },
       "generated": [
         {
           "behavior": "domain",
           "file": "sukka-phishing.mrs",
-          "entries": 142635
+          "entries": 138676
         }
       ]
     },
@@ -4953,7 +4953,7 @@
       "source_format": "yaml",
       "source_url": "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ByteDance/ByteDance.yaml",
       "type_counts": {
-        "domain": 369,
+        "domain": 370,
         "ipcidr": 1,
         "PROCESS-NAME": 1
       },
@@ -4961,7 +4961,7 @@
         {
           "behavior": "domain",
           "file": "bytedance-domain.mrs",
-          "entries": 369
+          "entries": 370
         },
         {
           "behavior": "ipcidr",
@@ -5675,7 +5675,7 @@
       "source_format": "text",
       "source_url": "https://fastly.jsdelivr.net/gh/szkane/ClashRuleSet@main/Clash/Ruleset/AiDomain.list",
       "type_counts": {
-        "domain": 229,
+        "domain": 230,
         "PROCESS-NAME": 13,
         "ipcidr": 28
       },
@@ -5683,7 +5683,7 @@
         {
           "behavior": "domain",
           "file": "szkane-ai-domain.mrs",
-          "entries": 213
+          "entries": 214
         },
         {
           "behavior": "ipcidr",
@@ -5958,7 +5958,7 @@
       "source_format": "yaml",
       "source_url": "https://fastly.jsdelivr.net/gh/VPSDance/ai-proxy-rules@main/rules/clash/coding.yaml",
       "type_counts": {
-        "domain": 213,
+        "domain": 217,
         "PROCESS-NAME": 23,
         "ipcidr": 6,
         "IP-ASN": 3
@@ -5967,7 +5967,7 @@
         {
           "behavior": "domain",
           "file": "vpsdance-ai-coding-domain.mrs",
-          "entries": 207
+          "entries": 211
         },
         {
           "behavior": "ipcidr",
