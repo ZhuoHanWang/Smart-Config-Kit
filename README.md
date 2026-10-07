@@ -219,7 +219,7 @@ config:
 flowchart TB
     Start(["<b>🚀 客户端启动</b>"])
 
-    L1["<b>① default-nameserver</b> &nbsp;·&nbsp; DoH-over-IP + 明文兜底 &nbsp;·&nbsp; 仅用于 bootstrap<br/><br/><b>https://223.5.5.5/dns-query &nbsp;·&nbsp; https://223.6.6.6/dns-query</b><br/><b>https://8.8.8.8/dns-query &nbsp;·&nbsp; https://1.1.1.1/dns-query &nbsp;·&nbsp; 223.5.5.5</b><br/>启动时解析下方 DoH 服务的域名（dns.alidns.com 等）<br/>业务查询由 nameserver-policy / nameserver / fallback 接管"]
+    L1["<b>① default-nameserver</b> &nbsp;·&nbsp; DoH-over-IP + 明文兜底 &nbsp;·&nbsp; 仅用于 bootstrap<br/><br/><b>https://223.5.5.5/dns-query &nbsp;·&nbsp; https://223.6.6.6/dns-query</b><br/><b>https://8.8.8.8/dns-query &nbsp;·&nbsp; https://1.1.1.1/dns-query </b><br/>启动时解析下方 DoH 服务的域名（dns.alidns.com 等）<br/>业务查询由 nameserver-policy / nameserver / fallback 接管"]
 
     Gate{{"<b>🔀 按域名性质分三路查询</b>"}}
 
