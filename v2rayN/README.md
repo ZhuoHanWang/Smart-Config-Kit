@@ -1,8 +1,10 @@
-# v2rayN 使用教程（对齐 Clash Party v6.0.14）
+# v2rayN 使用教程（对齐 Clash Party v6.0.15）
+
+> 测速与海外 QUIC 可选策略：参见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
 
 > 目录简介：这里提供 v2rayN 多核心导入教程和 Xray 路由 JSON fallback 产物说明。
 >
-> 路径 C（Xray 核）产物：`v2rayN/v2rayN(xray).json` v6.0.14-v2n.5（Build 2026-09-29；基线：Clash Party v6.0.14；变更历史见 `v2rayN/CHANGELOG.md`）。
+> 路径 C（Xray 核）产物：`v2rayN/v2rayN(xray).json` v6.0.15-v2n.6（Build 2026-10-07；基线：Clash Party v6.0.15；变更历史见 `v2rayN/CHANGELOG.md`）。
 
 ---
 

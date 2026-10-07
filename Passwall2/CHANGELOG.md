@@ -6,6 +6,11 @@
 
 ---
 
+## v6.0.15-pw2.6 (2026-10-07)
+
+- shunt 规则随海外 UDP/443 策略选择同步；该产物不管理节点测速。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-pw2.5 (2026-09-29)
 
 - SYNC：第 001 fused SRS shunt rule 加入微信 HTTPDNS 两个精确域名并保持 direct 国内语义。

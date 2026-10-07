@@ -5,8 +5,28 @@
 // upstream provider/rule relationship used by MRS and fused-rule compilers.
 
 const SOURCE_GRAPH_ID = 'rulesets/source/routing-graph.js';
-const SOURCE_GRAPH_VERSION = 'v6.0.14';
+const SOURCE_GRAPH_VERSION = 'v6.0.15';
 const VERSION = SOURCE_GRAPH_VERSION;
+const TRAFFIC_OPTIONS = require('./traffic-options.json');
+
+function validateTrafficOptions(options) {
+  if (!options || Object.prototype.toString.call(options) !== '[object Object]' ||
+      Object.keys(options).some(key => key !== 'healthCheckProfile' && key !== 'quicPolicy') ||
+      (options.healthCheckProfile !== 'standard' && options.healthCheckProfile !== 'power-save') ||
+      (options.quicPolicy !== 'block-foreign' && options.quicPolicy !== 'follow-rules')) {
+    throw new Error('Invalid traffic options: healthCheckProfile must be standard or power-save; quicPolicy must be block-foreign or follow-rules');
+  }
+  return options;
+}
+
+function getTrafficOptions() {
+  return cloneJson(validateTrafficOptions(TRAFFIC_OPTIONS));
+}
+
+function getHealthCheckSettings(profile = getTrafficOptions().healthCheckProfile) {
+  if (profile !== 'standard' && profile !== 'power-save') throw new Error('Invalid health check profile');
+  return { intervalSeconds: profile === 'power-save' ? 900 : 300, lazy: true };
+}
 
 let SCKI_DISABLE_MIHOMO_MRS_OVERRIDES = false;
 
@@ -1085,7 +1105,20 @@ function injectRuleProviders(config) {
 //  模块 H：规则注入
 // ================================================================
 
-function injectRules(config) {
+const BLOCK_FOREIGN_QUIC_RULES = Object.freeze([
+  `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,youtube)),${BIZ.YT}`,
+  `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,google)),${BIZ.GOOGLE}`,
+  `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,microsoft)),${BIZ.MS}`,
+  `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,apple)),${BIZ.APPLE}`,
+  'AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT',
+]);
+
+function getQuicRules(mode) {
+  if (mode !== 'block-foreign' && mode !== 'follow-rules') throw new Error('Invalid QUIC policy: ' + mode);
+  return mode === 'block-foreign' ? BLOCK_FOREIGN_QUIC_RULES.slice() : [];
+}
+
+function injectRules(config, quicPolicy) {
   config.rules = [
     // Repository-owned supplemental guards stay before all ad/phishing/TIF providers.
     `RULE-SET,${SCKI.ADFP_DIRECT},DIRECT`,
@@ -1119,12 +1152,8 @@ function injectRules(config) {
     // v5.4.34 FIX#169-AMAP: webapi.amap.com 属高德地图国内 API。专用 amap 规则放在广告/威胁规则之后、
     //   TikTok/GFW/geolocation-!cn 宽规则之前，避免依赖尾部 RULE-SET,cn 才直连。
     `RULE-SET,amap,${BIZ.CN_SITE}`,
-    // v5.4.22 #1 借鉴 Proxy-override：QUIC 精细化——YouTube/Google/MS/Apple 白名单豁免（QUIC 走对应业务组），其余海外 QUIC REJECT 强制回退 HTTP/2
-    `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,youtube)),${BIZ.YT}`,
-    `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,google)),${BIZ.GOOGLE}`,
-    `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,microsoft)),${BIZ.MS}`,
-    `AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,apple)),${BIZ.APPLE}`,
-    `AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT`,
+    // User-selectable QUIC policy. Keep these rules after ad guards and before private routing.
+    ...getQuicRules(quicPolicy),
     // v5.2.1 FIX#19: DST-PORT,7680 必须在 GEOIP,private 之前，否则私有 IP 先匹配走 DIRECT
     'DST-PORT,7680,REJECT',
     'GEOSITE,private,DIRECT',
@@ -1963,12 +1992,14 @@ function injectRules(config) {
 
 function buildMihomoRoutingGraph(options) {
   const opts = options || {};
+  const quicPolicy = opts.quicPolicy === undefined ? getTrafficOptions().quicPolicy : opts.quicPolicy;
+  getQuicRules(quicPolicy);
   const previousDisableMrs = SCKI_DISABLE_MIHOMO_MRS_OVERRIDES;
   SCKI_DISABLE_MIHOMO_MRS_OVERRIDES = opts.applyMihomoMrsOverrides === false;
   try {
     const config = { 'rule-providers': {}, rules: [] };
     injectRuleProviders(config);
-    injectRules(config);
+    injectRules(config, quicPolicy);
     return {
       authority: SOURCE_GRAPH_ID,
       version: SOURCE_GRAPH_VERSION,
@@ -1995,6 +2026,10 @@ module.exports = {
   BIZ,
   DOMESTIC_AUTHORITY_ANCHOR_RULE,
   GENERIC_INTL_FALLBACK_RULES,
+  validateTrafficOptions,
+  getTrafficOptions,
+  getHealthCheckSettings,
+  getQuicRules,
   buildMihomoRoutingGraph,
   getRawRoutingGraph,
   getMihomoNormalizedRoutingGraph,

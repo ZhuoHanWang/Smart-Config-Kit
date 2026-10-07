@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
+const { getTrafficOptions, getQuicRules } = require('../../rulesets/source/routing-graph');
 
 const root = path.resolve(__dirname, '../..');
 const targets = [
@@ -300,6 +301,6 @@ test('FlClash replaces malformed rule-provider container before fused output', (
     assert.equal(Array.isArray(serialized['rule-providers']), false);
     assert.equal(typeof serialized['rule-providers'], 'object');
     assert.equal(Object.keys(serialized['rule-providers']).length, 132);
-    assert.equal(serialized.rules.length, 151);
+    assert.equal(serialized.rules.length, 146 + getQuicRules(getTrafficOptions().quicPolicy).length);
   }
 });

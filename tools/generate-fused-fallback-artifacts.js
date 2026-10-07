@@ -2,6 +2,7 @@
 'use strict';
 
 const fs = require('node:fs');
+const { writeRepositoryArtifact } = require('./lib/write-repository-artifact');
 const path = require('node:path');
 const { repositoryAssetUrl } = require('./lib/generated-asset-url');
 
@@ -15,10 +16,10 @@ const V2RAYN_FILE = path.join(REPO_ROOT, 'v2rayN/v2rayN(xray).json');
 const PASSWALL_SHUNT_DIR = path.join(REPO_ROOT, 'Passwall/shunt-rules');
 const PASSWALL2_SHUNT_DIR = path.join(REPO_ROOT, 'Passwall2/shunt-rules');
 
-const BUILD_DATE = '2026-09-29';
-const V2RAYN_VERSION = 'v6.0.14-v2n.5';
-const PASSWALL_VERSION = 'v6.0.14-pw.5';
-const PASSWALL2_VERSION = 'v6.0.14-pw2.5';
+const BUILD_DATE = '2026-10-07';
+const V2RAYN_VERSION = 'v6.0.15-v2n.6';
+const PASSWALL_VERSION = 'v6.0.15-pw.6';
+const PASSWALL2_VERSION = 'v6.0.15-pw2.6';
 
 const DIRECT_POLICIES = new Set([
   'DIRECT',
@@ -92,7 +93,7 @@ function readJson(file) {
 function writeText(file, text) {
   const target = ensureRepoPath(file);
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, text, 'utf8');
+  writeRepositoryArtifact(target, text);
 }
 
 function resetDir(dir) {

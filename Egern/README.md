@@ -1,6 +1,10 @@
 # Egern 使用教程
 
-> 版本：**v6.0.14-egern.6**（Build 2026-09-30；正式跟随 Clash Party v6.0.14 / CMFA 融合规则顺序，原生规则集使用发布版本缓存键）
+> 测速与海外 QUIC 可选策略：参见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
+> 版本：**v6.0.15-egern.7**（Build 2026-10-07；正式跟随 Clash Party v6.0.15 / CMFA 融合规则顺序，原生规则集使用发布版本缓存键）
+
+本次 CMFA 默认测速 `lazy` 设置仅更新 Egern 生成清单的来源元数据哈希；Egern `smart` 组继续按原生自适应方式探测。
 
 ## 定位
 
@@ -11,6 +15,8 @@ Egern 已纳入正式同步产物，但不能直接复制 Mihomo/Clash 的 `rule
 - `Egern.yaml`：Egern Profile，可导入，可接订阅，包含 22 个 `smart` 区域组、33 个业务组；规则、顶层 `rule_set` 和非空资产的实际数量由本次上游输入决定，Profile 头部和生成清单会记录结果。
 - `rulesets/generated/egern/*.yaml`：由融合 rule-provider 生成的 Egern 原生规则集。
 - `rulesets/generated/egern/manifest.json`：无时间戳的生成合同，记录 CMFA / source graph / Profile / 每个原生 YAML 的内容哈希与引用顺序，供全产物 validator 检查陈旧、漏引用和重复资产。
+- `rulesets/generated/egern-traffic-snapshot.json.gz`：随仓库保存的已发布 Egern 原生资产快照。仅切换测速/QUIC 选项时，生成器 `--reuse-assets` 核对源及内容哈希后读取它；默认档复用原资产，`follow-rules` 重算受影响的域名部分并保留非域名部分。
+- 完整规则刷新使用不带 `--reuse-assets` 的 `node tools/generate-egern-from-cmfa.js`：先更新可复用的 `block-foreign` 中立快照，再输出当前 QUIC 选项的 Profile 和原生资产；当前为 `follow-rules` 时无需先切回默认档。
 - `tools/generate-egern-supplemental.js`：保留补充规则集的独立格式转换工具；正式 Profile 以 `tools/generate-egern-from-cmfa.js` 的 generated 输出为准。
 - `tools/generate-egern-from-cmfa.js`：从 `Clash Meta For Android/CMFA(mihomo).yaml` 生成正式 Egern Profile。
 

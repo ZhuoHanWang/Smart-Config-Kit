@@ -5,6 +5,11 @@
 
 ---
 
+## v6.0.15-sing.6 (2026-10-07)
+
+- 生成产物支持 urltest 15 分钟测速档和海外 UDP/443 策略选择，保留原有 idle_timeout。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-sing.5 (2026-09-29)
 
 - SYNC：第 001 fused SRS 加入微信 HTTPDNS 两个精确域名并绑定 DIRECT 出站，优先于 BlockHttpDNS 拦截。

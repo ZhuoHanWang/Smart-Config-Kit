@@ -5,8 +5,10 @@ const childProcess = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { getTrafficOptions } = require('../rulesets/source/routing-graph');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
+const TRAFFIC_OPTIONS = getTrafficOptions();
 const subscriptionAdapterProfiles = require('./lib/subscription-adapter-profiles');
 const SUBSCRIPTION_ADAPTER_PROFILE_CONTRACT = subscriptionAdapterProfiles.assertValidProfileContract(
   subscriptionAdapterProfiles.readProfileContract(REPO_ROOT),
@@ -164,7 +166,8 @@ dns:
     - https://cloudflare-dns.com/dns-query
 proxy-groups: []
 rule-providers: {}
-rules: []
+rules:
+  - DST-PORT,7680,REJECT
 `;
   fs.writeFileSync(configPath, config, 'utf8');
   fs.writeFileSync(overridePath, override, 'utf8');
@@ -252,7 +255,7 @@ function readYamlAsJson(ruby, yamlPath) {
 }
 
 function runProcessor(ruby, rubyPath, configPath, overridePath, statusPath, profile = 'adaptive') {
-  const result = childProcess.spawnSync(ruby, [rubyPath, configPath, overridePath, statusPath, profile], { encoding: 'utf8' });
+  const result = childProcess.spawnSync(ruby, [rubyPath, configPath, overridePath, statusPath, profile, '', TRAFFIC_OPTIONS.healthCheckProfile, TRAFFIC_OPTIONS.quicPolicy], { encoding: 'utf8' });
   if (result.status !== 0) throw new Error((result.stderr || result.stdout || 'OpenClash Ruby processor failed').trim());
 }
 
@@ -422,7 +425,7 @@ function runTarget(target, ruby) {
   assert(source.includes(`SCKI_SUBSCRIPTION_ADAPTER_PROFILE="\${SCKI_SUBSCRIPTION_ADAPTER_PROFILE:-${SUBSCRIPTION_ADAPTER_PROFILE_CONTRACT.default}}"`), `${target.id}: shell selects the profile-contract default locally`, failures);
   assert(/off\|policy\|adaptive/.test(source), `${target.id}: shell profile is constrained to the supported enum`, failures);
   assert(source.includes(`*) SCKI_SUBSCRIPTION_ADAPTER_PROFILE="${SUBSCRIPTION_ADAPTER_PROFILE_CONTRACT.default}" ;;`), `${target.id}: invalid shell profile falls back to the profile-contract default`, failures);
-  assert(/"\$SCKI_SUBSCRIPTION_ADAPTER_PROFILE" "\$SCKI_MAX_NODE_MULTIPLIER" 2>>/.test(source), `${target.id}: shell passes the trusted profile and local node multiplier into the Ruby adapter`, failures);
+  assert(/"\$SCKI_SUBSCRIPTION_ADAPTER_PROFILE" "\$SCKI_MAX_NODE_MULTIPLIER" "\$SCKI_HEALTH_CHECK_PROFILE" "\$SCKI_QUIC_POLICY" 2>>/.test(source), `${target.id}: shell passes the trusted profile, node multiplier and traffic options into the Ruby adapter`, failures);
   const rubyProcessor = extractRubyProcessor(source, target.file);
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scki-openclash-node-dns-'));
   try {

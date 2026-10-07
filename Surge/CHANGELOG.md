@@ -4,6 +4,11 @@
 
 ---
 
+## v6.0.15-Surge.7 (2026-10-07)
+
+- 受管配置支持 900 秒结果有效期与海外 UDP/443 策略选择；自动组按 Surge 原生机制在使用时复测。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-Surge.6 (2026-09-29)
 
 - FIX：第 001 远程 DIRECT RULE-SET 加入微信 HTTPDNS 两个精确主机；规则优先于 BlockHttpDNS 拒绝规则。

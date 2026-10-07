@@ -5,6 +5,15 @@
 
 ---
 
+## v6.0.15-cmfa.9 (2026-10-07)
+
+- `standard` 默认档的 url-test 组和 `Subscribe.health-check` 保持 300 秒并启用 `lazy: true`；900 秒档仍可选。QUIC 默认策略不变。
+
+## v6.0.15-cmfa.8 (2026-10-07)
+
+- 静态 YAML 随受管选项切换测速间隔、lazy 与海外 UDP/443 前置规则。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-cmfa.7 (2026-09-30)
 
 - CANDIDATES：22 个原生地区/全球/家宽 url-test 组使用 `exclude-type: direct|reject`，保留 provider 的具名支持出站和链路依赖，但不把它们当作远端测速候选。

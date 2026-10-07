@@ -4,6 +4,15 @@
 
 ---
 
+## v6.0.15-stash.9 (2026-10-07)
+
+- 由 CMFA 生成的可测速组在 `standard` 默认档保持 300 秒并启用官方支持的 `lazy: true`；`power-save` 仍用 900 秒加 `lazy: true`。QUIC 默认策略不变。
+
+## v6.0.15-stash.8 (2026-10-07)
+
+- 从 CMFA 派生的 YAML 支持 900 秒间隔、lazy 与海外 UDP/443 策略选择。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-stash.7 (2026-09-30)
 
 - SYNC：从 CMFA v6.0.14-cmfa.7 重新生成；延续只使用已确认 Stash 字段的策略，裁剪其未公开支持的 `exclude-type` / `empty-fallback`，不宣称具有 Mihomo 的类型过滤与空池 REJECT 语义。

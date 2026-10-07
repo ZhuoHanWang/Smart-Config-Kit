@@ -3,13 +3,15 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { getTrafficOptions, validateTrafficOptions } = require('../rulesets/source/routing-graph');
+const { writeRepositoryArtifact } = require('./lib/write-repository-artifact');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const SOURCE_FILE = 'Clash Meta For Android/CMFA(mihomo).yaml';
 const OUTPUT_FILE = 'Stash/Stash.yaml';
 const FUSED_MANIFEST_FILE = 'rulesets/generated/fused/manifest.json';
-const VERSION_SUFFIX = 'stash.7';
-const BUILD_DATE = '2026-09-30';
+const VERSION_SUFFIX = 'stash.9';
+const BUILD_DATE = '2026-10-07';
 
 const DNS_BOOTSTRAP_PLAINTEXT = ['223.5.5.5', '119.29.29.29', '1.1.1.1', '8.8.8.8'];
 const DNS_DOMESTIC_DOH = ['https://dns.alidns.com/dns-query', 'https://doh.pub/dns-query'];
@@ -192,7 +194,8 @@ function buildProxyProviders(lines) {
   ];
 }
 
-function transformBody(source, versions, counts) {
+function transformBody(source, versions, counts, trafficOptions = getTrafficOptions()) {
+  validateTrafficOptions(trafficOptions);
   const sourceLines = source.replace(/\r\n/g, '\n').split('\n');
   const firstTopLevel = sourceLines.findIndex((line) => topLevelKey(line));
   if (firstTopLevel === -1) throw new Error('CMFA source has no top-level YAML body');
@@ -219,8 +222,9 @@ function transformBody(source, versions, counts) {
 
     const line = lines[i];
     if (/^\s+proxy:\s*['"]?\u{1F6AB} \u53D7\u9650\u7F51\u7AD9['"]?\s*$/u.test(line)) continue;
-    // Preserve the existing Stash compatibility policy: do not forward undocumented Mihomo group fields.
-    if (/^  (lazy|tolerance|exclude-type|empty-fallback):\s*/.test(line)) continue;
+    // Stash documents lazy; both presets preserve the source's explicit lazy setting.
+    // https://stash.wiki/en/proxy-protocols/proxy-groups
+    if (/^  (tolerance|exclude-type|empty-fallback):\s*/.test(line)) continue;
     output.push(line);
   }
 
@@ -235,8 +239,10 @@ function main() {
   const output = transformBody(source, versions, counts);
   const target = relPath(OUTPUT_FILE);
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, output, 'utf8');
+  writeRepositoryArtifact(target, output);
   console.log(`Generated ${OUTPUT_FILE} from ${SOURCE_FILE} (${versions.stashVersion})`);
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { transformBody, extractVersions, extractCounts };

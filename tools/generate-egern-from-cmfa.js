@@ -4,13 +4,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { optimizeEntries, resolveOpaqueMrsSource } = require('./lib/fused-rule-optimizer');
-const { buildEgernGenerationManifest } = require('./lib/egern-generation-manifest');
+const { buildEgernGenerationManifest, validateEgernGenerationManifest, listGeneratedEgernAssetRecords } = require('./lib/egern-generation-manifest');
+const { SNAPSHOT_FILE, loadSnapshot, packStagedOutput, saveSnapshot, hash: snapshotHash } = require('./lib/egern-traffic-snapshot');
 const {
   SCKI_REPOSITORY_BASE,
   repositoryAssetUrl,
   withAssetRevision,
 } = require('./lib/generated-asset-url');
-const { SOURCE_GRAPH_VERSION } = require('../rulesets/source/routing-graph');
+const { SOURCE_GRAPH_VERSION, getTrafficOptions, getQuicRules } = require('../rulesets/source/routing-graph');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const CMFA_FILE = path.join(REPO_ROOT, 'Clash Meta For Android/CMFA(mihomo).yaml');
@@ -26,8 +27,8 @@ const SCKI_BASE = SCKI_REPOSITORY_BASE;
 const ASSET_REVISION = SOURCE_GRAPH_VERSION;
 const META_GEOSITE_BASE = 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite';
 const META_GEOIP_BASE = 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip';
-const EGERN_VERSION = 'v6.0.14-egern.6';
-const BUILD_DATE = '2026-09-30';
+const EGERN_VERSION = 'v6.0.15-egern.7';
+const BUILD_DATE = '2026-10-07';
 const FETCH_CONCURRENCY = 3;
 const MIHOMO_MRS_BASE_PATH = '/rulesets/generated/mihomo-mrs/';
 // jsDelivr rejects files at 20 MB. Keep generated Egern-native rule sets below 18 MiB.
@@ -76,6 +77,7 @@ const EGERN_SET_ORDER = [
   'dest_port_set',
   'protocol_set',
 ];
+const DOMAIN_SET_KEYS = new Set(EGERN_SET_ORDER.filter((key) => key.startsWith('domain_')));
 
 function readText(file) {
   return fs.readFileSync(file, 'utf8');
@@ -823,49 +825,238 @@ async function generateNativeRuleSets(assets, { outputDir = GENERATED_RULESET_DI
   };
 }
 
-async function main() {
-  const cmfa = readText(CMFA_FILE);
-  const providers = parseProviders(cmfa);
-  const rules = parseRules(cmfa);
-  const assets = new Map();
-  const discoveryStats = { ruleSetRefs: 0, skippedProcessRuleSets: [], skippedProcessLogicRules: [], skippedEmptyRuleSets: [] };
-  for (const rule of rules) renderEgernRule(rule, providers, assets, discoveryStats);
+function parseFrozenRuleSet(text) {
+  const converted = { sets: createEmptySets(), skipped: [], noResolve: /^no_resolve: true$/m.test(text) };
+  let key = null;
+  for (const line of text.split(/\r?\n/)) {
+    if (EGERN_SET_ORDER.some((candidate) => line === `${candidate}:`)) {
+      key = line.slice(0, -1);
+    } else if (/^  - /.test(line) && key) {
+      converted.sets[key].add(JSON.parse(line.slice(4)));
+    } else if (!/^  - /.test(line)) {
+      key = null;
+    }
+  }
+  return converted;
+}
 
-  const ruleSetStats = await generateNativeRuleSets(assets);
+function frozenFiles(snapshot, asset) {
+  const stem = asset.file.slice(0, -5);
+  return Object.keys(snapshot.assets).filter((file) => file === asset.file ||
+    (file.startsWith(`${stem}-part-`) && /^\d{3}\.yaml$/.test(file.slice(stem.length + 6)))).sort();
+}
+
+function frozenNonDomain(snapshot, asset) {
+  const converted = { sets: createEmptySets(), skipped: [], noResolve: false };
+  for (const file of frozenFiles(snapshot, asset)) {
+    const part = parseFrozenRuleSet(snapshot.assets[file]);
+    converted.noResolve ||= part.noResolve;
+    for (const key of EGERN_SET_ORDER) {
+      if (!DOMAIN_SET_KEYS.has(key)) for (const value of part.sets[key]) converted.sets[key].add(value);
+    }
+  }
+  return converted;
+}
+
+function generateNativeRuleSetsFromSnapshot(assets, snapshot, { outputDir, followRules }) {
+  if (!outputDir) throw new Error('Egern snapshot generation requires a staging directory');
+  fs.mkdirSync(outputDir, { recursive: true });
+  const used = new Set();
+  const seenDomain = new Set();
+  let assetCount = 0;
+  let totalEntries = 0;
+  let removedEntries = 0;
+  let emptyAssets = 0;
+  for (const asset of assets.values()) {
+    const files = frozenFiles(snapshot, asset);
+    if (!followRules) {
+      asset.urls = files.map((file) => repositoryAssetUrl(`rulesets/generated/egern/${file}`, ASSET_REVISION));
+      for (const file of files) {
+        if (used.has(file)) throw new Error(`Duplicate frozen Egern asset: ${file}`);
+        used.add(file);
+        fs.writeFileSync(path.join(outputDir, file), snapshot.assets[file], 'utf8');
+        totalEntries += convertedEntryCount(parseFrozenRuleSet(snapshot.assets[file]));
+      }
+      assetCount += files.length;
+      if (!files.length) emptyAssets += 1;
+      continue;
+    }
+    if (asset.id.startsWith('geosite-')) throw new Error(`Unexpected GEOSITE asset in follow-rules: ${asset.id}`);
+    const sourcePath = localSckiPath(asset.sourceUrl);
+    if (!sourcePath || !sourcePath.startsWith(path.join(REPO_ROOT, 'rulesets/generated/fused/mihomo') + path.sep)) {
+      throw new Error(`Egern follow-rules needs frozen fused source: ${asset.id}`);
+    }
+    const sourceText = readText(sourcePath);
+    if (snapshot.fusedMihomoHashes[path.basename(sourcePath)] !== snapshotHash(sourceText)) {
+      throw new Error(`Egern frozen fused source changed: ${asset.id}`);
+    }
+    let entries = parsePayloadEntries(sourceText).filter((entry) => classifyClashEntry(entry) === 'domain');
+    if (asset.sourceFilter === 'ipcidr') entries = [];
+    const optimized = optimizeEntries(entries);
+    const domain = convertEntriesToSets(optimized.entries, asset.behavior);
+    removedEntries += optimized.stats.input - optimized.stats.output;
+    const converted = frozenNonDomain(snapshot, asset);
+    for (const key of DOMAIN_SET_KEYS) {
+      for (const value of domain.sets[key]) {
+        const identity = `${key}\u0000${value}`;
+        if (seenDomain.has(identity)) { removedEntries += 1; continue; }
+        seenDomain.add(identity);
+        converted.sets[key].add(value);
+      }
+    }
+    if (!convertedRuleSetHasEntries(converted)) { asset.urls = []; emptyAssets += 1; continue; }
+    const parts = splitConvertedRuleSet(asset, converted);
+    const names = parts.map((part, index) => shardRuleSetFileName(asset.file, index, parts.length));
+    asset.urls = names.map((file) => repositoryAssetUrl(`rulesets/generated/egern/${file}`, ASSET_REVISION));
+    for (let index = 0; index < parts.length; index += 1) {
+      const partAsset = names.length === 1 ? asset : { ...asset, file: names[index] };
+      const rendered = renderEgernRuleSet(partAsset, parts[index]);
+      if (Buffer.byteLength(rendered) > MAX_REMOTE_RULE_SET_BYTES) throw new Error(`${names[index]} exceeds Egern rule-set size`);
+      fs.writeFileSync(path.join(outputDir, names[index]), rendered, 'utf8');
+      totalEntries += convertedEntryCount(parts[index]);
+      assetCount += 1;
+    }
+  }
+  if (!followRules && used.size !== Object.keys(snapshot.assets).length) throw new Error('Egern frozen asset inventory differs from current routing discovery');
+  if (!followRules) {
+    totalEntries = snapshot.publishedRendered.source_entry_count;
+    removedEntries = snapshot.publishedRendered.dedup_removed;
+    emptyAssets = snapshot.publishedRendered.empty_asset_count;
+  }
+  return { assetCount, totalEntries, removedEntries, globalExactDuplicates: followRules ? 0 : snapshot.publishedRendered.global_exact_duplicates_removed, emptyAssets, skippedTypes: [] };
+}
+
+function discoverAssets(rules, providers) {
+  const assets = new Map();
+  const stats = { ruleSetRefs: 0, skippedProcessRuleSets: [], skippedProcessLogicRules: [], skippedEmptyRuleSets: [] };
+  for (const rule of rules) renderEgernRule(rule, providers, assets, stats);
+  return assets;
+}
+
+function renderProfile(rules, providers, assets, ruleSetStats) {
   const stats = { ruleSetRefs: 0, skippedProcessRuleSets: [], skippedProcessLogicRules: [], skippedEmptyRuleSets: [] };
   const renderedRules = [];
-
   for (const rule of rules) {
     const block = renderEgernRule(rule, providers, assets, stats);
     if (block.length > 0) renderedRules.push(...block);
   }
+  return {
+    output: [
+      renderPrefix(ruleSetStats.assetCount, providers.size, rules.length),
+      '# Generated from Clash Meta For Android/CMFA(mihomo).yaml.',
+      '# Non-supplemental provider rule_set URLs point at generated Egern-native',
+      '# YAML files under rulesets/generated/egern/.',
+      '# PROCESS-NAME supplemental rule sets and process-scoped logic rules are omitted because Egern',
+      '# does not document a process-name rule or process-name rule-set field.',
+      '# Target-empty rule sets removed by global first-match deduplication are omitted.',
+      'rules:', ...renderedRules, '',
+    ].join('\n'), stats,
+  };
+}
 
-  const output = [
-    renderPrefix(ruleSetStats.assetCount, providers.size, rules.length),
-    '# Generated from Clash Meta For Android/CMFA(mihomo).yaml.',
-    '# Non-supplemental provider rule_set URLs point at generated Egern-native',
-    '# YAML files under rulesets/generated/egern/.',
-    '# PROCESS-NAME supplemental rule sets and process-scoped logic rules are omitted because Egern',
-    '# does not document a process-name rule or process-name rule-set field.',
-    '# Target-empty rule sets removed by global first-match deduplication are omitted.',
-    'rules:',
-    ...renderedRules,
-    '',
-  ].join('\n');
-
-  fs.writeFileSync(EGERN_FILE, output, 'utf8');
+function validateStaged(directory, output, cmfa, providers, rules, ruleSetStats) {
   const manifest = buildEgernGenerationManifest({
     assetRevision: ASSET_REVISION,
     cmfaSource: cmfa,
     routingGraphSource: readText(ROUTING_GRAPH_FILE),
     profileSource: output,
-    generatedRuleSetDirectory: GENERATED_RULESET_DIR,
+    generatedRuleSetDirectory: directory,
     sourceProviderCount: providers.size,
     sourceRuleCount: rules.length,
     ruleSetStats,
   });
-  fs.writeFileSync(EGERN_GENERATION_MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  const result = validateEgernGenerationManifest({
+    manifest, cmfaSource: cmfa, routingGraphSource: readText(ROUTING_GRAPH_FILE),
+    profileSource: output, generatedRuleSetDirectory: directory,
+    expectedSourceProviderCount: providers.size, expectedSourceRuleCount: rules.length,
+    expectedAssetRevision: ASSET_REVISION,
+  });
+  if (result.failures.length) throw new Error(`Staged Egern validation failed: ${JSON.stringify(result.failures)}`);
+  return manifest;
+}
+
+function publishStaged(directory, output, manifest, canonicalSnapshot) {
+  const parent = path.dirname(GENERATED_RULESET_DIR);
+  if (path.resolve(directory).startsWith(path.resolve(parent) + path.sep) !== true) throw new Error('Unsafe Egern staging path');
+  const backup = path.join(parent, `.egern-backup-${process.pid}-${Date.now()}`);
+  const profileTemp = `${EGERN_FILE}.tmp-${process.pid}`;
+  const previousProfile = fs.readFileSync(EGERN_FILE);
+  const previousSnapshot = canonicalSnapshot && fs.existsSync(SNAPSHOT_FILE) ? fs.readFileSync(SNAPSHOT_FILE) : null;
+  fs.writeFileSync(profileTemp, output, 'utf8');
+  fs.writeFileSync(path.join(directory, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  let movedOld = false;
+  try {
+    fs.renameSync(GENERATED_RULESET_DIR, backup);
+    movedOld = true;
+    fs.renameSync(directory, GENERATED_RULESET_DIR);
+    fs.renameSync(profileTemp, EGERN_FILE);
+    if (canonicalSnapshot) saveSnapshot(canonicalSnapshot);
+  } catch (error) {
+    if (movedOld) {
+      if (fs.existsSync(GENERATED_RULESET_DIR)) fs.renameSync(GENERATED_RULESET_DIR, directory);
+      fs.renameSync(backup, GENERATED_RULESET_DIR);
+      fs.writeFileSync(profileTemp, previousProfile);
+      fs.renameSync(profileTemp, EGERN_FILE);
+      if (previousSnapshot) {
+        const snapshotTemp = `${SNAPSHOT_FILE}.tmp-${process.pid}`;
+        try { fs.writeFileSync(snapshotTemp, previousSnapshot); fs.renameSync(snapshotTemp, SNAPSHOT_FILE); }
+        finally { if (fs.existsSync(snapshotTemp)) fs.rmSync(snapshotTemp); }
+      } else if (canonicalSnapshot && fs.existsSync(SNAPSHOT_FILE)) fs.rmSync(SNAPSHOT_FILE);
+    }
+    throw error;
+  } finally {
+    if (fs.existsSync(profileTemp)) fs.rmSync(profileTemp);
+  }
+  fs.rmSync(backup, { recursive: true, force: true });
+}
+
+function canonicalBlockRules(rules) {
+  const quic = getQuicRules('block-foreign');
+  const without = rules.filter((rule) => !quic.includes(rule));
+  const anchor = without.findIndex((rule) => rule.startsWith('DST-PORT,7680,'));
+  if (anchor < 0) throw new Error('Cannot locate Egern QUIC insertion anchor');
+  without.splice(anchor, 0, ...quic);
+  return without;
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.some((arg) => arg !== '--reuse-assets')) throw new Error(`Unknown Egern generator option: ${args.join(' ')}`);
+  const reuseAssets = args.includes('--reuse-assets');
+  const cmfa = readText(CMFA_FILE);
+  const providers = parseProviders(cmfa);
+  const rules = parseRules(cmfa);
+  const options = getTrafficOptions();
+  let snapshot = reuseAssets ? loadSnapshot() : null;
+  let canonicalSnapshot = null;
+  const parent = path.dirname(GENERATED_RULESET_DIR);
+  const canonicalDir = reuseAssets ? null : fs.mkdtempSync(path.join(parent, '.egern-canonical-'));
+  const stageDir = fs.mkdtempSync(path.join(parent, '.egern-stage-'));
+  let stagePublished = false;
+  try {
+    if (!reuseAssets) {
+      const blockRules = canonicalBlockRules(rules);
+      const canonicalAssets = discoverAssets(blockRules, providers);
+      const canonicalStats = await generateNativeRuleSets(canonicalAssets, { outputDir: canonicalDir });
+      const canonicalProfile = renderProfile(blockRules, providers, canonicalAssets, canonicalStats).output;
+      const canonicalManifest = buildEgernGenerationManifest({ assetRevision: ASSET_REVISION, cmfaSource: cmfa,
+        routingGraphSource: readText(ROUTING_GRAPH_FILE), profileSource: canonicalProfile,
+        generatedRuleSetDirectory: canonicalDir, sourceProviderCount: providers.size,
+        sourceRuleCount: blockRules.length, ruleSetStats: canonicalStats });
+      canonicalSnapshot = packStagedOutput(canonicalDir, canonicalManifest);
+      snapshot = canonicalSnapshot;
+    }
+    const assets = discoverAssets(rules, providers);
+    const ruleSetStats = generateNativeRuleSetsFromSnapshot(assets, snapshot, { outputDir: stageDir, followRules: options.quicPolicy === 'follow-rules' });
+    const { output, stats } = renderProfile(rules, providers, assets, ruleSetStats);
+    const manifest = validateStaged(stageDir, output, cmfa, providers, rules, ruleSetStats);
+    publishStaged(stageDir, output, manifest, canonicalSnapshot);
+    stagePublished = true;
   console.log(`Generated Egern/Egern.yaml rules=${manifest.rendered.rule_count} rule_set_refs=${manifest.rendered.rule_set_ref_count} native_rule_sets=${manifest.rendered.native_rule_set_count} source_entries=${ruleSetStats.totalEntries} dedup_removed=${ruleSetStats.removedEntries} global_exact_removed=${ruleSetStats.globalExactDuplicates} empty_assets=${ruleSetStats.emptyAssets} skipped_process=${stats.skippedProcessRuleSets.join(',') || 'none'} skipped_process_logic=${stats.skippedProcessLogicRules.length} skipped_empty=${stats.skippedEmptyRuleSets.join(',') || 'none'} skipped_source_types=${ruleSetStats.skippedTypes.join(',') || 'none'}`);
+  } finally {
+    if (!stagePublished && fs.existsSync(stageDir)) fs.rmSync(stageDir, { recursive: true, force: true });
+    if (canonicalDir && fs.existsSync(canonicalDir)) fs.rmSync(canonicalDir, { recursive: true, force: true });
+  }
 }
 
 if (require.main === module) {
@@ -876,10 +1067,18 @@ if (require.main === module) {
 }
 
 module.exports = {
+  canonicalBlockRules,
   convertEntriesToSets,
+  discoverAssets,
   fetchText,
   generateNativeRuleSets,
+  generateNativeRuleSetsFromSnapshot,
+  parseFrozenRuleSet,
   parsePayloadEntries,
+  parseProviders,
+  parseRules,
+  renderProfile,
   sourceCacheFile,
   sourceInfoForProvider,
+  validateStaged,
 };

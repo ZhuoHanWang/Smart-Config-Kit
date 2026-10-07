@@ -6,12 +6,14 @@ const path = require('node:path');
 const cp = require('node:child_process');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
+const { getTrafficOptions } = require('../rulesets/source/routing-graph');
 
 const root = path.resolve(__dirname, '..');
 const runtime = fs.readFileSync(path.join(__dirname, 'runtime', 'subscription-node-filter.rb'), 'utf8').replace(/\r\n/g, '\n').trimEnd();
 const begin = '# >>> SCKI SUBSCRIPTION NODE FILTER: BEGIN';
 const end = '# <<< SCKI SUBSCRIPTION NODE FILTER: END';
 const targets = ['OpenClash(mihomo).sh', 'OpenClash(mihomo-smart).sh'];
+const trafficOptions = getTrafficOptions();
 
 function rubyBinary() {
   for (const name of [process.env.RUBY, 'ruby', 'C:\\Ruby34-x64\\bin\\ruby.exe', 'C:\\Ruby33-x64\\bin\\ruby.exe'].filter(Boolean)) {
@@ -40,11 +42,11 @@ function fixture(temp, name, proxies, extra = {}) {
   const status = path.join(temp, `${name}.status`);
   const data = { proxies, 'proxy-groups': [], 'rule-providers': {}, rules: [], ...extra };
   fs.writeFileSync(config, JSON.stringify(data));
-  fs.writeFileSync(override, JSON.stringify({ 'proxy-groups': [{ name: '🐟 漏网之鱼', type: 'select', proxies: ['🌍 全球节点', 'DIRECT'] }], rules: ['MATCH,🐟 漏网之鱼'], 'rule-providers': {} }));
+  fs.writeFileSync(override, JSON.stringify({ 'proxy-groups': [{ name: '🐟 漏网之鱼', type: 'select', proxies: ['🌍 全球节点', 'DIRECT'] }], rules: ['DST-PORT,7680,REJECT', 'MATCH,🐟 漏网之鱼'], 'rule-providers': {} }));
   return { config, override, status };
 }
-function execute(processor, files, limit = '') {
-  return run(processor, [files.config, files.override, files.status, 'off', limit]);
+function execute(processor, files, limit = '', options = trafficOptions) {
+  return run(processor, [files.config, files.override, files.status, 'off', limit, options.healthCheckProfile, options.quicPolicy]);
 }
 
 const parityNames = [
@@ -105,7 +107,7 @@ assert.deepEqual(JSON.parse(rubyBehavior.stdout), JSON.parse(JSON.stringify(jsBe
 for (const target of targets) {
   const source = fs.readFileSync(path.join(root, 'OpenClash', target), 'utf8');
   assert.equal(extract(source, begin, end).replace(/\r/g, ''), runtime, `${target}: embedded runtime drift`);
-  assert(source.includes('"$SCKI_MAX_NODE_MULTIPLIER" 2>>'), `${target}: shell argument missing`);
+  assert(source.includes('"$SCKI_MAX_NODE_MULTIPLIER" "$SCKI_HEALTH_CHECK_PROFILE" "$SCKI_QUIC_POLICY" 2>>'), `${target}: shell traffic arguments missing`);
   const processor = extract(source, 'cat > "$RUBY_SCRIPT" << \'RUBY_EOF\'', '\nRUBY_EOF');
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'scki-oc-filter-'));
   try {
@@ -119,6 +121,24 @@ for (const target of targets) {
     let kept = output.proxies.map(p => p.name);
     for (const name of names.slice(0, 15)) assert(kept.includes(name), `${target}: default lost ${name}`);
     for (const name of names.slice(15)) assert(!kept.includes(name), `${target}: kept info ${name}`);
+    const automatic = output['proxy-groups'].filter(group => group.type === (target.includes('smart') ? 'smart' : 'url-test'));
+    assert(automatic.length > 0, `${target}: default generated no automatic region groups`);
+    for (const group of automatic) {
+      assert.equal(group.interval, trafficOptions.healthCheckProfile === 'power-save' ? 900 : 300, `${target}: default region interval ${group.name}`);
+      assert.equal(group.lazy, true, `${target}: default region lazy ${group.name}`);
+    }
+
+    files = fixture(temp, 'power-save-follow', names.map(n => makeProxy(n)));
+    result = execute(script, files, '', { healthCheckProfile: 'power-save', quicPolicy: 'follow-rules' });
+    assert.equal(result.status, 0, `${target}: power-save/follow-rules run ${result.stderr}`);
+    output = yamlRead(files.config);
+    const powerGroups = output['proxy-groups'].filter(group => group.type === (target.includes('smart') ? 'smart' : 'url-test'));
+    assert(powerGroups.length > 0, `${target}: power-save generated no automatic region groups`);
+    for (const group of powerGroups) {
+      assert.equal(group.interval, 900, `${target}: power-save region interval ${group.name}`);
+      assert.equal(group.lazy, true, `${target}: power-save region lazy ${group.name}`);
+    }
+    assert(!output.rules.some(rule => String(rule).startsWith('AND,((DST-PORT,443),(NETWORK,UDP),')), `${target}: follow-rules kept a dedicated UDP/443 rule`);
 
     files = fixture(temp, 'limited', names.map(n => makeProxy(n)));
     result = execute(script, files, '2');

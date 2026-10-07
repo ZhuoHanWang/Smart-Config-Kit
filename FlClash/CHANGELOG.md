@@ -5,6 +5,15 @@
 
 ---
 
+## v6.0.15-flclash.15 (2026-10-07)
+
+- 默认 `standard` 档保持 300 秒并启用 `lazy: true`；`power-save` 仍为 900 秒加 `lazy: true`。QUIC 默认策略不变。
+
+## v6.0.15-flclash.14 (2026-10-07)
+
+- JS 覆写支持运行时健康检查与海外 UDP/443 选择；省电档调整可测速组。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-flclash.13 (2026-09-30)
 
 - INLINE：同步受控 inline payload 展平、共享对象保护和统一节点预检，成功后移除展平 provider；保持已有 proxies 数组引用。

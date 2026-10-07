@@ -1,8 +1,10 @@
-# Passwall 使用教程（对齐 Clash Party v6.0.14）
+# Passwall 使用教程（对齐 Clash Party v6.0.15）
+
+> 测速与海外 QUIC 可选策略：参见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
 
 > 目录简介：这里提供 Passwall 全功能版的 fused shunt rule fallback、UCI 批量脚本和 OpenWrt 导入说明。
 >
-> 版本：**v6.0.14-pw.5**（Build 2026-09-29；基线：Clash Party v6.0.14；生成 `.srs` 资产使用发布版本缓存键；变更历史见 `Passwall/CHANGELOG.md`）。
+> 版本：**v6.0.15-pw.6**（Build 2026-10-07；基线：Clash Party v6.0.15；生成 `.srs` 资产使用发布版本缓存键；变更历史见 `Passwall/CHANGELOG.md`）。
 
 ---
 

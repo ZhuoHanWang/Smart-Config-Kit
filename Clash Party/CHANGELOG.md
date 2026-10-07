@@ -7,6 +7,16 @@
 
 ---
 
+## v6.0.15-dns.13 / v6.0.15-normal.14 (2026-10-07)
+
+- Smart/Normal 的默认 `standard` 档维持 300 秒并设 `lazy: true`；`power-save` 仍为 900 秒加 `lazy: true`。QUIC 默认策略不变。
+- 操作方式及其他平台的适用范围见[测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
+## v6.0.15-dns.12 / v6.0.15-normal.13 (2026-10-07)
+
+- Smart/Normal 覆写支持健康检查与海外 UDP/443 两项运行时选择；健康检查省电档调整可测速组并启用按需跳过。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-dns.11 / v6.0.14-normal.12 (2026-09-30)
 
 - INLINE：接受仅含 `type: inline` 与 `payload` 的代理集合，将显式节点和 payload 一起预检、去重、筛选、校验依赖，再移除已展平 provider；payload 节点独立复制，保留共享源对象。带远端/过滤/覆写/健康检查字段的 provider 仍需先聚合展平。

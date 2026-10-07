@@ -6,6 +6,11 @@
 
 ---
 
+## v6.0.15-QX.7 (2026-10-07)
+
+- 受管配置支持 900 秒自动组检查档及海外 UDP/443 策略选择。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-QX.6 (2026-09-29)
 
 - FIX：第 001 remote filter 加入微信 HTTPDNS 两个精确主机并设为 DIRECT，先于 BlockHttpDNS 拒绝规则。

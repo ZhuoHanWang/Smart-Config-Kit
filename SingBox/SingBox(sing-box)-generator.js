@@ -2,10 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { repositoryAssetUrl } = require('../tools/lib/generated-asset-url');
+const { getTrafficOptions } = require('../rulesets/source/routing-graph');
+const TRAFFIC_OPTIONS = getTrafficOptions();
 
-const VERSION = 'v6.0.14-sing.5';
-const BUILD = '2026-09-29';
-const BASELINE = 'Clash Party v6.0.14';
+const VERSION = 'v6.0.15-sing.6';
+const BUILD = '2026-10-07';
+const BASELINE = 'Clash Party v6.0.15';
 
 const SMART = {
   GLOBAL: '🌍 全球节点',
@@ -266,7 +268,7 @@ function urltest(tag, outbounds) {
     type: 'urltest',
     tag,
     outbounds,
-    interval: '5m',
+    interval: TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? '15m' : '5m',
     tolerance: 10
   };
 }
@@ -555,20 +557,22 @@ if (!adFusedRuleSet) throw new Error('missing fused ad rule set for Sing-box DNS
 // v5.4.22 #1 借鉴 Proxy-override：QUIC 精细化——sing-box 首命中模型逐条匹配。
 // 插入到 Clash 主线 5 条 AND/QUIC 规则所在位置，避免被后续普通规则或 route.final 改变语义。
 // YouTube/Google/MS/Apple QUIC → 走对应业务组；CN QUIC → DIRECT 放行；其余海外 QUIC → REJECT。
-const quicRules = [
+const quicRules = TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? [
   { rule_set: ['geosite-youtube'], port: [443], network: 'udp', action: 'route', outbound: '📹 YouTube' },
   { rule_set: ['geosite-google'], port: [443], network: 'udp', action: 'route', outbound: '🔍 Google 服务' },
   { rule_set: ['geosite-microsoft'], port: [443], network: 'udp', action: 'route', outbound: 'Ⓜ️ 微软服务' },
   { rule_set: ['geosite-apple'], port: [443], network: 'udp', action: 'route', outbound: '🍎 苹果服务' },
   { rule_set: ['geosite-cn'], port: [443], network: 'udp', action: 'route', outbound: 'DIRECT' },
   { port: [443], network: 'udp', action: 'reject' },
-];
+]: [];
 let convertedRules = [];
 let insertedQuicRules = false;
 let convertedSourceRules = 0;
+let skippedQuicSourceRules = 0;
 const emittedFusedSegments = new Set();
 for (const rule of rules) {
   if (String(rule).startsWith('AND,((DST-PORT,443),(NETWORK,UDP),')) {
+    skippedQuicSourceRules++;
     if (!insertedQuicRules) {
       convertedRules.push(...quicRules);
       insertedQuicRules = true;
@@ -598,13 +602,14 @@ for (const rule of rules) {
     convertedSourceRules++;
   }
 }
-if (!insertedQuicRules) convertedRules.unshift(...quicRules);
+if (!insertedQuicRules && quicRules.length) {
+  throw new Error('QUIC rules missing from source routing order; refusing to move them ahead of advertisement rules');
+}
 const skippedProviders = unmappedFusedProviders.length;
 const coalescedProviders = Object.keys(providers).length - ruleSet.length;
 // v5.4.22: AND/QUIC rules handled out-of-band；MATCH fallback is represented by route.final.
-const QUIC_AND_RULES = 5;
 const MATCH_FALLBACK_RULES = 1;
-const skippedRules = rules.length - convertedSourceRules - QUIC_AND_RULES - MATCH_FALLBACK_RULES;
+const skippedRules = rules.length - convertedSourceRules - skippedQuicSourceRules - MATCH_FALLBACK_RULES;
 
 // v5.4.23-sing.2: Remove redundant domain_suffix rules that are fully covered by
 // a corresponding rule_set pointing to the same outbound.  The "root" domain suffix

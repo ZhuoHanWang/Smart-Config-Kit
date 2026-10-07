@@ -6,6 +6,17 @@
 
 ---
 
+## v6.0.15 — 默认测速组按需检查 (2026-10-07)
+
+- 根据实际使用选择，Mihomo 与 Stash 的默认档保持 300 秒并启用 `lazy: true`；900 秒仍是可选省电档。其他客户端沿用各自原生测速调度；海外 QUIC 默认档不变。详见[测速与 QUIC 策略选项](./docs/traffic-options.md)。
+- 本次更新 [Clash Party](./Clash%20Party/CHANGELOG.md)、[CMFA](./Clash%20Meta%20For%20Android/CHANGELOG.md)、[OpenClash](./OpenClash/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 与 [Stash](./Stash/CHANGELOG.md) 的客户端尾号；Egern 只刷新 CMFA 生成来源元数据。
+
+## v6.0.15 — 测速与海外 QUIC 策略可选 (2026-10-07)
+
+- 增加 `standard` / `power-save` 健康检查档与 `block-foreign` / `follow-rules` 海外 UDP/443 档，集中保存并联动客户端配置；使用方法及各平台限制见 [测速与 QUIC 策略选项](./docs/traffic-options.md)。
+- 选项生成复用已发布融合资产，并改进 Windows 上生成文件的原子写入可靠性；规则源变更仍走完整构建链。
+- 各客户端实现与版本记录见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[CMFA](./Clash%20Meta%20For%20Android/CHANGELOG.md)、[OpenClash](./OpenClash/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 及其他对应目录的 CHANGELOG。
+
 ## v6.0.14 — inline 订阅兼容与测速候选隔离 (2026-09-30)
 
 - 横向研究 HotKids、Repcz 与其他高星脚本后，五个订阅处理器支持受控 inline payload 展平；具名直连/拒绝出站保留依赖但不进入测速组。CMFA 同步原生类型过滤，Stash 明确平台限制，Egern 刷新派生清单。

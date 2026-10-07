@@ -5,6 +5,11 @@
 
 ---
 
+## v6.0.15-SR.7 (2026-10-07)
+
+- 受管配置加入 900 秒测速档及海外 UDP/443 策略选择，保留 Shadowrocket 原生语法边界。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-SR.6 (2026-09-29)
 
 - FIX：第 001 远程 DIRECT RULE-SET 加入微信 HTTPDNS 两个精确主机；规则优先于 BlockHttpDNS 拒绝规则。

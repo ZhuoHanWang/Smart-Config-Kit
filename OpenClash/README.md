@@ -1,7 +1,9 @@
 # OpenClash 使用说明（Smart / Normal 双版本）
 
+> 测速与海外 QUIC 可选策略：参见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 > 目录简介：这里提供 OpenWrt OpenClash 的 Smart/Normal 覆写脚本、UI 配置快照和部署排障说明。
-> 当前版本：**v6.0.14-oc-normal.10 / v6.0.14-oc-smart.10**（Build 2026-09-30，跟随 source graph v6.0.14；融合规则缓存按发布版本隔离）。
+> 当前版本：**v6.0.15-oc-normal.12 / v6.0.15-oc-smart.12**（Build 2026-10-07，跟随 source graph v6.0.15；融合规则缓存按发布版本隔离）。
 >
 > 本目录提供「同规则量、不同内核能力」的两份覆写脚本，外加一份 OpenClash UI 配置快照（`.conf`）。
 >

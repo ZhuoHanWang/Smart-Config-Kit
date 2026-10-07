@@ -122,14 +122,14 @@ static=策略组名, 候选1, 候选2, ..., img-url=图标URL
 
 语法：
 ```
-url-latency-benchmark=组名, server-tag-regex=正则, check-interval=秒, tolerance=毫秒, alive-checker-enabled=true, img-url=URL
+url-latency-benchmark=组名, server-tag-regex=正则, check-interval=秒, tolerance=毫秒, alive-checking=false, img-url=URL
 ```
 
 参数：
 - **`server-tag-regex`**：按节点 tag 字段正则匹配（核心筛选机制）
-- **`check-interval`**：测试间隔秒数（默认 1800）
+- **`check-interval`**：测试间隔秒数；策略被请求激活后才按此间隔考虑测速
 - **`tolerance`**：切换容差毫秒数
-- **`alive-checker-enabled`**：启用存活检测（注：文档中可能为 `alive-checking`，需确认）
+- **`alive-checking`**：设为 `true` 时，空闲组也按间隔测速；省电档设为 `false`。字段名及语义见 [Quantumult X 官方示例](https://github.com/crossutility/Quantumult-X/blob/master/sample.conf)。
 - **`img-url`**：图标 URL
 
 ### 4.3 `available` — 故障转移
@@ -233,4 +233,4 @@ URL, tag=标签, force-policy=策略组, update-interval=秒, opt-parser=true/fa
 | DNS server | `server=IP` + `doh-server=URL` | `dns-server=IP` + `encrypted-dns-server=URL` | `dns-server=URL` + `proxy-dns-server=URL` |
 | doh-server 多条目 | iOS 版本相关；iOS 15+ 支持多条并发 | 全部生效 | 全部生效 |
 | 最终兜底 | `final, policy` | `FINAL,policy` | `FINAL,policy,dns-failed` |
-| alive-checker | `alive-checker-enabled=true`（需确认字段名） | 无 | 无 |
+| 空闲测速 | `alive-checking=true/false` | 无 | 无 |

@@ -1,0 +1,4 @@
+{
+  "healthCheckProfile": "standard",
+  "quicPolicy": "block-foreign"
+}

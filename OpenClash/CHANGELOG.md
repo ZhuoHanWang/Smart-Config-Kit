@@ -7,6 +7,15 @@
 
 ---
 
+## v6.0.15-oc-normal.12 / v6.0.15-oc-smart.12 (2026-10-07)
+
+- Normal/Smart 默认 300 秒测速并启用 `lazy: true`；900 秒档保留为可选。QUIC 默认策略不变。
+
+## v6.0.15-oc-normal.11 / v6.0.15-oc-smart.11 (2026-10-07)
+
+- Normal/Smart 脚本支持受管默认值及运行时环境变量，联动测速间隔和海外 UDP/443 规则。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-oc-normal.10 / v6.0.14-oc-smart.10 (2026-09-30)
 
 - INLINE：两份 Ruby 处理器只展平仅含 type/payload 的 inline provider；显式与 payload 节点统一校验，payload 深拷贝。失败不写源文件，成功后移除已展平 provider。

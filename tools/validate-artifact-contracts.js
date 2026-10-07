@@ -32,6 +32,8 @@ const {
   GENERIC_INTL_FALLBACK_RULES,
   getRawRoutingGraph,
   getMihomoNormalizedRoutingGraph,
+  getTrafficOptions,
+  getQuicRules,
 } = require('../rulesets/source/routing-graph');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -41,21 +43,23 @@ const EXPECTED_REGION_GROUPS = EXPECTED_GROUPS - EXPECTED_BUSINESS_GROUPS;
 const EXPECTED_SINGBOX_GROUPS = 54;
 const EXPECTED_SINGBOX_URLTEST_GROUPS = 2;
 const EXPECTED_PASSWALL_RULES = 69;
-const EXPECTED_REGION_TEST_INTERVAL_SECONDS = 300;
-const EXPECTED_SINGBOX_URLTEST_INTERVAL = '5m';
+const TRAFFIC_OPTIONS = getTrafficOptions();
+const EXPECTED_REGION_TEST_INTERVAL_SECONDS = TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? 900 : 300;
+const EXPECTED_SINGBOX_URLTEST_INTERVAL = TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? '15m' : '5m';
+const EXPECTED_QUIC_RULES = getQuicRules(TRAFFIC_OPTIONS.quicPolicy);
 const SOURCE_FULL_PROVIDERS = 514;
-const SOURCE_FULL_RULES = 973;
+const SOURCE_FULL_RULES = 968 + EXPECTED_QUIC_RULES.length;
 const MIN_FULL_PROVIDERS = 132;
 const EXPECTED_SINGBOX_RUNTIME_GEO_RULE_SETS = 7;
-const MIN_FULL_RULES = 151;
+const MIN_FULL_RULES = 146 + EXPECTED_QUIC_RULES.length;
 const EXPECTED_FUSED_SEGMENTS = 72;
 const EXPECTED_FUSED_MOBILE_SEGMENTS = 69;
-const EXPECTED_FUSED_INLINE_RULES = 19;
+const EXPECTED_FUSED_INLINE_RULES = 14 + EXPECTED_QUIC_RULES.length;
 const EXPECTED_FUSED_MRS_FILES = 96;
 const EXPECTED_FUSED_SRS_FILES = 69;
 const EXPECTED_FUSED_PASSWALL_FILES = 69;
 const EXPECTED_FUSED_XRAY_SEGMENTS = 69;
-const EXPECTED_XRAY_RULES = 89;
+const EXPECTED_XRAY_RULES = TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? 89 : 84;
 const EXPECTED_MIHOMO_MRS_CONVERTED = 237;
 const EXPECTED_MIHOMO_MRS_SPLIT = 28;
 const EXPECTED_MIHOMO_MRS_PARTIAL = 70;
@@ -64,7 +68,7 @@ const EXPECTED_MIHOMO_MRS_RETAINED = 23;
 const EXPECTED_MIHOMO_MRS_FILES = 386;
 const EXPECTED_MIHOMO_MRS_RESIDUAL_FILES = 70;
 const EXPECTED_MIHOMO_MRS_PROVIDER_REFS = EXPECTED_MIHOMO_MRS_FILES + EXPECTED_MIHOMO_MRS_EXISTING;
-const EXPECTED_SINGBOX_ROUTE_RULES = 88;
+const EXPECTED_SINGBOX_ROUTE_RULES = 82 + (TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? 6 : 0);
 const RESTRICTED_SITE = '\u{1F6AB} \u53D7\u9650\u7F51\u7AD9';
 const RESTRICTED_SITE_RUBY = '\\U0001F6AB \u53D7\u9650\u7F51\u7AD9';
 const CLOUD_CDN = '\u2601\uFE0F \u4E91\u4E0ECDN';
@@ -513,6 +517,7 @@ function validateMihomoMrsRuleSets(record) {
   record.check('mihomo-mrs.source-graph.normalized-rule-count', (normalizedGraph.rules || []).length === SOURCE_FULL_RULES, {
     value: (normalizedGraph.rules || []).length,
   });
+  checkMihomoQuicPolicy(record, 'source-graph', (normalizedGraph.rules || []).join('\n'));
 
   for (const spec of [
     { id: 'js-smart', file: 'Clash Party/ClashParty(mihomo-smart).js' },
@@ -1215,6 +1220,30 @@ function failureMessage(condition, message) {
   return condition ? {} : { message };
 }
 
+function checkMihomoQuicPolicy(record, id, rulesText, expectedRules = EXPECTED_QUIC_RULES) {
+  const rules = String(rulesText).split(/\r?\n/).map((line) => line.trim()
+    .replace(/^-\s*/, '').replace(/^['"]|['"]$/g, ''));
+  const udp443 = rules.filter((rule) => rule.includes('DST-PORT,443') && rule.includes('NETWORK,UDP'));
+  record.check(`${id}.quic.no-global-direct-exemption`, !rules.includes('DST-PORT,443,DIRECT'), {
+    message: 'UDP/443 must not be globally forced DIRECT in either policy',
+  });
+  record.check(`${id}.quic.${TRAFFIC_OPTIONS.quicPolicy}`, JSON.stringify(udp443) === JSON.stringify(expectedRules), {
+    value: udp443,
+    message: `expected exactly ${expectedRules.length} dedicated UDP/443 rules in source order`,
+  });
+  const portGuard = rules.indexOf('DST-PORT,7680,REJECT');
+  record.check(`${id}.quic.port-guard`, portGuard !== -1, { message: 'missing 7680 port guard' });
+  if (expectedRules.length && portGuard !== -1) {
+    record.check(`${id}.quic.priority`, JSON.stringify(rules.slice(portGuard - expectedRules.length, portGuard)) === JSON.stringify(expectedRules), {
+      message: 'dedicated QUIC rules must directly precede the 7680/private routing guards',
+    });
+    const adGuard = rules.findIndex((rule) => rule.endsWith(',🛑 广告拦截'));
+    record.check(`${id}.quic.ad-guard-first`, adGuard !== -1 && adGuard < portGuard - expectedRules.length, {
+      message: 'ad and threat policy must take priority over dedicated QUIC rules',
+    });
+  }
+}
+
 function validateJsProducts(record) {
   const smart = compileJs('Clash Party/ClashParty(mihomo-smart).js');
   const normal = compileJs('Clash Party/ClashParty(mihomo).js');
@@ -1230,15 +1259,24 @@ function validateJsProducts(record) {
   record.check('js.smart.routing-baseline', Boolean(baselineVersion), { value: baselineVersion, message: `cannot extract routing baseline from ${runtimeVersion}` });
   record.check('js.normal.version-prefix', Boolean(baselineVersion && normalVersion && normalVersion.startsWith(`${baselineVersion}-normal`)), { value: normalVersion });
   record.check('js.flclash.version-prefix', Boolean(baselineVersion && flclashVersion && flclashVersion.startsWith(`${baselineVersion}-flclash`)), { value: flclashVersion });
-  record.check('js.smart.region-interval-300', smart.includes(`interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}, tolerance: 30`), {
-    message: 'Smart region groups must use 300s health-test interval',
+  record.check('js.smart.region-baseline-interval', smart.includes('interval: 300, tolerance: 30') && smart.includes('SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE'), {
+    message: 'Smart groups must retain the 300s baseline constructor and apply the selected profile',
   });
-  record.check('js.normal.region-interval-300', normal.includes(`interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}, tolerance: 10`), {
-    message: 'Normal region url-test groups must use 300s interval',
+  record.check('js.normal.region-baseline-interval', normal.includes('interval: 300, tolerance: 10') && normal.includes('SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE'), {
+    message: 'Normal groups must retain the 300s baseline constructor and apply the selected profile',
   });
-  record.check('js.flclash.region-interval-300', flclash.includes(`interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}, tolerance: 10`), {
-    message: 'FlClash region url-test groups must use 300s interval',
+  record.check('js.flclash.region-baseline-interval', flclash.includes('interval: 300, tolerance: 10') && flclash.includes('SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE'), {
+    message: 'FlClash groups must retain the 300s baseline constructor and apply the selected profile',
   });
+  for (const [id, source] of [['smart', smart], ['normal', normal], ['flclash', flclash]]) {
+    record.check(`js.${id}.health-profile`, source.includes(`const SCKI_HEALTH_CHECK_PROFILE = '${TRAFFIC_OPTIONS.healthCheckProfile}'`), {
+      message: `JS option must match ${TRAFFIC_OPTIONS.healthCheckProfile}`,
+    });
+    record.check(`js.${id}.quic-policy`, source.includes(`const SCKI_QUIC_POLICY = '${TRAFFIC_OPTIONS.quicPolicy}'`)
+      && source.includes('SckiTrafficOptions.applyQuicPolicy(config.rules, SCKI_QUIC_POLICY)'), {
+      message: `JS option must match ${TRAFFIC_OPTIONS.quicPolicy} and be applied to runtime rules`,
+    });
+  }
   record.check('js.no-legacy-fast-region-interval', !/interval:\s*(120|180),\s*tolerance:/.test(`${smart}\n${normal}\n${flclash}`), {
     message: 'JS region interval must not regress to 120s/180s',
   });
@@ -1257,22 +1295,33 @@ function validateClashYaml(record, baselineVersion, options) {
 
   record.check('cmfa.group-count', groupCount === EXPECTED_GROUPS, { value: groupCount });
   record.check('cmfa.provider-count', providerCount >= MIN_FULL_PROVIDERS, { value: providerCount });
-  record.check('cmfa.rule-count', ruleCount >= MIN_FULL_RULES, { value: ruleCount });
+  record.check('cmfa.rule-count', ruleCount === MIN_FULL_RULES, { value: ruleCount });
   const hasBaselineHeader = source.includes(`Clash Party ${baselineVersion}`);
   record.check('cmfa.baseline-header', hasBaselineHeader, failureMessage(hasBaselineHeader, `missing Clash Party ${baselineVersion}`));
   record.check('cmfa.rule-provider-singleton', countMatches(source, /^rule-providers:$/gm) === 1, { value: countMatches(source, /^rule-providers:$/gm) });
   record.check('cmfa.rules-singleton', countMatches(source, /^rules:$/gm) === 1, { value: countMatches(source, /^rules:$/gm) });
-  const cmfaInterval300Count = countMatches(source, /^\s+interval:\s*300\s*$/gm);
+  const cmfaSelectedIntervalCount = countMatches(source, new RegExp(`^\\s+interval:\\s*${EXPECTED_REGION_TEST_INTERVAL_SECONDS}\\s*$`, 'gm'));
   const cmfaLegacyRegionIntervals = (source.match(/^\s+interval:\s*(120|180)\s*$/gm) || []).length;
-  record.check('cmfa.region-test-interval-300', cmfaInterval300Count >= EXPECTED_REGION_GROUPS + 1, {
-    value: cmfaInterval300Count,
-    message: 'CMFA region url-test groups plus provider health-check must use 300s',
+  record.check('cmfa.region-test-interval-selected', cmfaSelectedIntervalCount === EXPECTED_REGION_GROUPS + 1, {
+    value: cmfaSelectedIntervalCount,
+    message: `CMFA region groups plus provider health-check must use ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}s`,
   });
   record.check('cmfa.no-legacy-fast-region-interval', cmfaLegacyRegionIntervals === 0, {
     value: cmfaLegacyRegionIntervals,
     message: 'CMFA must not use 120s/180s region test intervals',
   });
   const nativeRegionGroups = extractYamlBlock(source, 'proxy-groups').split(/(?=^- )/m).filter(block => /^- type: url-test$/m.test(block));
+  record.check('cmfa.region-health-profile-exact', nativeRegionGroups.length === EXPECTED_REGION_GROUPS && nativeRegionGroups.every((block) => (
+    new RegExp(`^  interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}$`, 'm').test(block)
+    && /^  lazy: true$/m.test(block)
+  )), { message: 'Each CMFA region group must use the selected interval and lazy mode' });
+  const cmfaHealthCheck = source.match(/^    health-check:\s*\r?\n((?:^      .*\r?\n?)*)/m);
+  record.check('cmfa.provider-health-profile-exact', Boolean(cmfaHealthCheck)
+    && new RegExp(`^      interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}$`, 'm').test(cmfaHealthCheck[1])
+    && /^      lazy: true$/m.test(cmfaHealthCheck[1]), {
+    message: 'CMFA Subscribe provider health-check must use selected interval and explicit lazy true',
+  });
+  checkMihomoQuicPolicy(record, 'cmfa', rulesBlock);
   record.check('cmfa.region-excludes-local-outbounds', nativeRegionGroups.length === EXPECTED_REGION_GROUPS && nativeRegionGroups.every(block => /^  exclude-type: ['"]direct\|reject['"]$/m.test(block)), {
     message: 'Every CMFA region group must exclude direct/reject provider members without deleting dialer dependencies',
   });
@@ -1291,7 +1340,7 @@ function validateClashYaml(record, baselineVersion, options) {
       record.check('cmfa.ruby-top-rules-singleton', parsed.top_rules === 1, { value: parsed.top_rules });
       record.check('cmfa.ruby-group-count', parsed.groups === EXPECTED_GROUPS, { value: parsed.groups });
       record.check('cmfa.ruby-provider-count', parsed.providers >= MIN_FULL_PROVIDERS, { value: parsed.providers });
-      record.check('cmfa.ruby-rule-count', parsed.rules >= MIN_FULL_RULES, { value: parsed.rules });
+      record.check('cmfa.ruby-rule-count', parsed.rules === MIN_FULL_RULES, { value: parsed.rules });
     } catch (error) {
       record.check('cmfa.ruby-parse', false, { message: error.message });
     }
@@ -1361,12 +1410,12 @@ function validateStashYaml(record, baselineVersion, options) {
   const groupCount = countMatches(source, /^- name: |^  name: /gm);
   const providerCount = countMatches(providersBlock, /^  [^ #][^:]+:\s*$/gm);
   const ruleCount = countMatches(rulesBlock, /^- /gm);
-  const stashInterval300Count = countMatches(source, /^\s+interval:\s*300\s*$/gm);
+  const stashSelectedIntervalCount = countMatches(source, new RegExp(`^\\s+interval:\\s*${EXPECTED_REGION_TEST_INTERVAL_SECONDS}\\s*$`, 'gm'));
   const legacyRegionIntervals = countMatches(source, /^\s+interval:\s*(120|180)\s*$/gm);
 
   record.check('stash.group-count', groupCount === EXPECTED_GROUPS, { value: groupCount });
   record.check('stash.provider-count', providerCount >= MIN_FULL_PROVIDERS, { value: providerCount });
-  record.check('stash.rule-count', ruleCount >= MIN_FULL_RULES, { value: ruleCount });
+  record.check('stash.rule-count', ruleCount === MIN_FULL_RULES, { value: ruleCount });
   record.check('stash.baseline-header', source.includes(`rulesets/source/routing-graph.js ${baselineVersion}`), {
     message: `missing source graph ${baselineVersion}`,
   });
@@ -1378,10 +1427,19 @@ function validateStashYaml(record, baselineVersion, options) {
   record.check('stash.generator-not-reading-generated-output', !/readFileSync\([^)]*Stash\/Stash\.yaml/.test(generator));
   record.check('stash.rule-provider-singleton', countMatches(source, /^rule-providers:$/gm) === 1, { value: countMatches(source, /^rule-providers:$/gm) });
   record.check('stash.rules-singleton', countMatches(source, /^rules:$/gm) === 1, { value: countMatches(source, /^rules:$/gm) });
-  record.check('stash.region-test-interval-300', stashInterval300Count === EXPECTED_REGION_GROUPS, {
-    value: stashInterval300Count,
-    message: 'Stash region url-test groups must use 300s; proxy-provider health-check is intentionally omitted',
+  record.check('stash.region-test-interval-selected', stashSelectedIntervalCount === EXPECTED_REGION_GROUPS, {
+    value: stashSelectedIntervalCount,
+    message: `Stash region groups must use ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}s; provider health-check is omitted`,
   });
+  const stashRegionGroups = extractYamlBlock(source, 'proxy-groups').split(/(?=^- )/m).filter((block) => /^- type: url-test$/m.test(block));
+  record.check('stash.region-health-profile-exact', stashRegionGroups.length === EXPECTED_REGION_GROUPS && stashRegionGroups.every((block) => (
+    new RegExp(`^  interval: ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}$`, 'm').test(block)
+    && /^  lazy: true$/m.test(block)
+  )), { message: 'Each Stash region group must use the selected interval and supported lazy behavior' });
+  record.check('stash.lazy-field-count', countMatches(source, /^  lazy:/gm) === EXPECTED_REGION_GROUPS, {
+    message: 'Stash must emit explicit lazy true for all 22 region groups',
+  });
+  checkMihomoQuicPolicy(record, 'stash', rulesBlock);
   record.check('stash.no-legacy-fast-region-interval', legacyRegionIntervals === 0, {
     value: legacyRegionIntervals,
     message: 'Stash must not use 120s/180s region test intervals',
@@ -1399,7 +1457,7 @@ function validateStashYaml(record, baselineVersion, options) {
       record.check('stash.ruby-top-rules-singleton', parsed.top_rules === 1, { value: parsed.top_rules });
       record.check('stash.ruby-group-count', parsed.groups === EXPECTED_GROUPS, { value: parsed.groups });
       record.check('stash.ruby-provider-count', parsed.providers >= MIN_FULL_PROVIDERS, { value: parsed.providers });
-      record.check('stash.ruby-rule-count', parsed.rules >= MIN_FULL_RULES, { value: parsed.rules });
+      record.check('stash.ruby-rule-count', parsed.rules === MIN_FULL_RULES, { value: parsed.rules });
     } catch (error) {
       record.check('stash.ruby-parse', false, { message: error.message });
     }
@@ -1431,7 +1489,6 @@ function validateStashYaml(record, baselineVersion, options) {
     'fallback-filter',
     'health-check',
     'exclude-filter',
-    'lazy',
     'tolerance',
     'exclude-type',
     'empty-fallback',
@@ -1541,8 +1598,20 @@ function validateOpenClash(record, baselineVersion, options) {
     const hasRubyVersionPrefix = source.includes(`VERSION = "${versionPrefixPattern}`);
     record.check(`openclash.${spec.id}.shell-version-prefix`, hasShellVersionPrefix, failureMessage(hasShellVersionPrefix, `missing VERSION_TAG ${versionPrefixPattern}*`));
     record.check(`openclash.${spec.id}.ruby-version-prefix`, hasRubyVersionPrefix, failureMessage(hasRubyVersionPrefix, `missing Ruby VERSION ${versionPrefixPattern}*`));
-    record.check(`openclash.${spec.id}.region-test-interval-300`, source.includes(`"interval"           => ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}`), {
-      message: 'OpenClash generated region groups must use 300s interval',
+    record.check(`openclash.${spec.id}.region-health-profile`, source.includes('health_profile == \'power-save\' ? 900 : 300')
+      && /"lazy"\s*=>\s*true\b/.test(source)
+      && source.includes(`SCKI_DEFAULT_HEALTH_CHECK_PROFILE="${TRAFFIC_OPTIONS.healthCheckProfile}"`), {
+      message: 'OpenClash must use 300s/900s interval and explicit lazy true with source default',
+    });
+    record.check(`openclash.${spec.id}.quic-policy-default`, source.includes(`SCKI_DEFAULT_QUIC_POLICY="${TRAFFIC_OPTIONS.quicPolicy}"`), {
+      message: 'OpenClash QUIC default must match the source option',
+    });
+    checkMihomoQuicPolicy(record, `openclash.${spec.id}.template`, rulesOnly);
+    record.check(`openclash.${spec.id}.quic-runtime-selection`, source.includes(`SCKI_SOURCE_QUIC_RULES = ${JSON.stringify(getQuicRules('block-foreign'))}.freeze`)
+      && source.includes('config["rules"].reject! { |rule| SCKI_SOURCE_QUIC_RULES.include?(rule) }')
+      && source.includes("if quic_policy == 'block-foreign'")
+      && source.includes('config["rules"].insert(quic_anchor, *SCKI_SOURCE_QUIC_RULES)'), {
+      message: 'OpenClash must remove only the exact source QUIC rules and reinsert them only for block-foreign',
     });
     record.check(`openclash.${spec.id}.no-legacy-fast-region-interval`, !/"interval"\s*=>\s*(120|180)\b/.test(source), {
       message: 'OpenClash interval must not regress to 120s/180s',
@@ -1644,12 +1713,12 @@ function validateConfProducts(record, baselineVersion) {
     const hasBaselineHeader = source.includes(`Clash Party ${baselineVersion}`);
     record.check(`${spec.id}.baseline-header`, hasBaselineHeader, failureMessage(hasBaselineHeader, `missing Clash Party ${baselineVersion}`));
     record.check(`${spec.id}.changelog-reference`, source.includes('CHANGELOG.md'));
-    const intervalToken = spec.id === 'qx' ? 'check-interval=300' : 'interval=300';
+    const intervalToken = spec.id === 'qx' ? `check-interval=${EXPECTED_REGION_TEST_INTERVAL_SECONDS}` : `interval=${EXPECTED_REGION_TEST_INTERVAL_SECONDS}`;
     const legacyIntervalPattern = spec.id === 'qx' ? /check-interval=(120|180)\b/ : /interval=(120|180)\b/;
     const intervalCount = countLiteral(source, intervalToken);
-    record.check(`${spec.id}.region-test-interval-300`, intervalCount === EXPECTED_REGION_GROUPS, {
+    record.check(`${spec.id}.region-test-interval-selected`, intervalCount === EXPECTED_REGION_GROUPS, {
       value: intervalCount,
-      message: `${spec.id} must emit ${EXPECTED_REGION_GROUPS} region test intervals at 300s`,
+      message: `${spec.id} must emit ${EXPECTED_REGION_GROUPS} region test intervals at ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}s`,
     });
     record.check(`${spec.id}.no-legacy-fast-region-interval`, !legacyIntervalPattern.test(source), {
       message: `${spec.id} must not regress to 120s/180s interval`,
@@ -1664,6 +1733,26 @@ function validateConfProducts(record, baselineVersion) {
   const loonRuleSection = extractConfSection(loon, 'Rule');
   const qxFilterRemote = extractConfSection(qx, 'filter_remote');
   const qxFilterLocal = extractConfSection(qx, 'filter_local');
+  const blockQuicValue = (source) => (source.match(/^block-quic\s*=\s*([^\r\n#]+)/m) || [])[1]?.trim();
+  const loonDisabledUdpPorts = (loon.match(/^disable-udp-ports\s*=\s*([^\r\n#]+)/m) || [])[1]?.trim();
+  for (const [id, source] of [['shadowrocket', shadowrocket], ['surge', surge]]) {
+    const value = blockQuicValue(source);
+    record.check(`${id}.quic-engine-policy`, TRAFFIC_OPTIONS.quicPolicy === 'block-foreign'
+      ? value === 'all-proxy'
+      : value === undefined, {
+      value,
+      message: `${id} engine QUIC switch must reflect ${TRAFFIC_OPTIONS.quicPolicy}`,
+    });
+  }
+  record.check('loon.quic-engine-policy', TRAFFIC_OPTIONS.quicPolicy === 'block-foreign'
+    ? loonDisabledUdpPorts === '443'
+    : loonDisabledUdpPorts === undefined, {
+    value: loonDisabledUdpPorts,
+    message: `Loon UDP/443 engine switch must reflect ${TRAFFIC_OPTIONS.quicPolicy}`,
+  });
+  record.check('qx.udp-fallback-policy-preserved', /^fallback_udp_policy=reject$/m.test(qx), {
+    message: 'QX unsupported-node UDP fallback remains REJECT independently of QUIC routing mode',
+  });
   record.check('shadowrocket.no-legacy-scholar-list', !shadowrocket.includes('/Scholar/Scholar.list'));
   record.check('surge.no-legacy-scholar-list', !surge.includes('/Scholar/Scholar.list'));
   record.check('loon.no-legacy-scholar-list', !loon.includes('/Scholar/Scholar.list'));
@@ -1798,12 +1887,12 @@ function validateJsonProducts(record, baselineVersion) {
   });
   record.check('singbox.generator-clean-base', !/readFileSync\(['"]SingBox\/SingBox\(sing-box\)-full\.json['"]/.test(singboxGenerator));
   record.check('singbox.selector-urltest-count', selectorCount === EXPECTED_SINGBOX_GROUPS, { value: selectorCount });
-  record.check('singbox.urltest-interval-5m', singboxUrltests.length === EXPECTED_SINGBOX_URLTEST_GROUPS && singboxUrltests.every((outbound) => outbound.interval === EXPECTED_SINGBOX_URLTEST_INTERVAL), {
+  record.check('singbox.urltest-interval-selected', singboxUrltests.length === EXPECTED_SINGBOX_URLTEST_GROUPS && singboxUrltests.every((outbound) => outbound.interval === EXPECTED_SINGBOX_URLTEST_INTERVAL), {
     value: Array.from(new Set(singboxUrltests.map((outbound) => outbound.interval))).sort(),
-    message: 'SingBox urltest outbounds must use 5m interval (300s)',
+    message: `SingBox urltest outbounds must use ${EXPECTED_SINGBOX_URLTEST_INTERVAL}`,
   });
-  record.check('singbox.generator-urltest-interval-5m', singboxGenerator.includes(`interval: '${EXPECTED_SINGBOX_URLTEST_INTERVAL}'`) && !singboxGenerator.includes("interval: '3m'"), {
-    message: 'SingBox generator must emit 5m urltest intervals',
+  record.check('singbox.generator-urltest-profile', singboxGenerator.includes("TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? '15m' : '5m'"), {
+    message: 'SingBox generator must map standard to 5m and power-save to 15m',
   });
   checkExactList(record, 'singbox.business-group-order', singboxBusinessOrder, SINGBOX_BUSINESS_ORDER);
   const finalAsUnconditionalRule = routeRules.some((rule) => (
@@ -1817,6 +1906,30 @@ function validateJsonProducts(record, baselineVersion) {
   });
   record.check('singbox.rule-set-count', ruleSetCount === EXPECTED_FUSED_SRS_FILES + EXPECTED_SINGBOX_RUNTIME_GEO_RULE_SETS, { value: ruleSetCount });
   record.check('singbox.route-rule-count', routeRuleCount === EXPECTED_SINGBOX_ROUTE_RULES, { value: routeRuleCount });
+  const expectedSingboxQuic = TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? [
+    { rule_set: ['geosite-youtube'], port: [443], network: 'udp', action: 'route', outbound: '📹 YouTube' },
+    { rule_set: ['geosite-google'], port: [443], network: 'udp', action: 'route', outbound: '🔍 Google 服务' },
+    { rule_set: ['geosite-microsoft'], port: [443], network: 'udp', action: 'route', outbound: 'Ⓜ️ 微软服务' },
+    { rule_set: ['geosite-apple'], port: [443], network: 'udp', action: 'route', outbound: '🍎 苹果服务' },
+    { rule_set: ['geosite-cn'], port: [443], network: 'udp', action: 'route', outbound: 'DIRECT' },
+    { port: [443], network: 'udp', action: 'reject' },
+  ] : [];
+  const singboxQuic = routeRules.filter((rule) => Array.isArray(rule.port) && rule.port.includes(443) && rule.network === 'udp');
+  record.check('singbox.quic-policy-exact', JSON.stringify(singboxQuic) === JSON.stringify(expectedSingboxQuic), {
+    value: singboxQuic,
+    message: `SingBox ${TRAFFIC_OPTIONS.quicPolicy} must emit exactly ${expectedSingboxQuic.length} UDP/443 route rules`,
+  });
+  if (expectedSingboxQuic.length) {
+    const firstQuic = routeRules.indexOf(singboxQuic[0]);
+    record.check('singbox.quic-contiguous', JSON.stringify(routeRules.slice(firstQuic, firstQuic + expectedSingboxQuic.length)) === JSON.stringify(expectedSingboxQuic), {
+      message: 'SingBox QUIC exemptions and fallback reject must remain contiguous and ordered',
+    });
+    const singboxAdGuard = routeRules.findIndex((rule) => Array.isArray(rule.rule_set)
+      && rule.rule_set.includes('scki-fused-006-ad'));
+    record.check('singbox.quic-after-ad', singboxAdGuard !== -1 && singboxAdGuard < firstQuic, {
+      message: 'SingBox ad rejection must precede dedicated UDP/443 handling',
+    });
+  }
   const singboxScholarGoogle = routeRules.some((rule) => (
     Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-022-google') && rule.outbound === '🔍 Google 服务'
   ));

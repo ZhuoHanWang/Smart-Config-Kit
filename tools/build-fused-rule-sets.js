@@ -2,13 +2,20 @@
 'use strict';
 
 const childProcess = require('node:child_process');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const zlib = require('node:zlib');
+const vm = require('node:vm');
+const { createRequire } = require('node:module');
 const {
   SOURCE_GRAPH_ID,
+  getTrafficOptions,
+  getHealthCheckSettings,
+  getQuicRules,
   getMihomoNormalizedRoutingGraph,
+  getRawRoutingGraph,
 } = require('../rulesets/source/routing-graph');
 const {
   generateFusedFallbackArtifacts,
@@ -53,6 +60,7 @@ const MIHOMO_REPO_API = `https://api.github.com/repos/${MIHOMO_REPO}/releases/la
 const SING_BOX_REPO_API = `https://api.github.com/repos/${SING_BOX_REPO}/releases/latest`;
 const RELEASE_FETCH_TIMEOUT_MS = Number(process.env.SCKI_RELEASE_FETCH_TIMEOUT_MS || 15000);
 const SOURCE_FETCH_TIMEOUT_MS = Number(process.env.SCKI_SOURCE_FETCH_TIMEOUT_MS || 30000);
+const SCKI_OFFLINE = process.env.SCKI_OFFLINE === '1';
 // jsDelivr rejects files at 20 MB. Keep a 2 MiB buffer for all client-facing text assets.
 const MAX_REMOTE_RULE_SET_BYTES = 18 * 1024 * 1024;
 
@@ -252,8 +260,15 @@ function parsePayloadEntries(text) {
   return entries;
 }
 
-function runSourceRoutingGraphBaseline() {
-  const output = getMihomoNormalizedRoutingGraph();
+function runSourceRoutingGraphBaseline(options = {}) {
+  const originalRandom = Math.random;
+  let output;
+  try {
+    if (options.deterministicIntervals) Math.random = () => 0;
+    output = getMihomoNormalizedRoutingGraph();
+  } finally {
+    Math.random = originalRandom;
+  }
   return {
     version: output.version,
     providers: output['rule-providers'] || {},
@@ -338,6 +353,7 @@ async function fetchText(url) {
   const key = Buffer.from(url).toString('base64url');
   const cached = path.join(CACHE_DIR, `${key}.txt`);
   if (fs.existsSync(cached)) return readText(cached);
+  if (SCKI_OFFLINE) throw new Error(`offline fused source cache miss: ${url}`);
 
   const candidates = [url];
   if (url.includes('fastly.jsdelivr.net/gh/')) candidates.push(url.replace('https://fastly.jsdelivr.net/gh/', 'https://cdn.jsdelivr.net/gh/'));
@@ -1455,27 +1471,268 @@ function applyMobileConfigs(timeline, assetRevision) {
   writeText(qx, qxText);
 }
 
+function applyCmfaTrafficOptions(source, options) {
+  source = source.replace(/\r\n/g, '\n');
+  const providerStart = source.indexOf('\nproxy-providers:\n');
+  const groupStart = source.indexOf('\nproxy-groups:\n', providerStart);
+  const rulesStart = source.indexOf('\nrules:\n', groupStart);
+  if (providerStart < 0 || groupStart < 0 || rulesStart < 0) throw new Error('CMFA traffic option sections missing');
+  const providerPart = source.slice(providerStart, groupStart).replace(
+    /(\n    health-check:\n      enable: true\n      url: [^\n]+\n      interval: )(?:300|900)(?:\n      lazy: (?:true|false))?/g,
+    (_match, prefix) => `${prefix}${getHealthCheckSettings(options.healthCheckProfile).intervalSeconds}\n      lazy: true`,
+  );
+  const groupPart = source.slice(groupStart, rulesStart)
+    .replace(/^  interval: (?:300|900)$/gm, `  interval: ${options.healthCheckProfile === 'power-save' ? 900 : 300}`)
+    .replace(/^  lazy: (?:true|false)$/gm, '  lazy: true');
+  return source.slice(0, providerStart) + providerPart + groupPart + source.slice(rulesStart);
+}
+
+function applyMobileTrafficOptions(source, platform, options) {
+  const interval = options.healthCheckProfile === 'power-save' ? 900 : 300;
+  const lines = source.replace(/\r\n/g, '\n').split('\n').map((line) => {
+    if (platform === 'quantumultx' && line.startsWith('url-latency-benchmark=')) {
+      return line.replace(/check-interval=(?:300|900)/, `check-interval=${interval}`)
+        .replace(/alive-checking=(?:true|false)/, `alive-checking=${options.healthCheckProfile === 'standard'}`);
+    }
+    if (/\s= url-test,/.test(line)) return line.replace(/interval=(?:300|900)/, `interval=${interval}`);
+    return line;
+  });
+  let result = lines.join('\n');
+  if (platform === 'shadowrocket' || platform === 'surge') {
+    result = result.replace(/^block-quic = all-proxy\n/gm, '');
+    if (options.quicPolicy === 'block-foreign') {
+      const marker = platform === 'shadowrocket' ? '# v5.4.22 N/A#1：SR block-quic' : '# v5.4.22 N/A#1：Surge block-quic';
+      const anchor = result.split('\n').find((line) => line.startsWith(marker));
+      if (!anchor) throw new Error(`${platform}: QUIC toggle anchor missing`);
+      result = result.replace(`${anchor}\n`, `${anchor}\nblock-quic = all-proxy\n`);
+    }
+  }
+  if (platform === 'loon') {
+    result = result.replace(/^disable-udp-ports = 443\n/gm, '');
+    if (options.quicPolicy === 'block-foreign') {
+      const anchor = result.split('\n').find((line) => line.startsWith('# v5.4.22 N/A#1：Loon disable-udp-ports'));
+      if (!anchor) throw new Error('Loon QUIC toggle anchor missing');
+      result = result.replace(`${anchor}\n`, `${anchor}\ndisable-udp-ports = 443\n`);
+    }
+  }
+  return result;
+}
+
+function applyTrafficOptionsToStaticArtifacts(options) {
+  const cmfa = path.join(REPO_ROOT, 'Clash Meta For Android/CMFA(mihomo).yaml');
+  writeText(cmfa, applyCmfaTrafficOptions(readText(cmfa), options));
+  for (const [platform, relative] of [
+    ['shadowrocket', 'Shadowrocket/Shadowrocket.conf'],
+    ['surge', 'Surge/Surge.conf'],
+    ['loon', 'Loon/Loon.conf'],
+    ['quantumultx', 'Quantumult X/QuantumultX.conf'],
+  ]) {
+    const file = path.join(REPO_ROOT, relative);
+    writeText(file, applyMobileTrafficOptions(readText(file), platform, options));
+  }
+}
+
+function assertTrafficOnlySourceChange(clashOutput) {
+  const relative = 'rulesets/source/routing-graph.js';
+  const source = childProcess.execFileSync('git', ['show', `HEAD:${relative}`], { cwd: REPO_ROOT, encoding: 'utf8' });
+  const sourceFile = path.join(REPO_ROOT, relative);
+  const module = { exports: {} };
+  const fixedMath = Object.create(Math);
+  fixedMath.random = () => 0;
+  vm.runInNewContext(source, {
+    module, exports: module.exports, require: createRequire(sourceFile),
+    __dirname: path.dirname(sourceFile), process: { env: {} }, Math: fixedMath, console: { log() {} },
+  }, { filename: `${relative}@HEAD`, timeout: 15000 });
+  const baseline = module.exports.buildMihomoRoutingGraph({ quicPolicy: 'block-foreign' });
+  const normalizeProviders = providers => JSON.stringify(providers)
+    .replace(/([?&]scki=)v\d+\.\d+\.\d+/g, '$1__revision__')
+    .replace(/\.\/ruleset\/v\d+\.\d+\.\d+\//g, './ruleset/__revision__/');
+  const baselineRaw = module.exports.buildMihomoRoutingGraph({ applyMihomoMrsOverrides: false, quicPolicy: 'block-foreign' });
+  const originalRandom = Math.random;
+  let currentRaw;
+  try { Math.random = () => 0; currentRaw = getRawRoutingGraph(); }
+  finally { Math.random = originalRandom; }
+  if (normalizeProviders(baselineRaw['rule-providers']) !== normalizeProviders(currentRaw['rule-providers'])) {
+    throw new Error('--reuse-assets requires unchanged raw source providers; run the full MRS and fused build for upstream changes');
+  }
+  if (normalizeProviders(baseline['rule-providers']) !== normalizeProviders(clashOutput.providers)) {
+    throw new Error('--reuse-assets requires unchanged source providers; run a full ruleset build for provider changes');
+  }
+  const quic = new Set(getQuicRules('block-foreign'));
+  const withoutQuic = rules => rules.filter(rule => !quic.has(rule));
+  if (JSON.stringify(withoutQuic(baseline.rules)) !== JSON.stringify(withoutQuic(clashOutput.rules))) {
+    throw new Error('--reuse-assets permits only traffic preset changes; other source rule changes require a full build');
+  }
+}
+
+function trafficSourceFingerprint() {
+  const originalRandom = Math.random;
+  let raw, normalized;
+  try { Math.random = () => 0; raw = getRawRoutingGraph(); normalized = getMihomoNormalizedRoutingGraph(); }
+  finally { Math.random = originalRandom; }
+  const quic = new Set(getQuicRules('block-foreign'));
+  const canonical = JSON.stringify({
+    rawProviders: raw['rule-providers'], normalizedProviders: normalized['rule-providers'],
+    rawRules: raw.rules.filter(rule => !quic.has(rule)), normalizedRules: normalized.rules.filter(rule => !quic.has(rule)),
+    quicRules: getQuicRules('block-foreign'),
+  }).replace(/([?&]scki=)v\d+\.\d+\.\d+/g, '$1__revision__')
+    .replace(/\.\/ruleset\/v\d+\.\d+\.\d+\//g, './ruleset/__revision__/');
+  return crypto.createHash('sha256').update(canonical).digest('hex');
+}
+
+function fusedPayloadReceipt() {
+  const files = new Map();
+  function walk(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) walk(file);
+      else {
+        const data = fs.readFileSync(file);
+        const canonical = /\.(?:mrs|srs)$/.test(file) ? data : Buffer.from(data.toString('utf8').replace(/\r\n/g, '\n'));
+        files.set(path.relative(REPO_ROOT, file).replace(/\\/g, '/'), canonical);
+      }
+    }
+  }
+  for (const directory of ['mihomo', 'clash', 'surge', 'quantumultx', 'egern', 'sing-box']) walk(path.join(FUSED_ROOT, directory));
+  const digest = crypto.createHash('sha256');
+  for (const [file, content] of [...files].sort(([a], [b]) => a.localeCompare(b, 'en'))) {
+    digest.update(file + '\0' + crypto.createHash('sha256').update(content).digest('hex') + '\n');
+  }
+  return { files, digest: digest.digest('hex') };
+}
+
+function assertSnapshotBinding(manifest) {
+  const sourceFingerprint = trafficSourceFingerprint();
+  const receipt = fusedPayloadReceipt();
+  if (manifest.traffic_source_fingerprint || manifest.payload_fingerprint) {
+    if (manifest.traffic_source_fingerprint !== sourceFingerprint || manifest.payload_fingerprint !== receipt.digest) {
+      throw new Error('Fused snapshot source or payload fingerprint changed; a full ruleset build is required');
+    }
+  } else {
+    // Adopt a legacy snapshot only when its published source version and all
+    // payload blobs match HEAD; count-only topology checks are insufficient.
+    const committed = JSON.parse(childProcess.execFileSync('git', ['show', 'HEAD:rulesets/generated/fused/manifest.json'], { cwd: REPO_ROOT, encoding: 'utf8' }));
+    const versionMatch = childProcess.execFileSync('git', ['show', 'HEAD:rulesets/source/routing-graph.js'], { cwd: REPO_ROOT, encoding: 'utf8' }).match(/const SOURCE_GRAPH_VERSION = ['"]([^'"]+)/);
+    if (!versionMatch || committed.baseline_version !== versionMatch[1] || JSON.stringify(manifest.segments) !== JSON.stringify(committed.segments)) {
+      throw new Error('Legacy fused snapshot is not bound to the committed source graph; run a full build');
+    }
+    const output = childProcess.execFileSync('git', ['ls-tree', '-r', 'HEAD', '--', ...['mihomo', 'clash', 'surge', 'quantumultx', 'egern', 'sing-box'].map(dir => `rulesets/generated/fused/${dir}`)], { cwd: REPO_ROOT, encoding: 'utf8' });
+    const blobs = new Map(output.trim().split('\n').filter(Boolean).map(line => { const match = line.match(/^\d+ blob ([0-9a-f]+)\t(.+)$/); if (!match) throw new Error('Unexpected snapshot tree record'); return [match[2], match[1]]; }));
+    if (blobs.size !== receipt.files.size) throw new Error('Legacy fused payload inventory differs from HEAD');
+    for (const [file, content] of receipt.files) {
+      const oid = crypto.createHash('sha1').update(`blob ${content.length}\0`).update(content).digest('hex');
+      if (blobs.get(file) !== oid) throw new Error(`Legacy fused payload differs from HEAD: ${file}`);
+    }
+  }
+  return { sourceFingerprint, payloadFingerprint: receipt.digest };
+}
+
+function reuseSnapshotTopology(clashOutput, manifest) {
+  if ((manifest.unresolved_providers || []).length || (manifest.unresolved_sources || []).length ||
+      (manifest.passthrough_providers || []).length) {
+    throw new Error('Cannot reuse assets from an unresolved fused snapshot');
+  }
+  const oldSegments = new Map(manifest.segments.map(row => [row.id, row]));
+  if (oldSegments.size !== manifest.segments.length) throw new Error('Duplicate fused snapshot segments');
+  const pruned = new Set(manifest.pruned_empty_segments || []);
+  const segments = [], timeline = [], inlineRules = [], seen = new Set();
+  let current = null, index = 1;
+  function flush() {
+    if (!current) return;
+    const row = oldSegments.get(current.id);
+    if (!row) {
+      if (!pruned.has(current.id)) throw new Error(`Fused topology mismatch: missing ${current.id}`);
+      current = null;
+      return;
+    }
+    if (row.policy !== current.policy || row.source_rules !== current.sourceRules.length) {
+      throw new Error(`Fused topology mismatch: policy/source rule count for ${current.id}`);
+    }
+    for (const [bucket, countKey] of [['domain', 'domain'], ['ipcidr', 'ipcidr'], ['ipcidrNoResolve', 'ipcidr_no_resolve'], ['residual', 'residual']]) {
+      // Existing renderers only inspect bucket presence; payload bytes remain untouched.
+      current[bucket] = row.counts[countKey] > 0 ? [true] : [];
+    }
+    current.remoteRuleSetFiles = {};
+    for (const target of ['clash', 'surge', 'quantumultx']) {
+      const record = row.files[target];
+      current.remoteRuleSetFiles[target] = record ? (record.parts || [record.file]) : [];
+      for (const file of current.remoteRuleSetFiles[target]) {
+        if (!file || !fs.existsSync(path.join(FUSED_ROOT, target, file))) throw new Error(`Missing snapshot asset: ${target}/${file}`);
+      }
+    }
+    for (const bucket of ['domain', 'ipcidr', 'ipcidr_no_resolve', 'residual']) {
+      const record = row.files[bucket];
+      if (record && !fs.existsSync(path.join(FUSED_MIHOMO_DIR, record.file))) throw new Error(`Missing snapshot asset: ${record.file}`);
+    }
+    segments.push(current); timeline.push({ type: 'segment', segment: current }); seen.add(current.id);
+    current = null;
+  }
+  for (const rule of clashOutput.rules) {
+    const parts = splitTopLevel(rule), type = parts[0];
+    if (INLINE_ONLY_TYPES.has(type)) {
+      flush(); inlineRules.push(rule); timeline.push({ type: 'inline', rule }); continue;
+    }
+    if (!['RULE-SET', 'GEOSITE', 'GEOIP'].includes(type) && !DOMAIN_TYPES.has(type) && !IPCIDR_TYPES.has(type) && !RESIDUAL_TYPES.has(type)) {
+      throw new Error(`Unsupported snapshot source rule: ${rule}`);
+    }
+    if (type === 'RULE-SET' && !clashOutput.providers[parts[1]]) throw new Error(`Missing snapshot source provider: ${parts[1]}`);
+    const policy = parts[2];
+    if (!current || current.policy !== policy) { flush(); current = createSegment(index++, policy); }
+    current.sourceRules.push(rule);
+  }
+  flush();
+  if (seen.size !== oldSegments.size) throw new Error('Fused topology mismatch: unused snapshot segments');
+  return { segments, timeline, inlineRules };
+}
+
+function writeClientArtifacts(timeline, assetRevision, fused) {
+  for (const file of ['Clash Party/ClashParty(mihomo-smart).js', 'Clash Party/ClashParty(mihomo).js', 'FlClash/FlClash(mihomo).js']) {
+    applyJsFusedBlock(file, fused.providers, fused.rules);
+  }
+  for (const file of ['Clash Meta For Android/CMFA(mihomo).yaml', 'OpenClash/OpenClash(mihomo).sh', 'OpenClash/OpenClash(mihomo-smart).sh']) {
+    replaceOpenClashYaml(file, fused.providers, fused.rules);
+  }
+  applyMobileConfigs(timeline, assetRevision);
+  applyTrafficOptionsToStaticArtifacts(getTrafficOptions());
+}
+
+function rebuildClientsFromSnapshot(clashOutput) {
+  assertTrafficOnlySourceChange(clashOutput);
+  const manifest = JSON.parse(readText(path.join(FUSED_ROOT, 'manifest.json')));
+  const binding = assertSnapshotBinding(manifest);
+  const { segments, timeline, inlineRules } = reuseSnapshotTopology(clashOutput, manifest);
+  const fused = mergeFusedRules(segments, timeline, clashOutput.providers, new Set(), clashOutput.version);
+  if (process.argv.includes('--dry-run')) {
+    console.log(`Snapshot reuse dry run: providers=${Object.keys(fused.providers).length} rules=${fused.rules.length} segments=${segments.length}`);
+    return;
+  }
+  writeClientArtifacts(timeline, clashOutput.version, fused);
+  Object.assign(manifest, {
+    generated_at: new Date().toISOString(), baseline_version: clashOutput.version, asset_revision: clashOutput.version,
+    source_provider_count: Object.keys(clashOutput.providers).length, source_rule_count: clashOutput.rules.length,
+    fused_provider_count: Object.keys(fused.providers).length, fused_rule_count: fused.rules.length,
+    inline_rule_count: inlineRules.length, inline_rules: inlineRules,
+    traffic_source_fingerprint: binding.sourceFingerprint, payload_fingerprint: binding.payloadFingerprint,
+  });
+  writeText(path.join(FUSED_ROOT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  generateFusedFallbackArtifacts({ quiet: true, updateManifest: true });
+  console.log(`Reused fused snapshot payloads: providers=${manifest.fused_provider_count} rules=${manifest.fused_rule_count} segments=${manifest.segment_count}; no upstream refresh`);
+}
+
 async function main() {
+  const args = process.argv.slice(2);
+  if (args.some(arg => arg !== '--reuse-assets' && arg !== '--dry-run') || (args.includes('--dry-run') && !args.includes('--reuse-assets'))) {
+    throw new Error('Usage: node tools/build-fused-rule-sets.js [--reuse-assets [--dry-run]]');
+  }
   fs.mkdirSync(CACHE_DIR, { recursive: true });
-  const clashOutput = runSourceRoutingGraphBaseline();
+  const clashOutput = runSourceRoutingGraphBaseline({ deterministicIntervals: args.includes('--reuse-assets') });
+  if (args.includes('--reuse-assets')) return rebuildClientsFromSnapshot(clashOutput);
   const assetRevision = clashOutput.version;
   const { segments, inlineRules, timeline, stats } = await buildSegments(clashOutput);
   const writeStats = await writeFusedRuleSets(segments);
   const fused = mergeFusedRules(segments, timeline, clashOutput.providers, stats.passthroughProviderIds, assetRevision);
 
-  for (const file of [
-    'Clash Party/ClashParty(mihomo-smart).js',
-    'Clash Party/ClashParty(mihomo).js',
-    'FlClash/FlClash(mihomo).js',
-  ]) applyJsFusedBlock(file, fused.providers, fused.rules);
-
-  for (const file of [
-    'Clash Meta For Android/CMFA(mihomo).yaml',
-    'OpenClash/OpenClash(mihomo).sh',
-    'OpenClash/OpenClash(mihomo-smart).sh',
-  ]) replaceOpenClashYaml(file, fused.providers, fused.rules);
-
-  applyMobileConfigs(timeline, assetRevision);
+  writeClientArtifacts(timeline, assetRevision, fused);
 
   const manifest = {
     generated_at: new Date().toISOString(),
@@ -1500,6 +1757,8 @@ async function main() {
     required_support_providers: [...REQUIRED_SUPPORT_PROVIDERS],
     segments: writeStats.manifestSegments,
     inline_rules: inlineRules,
+    traffic_source_fingerprint: trafficSourceFingerprint(),
+    payload_fingerprint: fusedPayloadReceipt().digest,
   };
   writeText(path.join(FUSED_ROOT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   const fallbackStats = generateFusedFallbackArtifacts({ quiet: true, updateManifest: true });
@@ -1510,7 +1769,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+if (require.main === module) main().catch((error) => {
   console.error(error.stack || error.message);
   process.exit(1);
 });
+
+module.exports = { applyCmfaTrafficOptions, applyMobileTrafficOptions, reuseSnapshotTopology, assertTrafficOnlySourceChange, assertSnapshotBinding, trafficSourceFingerprint, fusedPayloadReceipt };

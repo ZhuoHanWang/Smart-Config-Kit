@@ -1,7 +1,9 @@
 # Stash
 
+> 测速与海外 QUIC 可选策略：参见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 > 目录简介：这里提供 Stash 专用 YAML 产物。`Stash.yaml` 由 `tools/generate-stash-from-cmfa.js` 从 CMFA 自动裁剪生成，不手工维护。
-> 当前版本：**v6.0.14-stash.7**（Build 2026-09-30，跟随 Clash Party v6.0.14 / CMFA v6.0.14-cmfa.7；132 个融合 rule-providers / 151 条主规则）。
+> 当前版本：**v6.0.15-stash.9**（Build 2026-10-07，跟随 Clash Party v6.0.15 / CMFA v6.0.15-cmfa.9；132 个融合 rule-providers / 151 条主规则）。
 
 ## 文件
 

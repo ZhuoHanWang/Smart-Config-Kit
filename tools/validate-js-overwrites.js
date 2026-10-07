@@ -7,7 +7,9 @@ const vm = require('node:vm');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const RESTRICTED_SITE = '🚫 受限网站';
-const EXPECTED_REGION_TEST_INTERVAL_SECONDS = 300;
+const { getTrafficOptions, getQuicRules } = require('../rulesets/source/routing-graph');
+const TRAFFIC_OPTIONS = getTrafficOptions();
+const EXPECTED_REGION_TEST_INTERVAL_SECONDS = TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? 900 : 300;
 const FUSED_MANIFEST = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'rulesets/generated/fused/manifest.json'), 'utf8'));
 const EXPECTED_FUSED_PROVIDERS = FUSED_MANIFEST.fused_provider_count;
 const EXPECTED_FUSED_RULES = FUSED_MANIFEST.fused_rule_count;
@@ -576,7 +578,10 @@ function validateGroups(target, output, record) {
     const group = groupsByName.get(name);
     record.expect(!!group, `region group exists: ${name}`);
     if (group) record.expectEqual(group.type, target.regionType, `region group type is ${target.regionType}: ${name}`);
-    if (group) record.expectEqual(group.interval, EXPECTED_REGION_TEST_INTERVAL_SECONDS, `region group interval is 300s: ${name}`);
+    if (group) {
+      record.expectEqual(group.interval, EXPECTED_REGION_TEST_INTERVAL_SECONDS, `region group interval is ${EXPECTED_REGION_TEST_INTERVAL_SECONDS}s: ${name}`);
+      record.expectEqual(group.lazy, true, `region group uses lazy health checks in ${TRAFFIC_OPTIONS.healthCheckProfile}: ${name}`);
+    }
   }
 
   record.expect(!groupsByName.has('机场自动选择'), 'subscription-native proxy-groups are removed');
@@ -691,14 +696,18 @@ function validateRulesAndProviders(output, record, target) {
     record.expect(rules.includes(`DST-PORT,${port},DIRECT`), `STUN/TURN port stays on DIRECT: ${port}`);
   }
   record.expect(!rules.includes('DST-PORT,443,DIRECT'), 'UDP/443 TURN is not globally exempted from QUIC blocking');
-  // v5.4.25: 确保 5 条 QUIC AND 规则内部引用完整且未被意外修改
+  // QUIC policy is sourced from the routing graph; both modes have exact rule contracts.
   const quicAndRules = rules.filter(function(r) { return String(r).startsWith('AND,((DST-PORT,443),(NETWORK,UDP),'); });
-  record.expectEqual(quicAndRules.length, 5, 'exactly 5 QUIC AND rules exist');
-  record.expect(quicAndRules.some(function(r) { return String(r).includes('GEOSITE,youtube') && String(r).endsWith('📹 YouTube'); }), 'QUIC AND: YouTube whitelist intact');
-  record.expect(quicAndRules.some(function(r) { return String(r).includes('GEOSITE,google') && String(r).endsWith('🔍 Google 服务'); }), 'QUIC AND: Google service whitelist intact');
-  record.expect(quicAndRules.some(function(r) { return String(r).includes('GEOSITE,microsoft') && String(r).endsWith('Ⓜ️ 微软服务'); }), 'QUIC AND: Microsoft whitelist intact');
-  record.expect(quicAndRules.some(function(r) { return String(r).includes('GEOSITE,apple') && String(r).endsWith('🍎 苹果服务'); }), 'QUIC AND: Apple whitelist intact');
-  record.expect(quicAndRules.some(function(r) { return String(r).includes('NOT,((GEOSITE,cn))') && String(r).endsWith('REJECT'); }), 'QUIC AND: non-CN REJECT fallback intact');
+  const expectedQuicRules = getQuicRules(TRAFFIC_OPTIONS.quicPolicy);
+  record.expectArrayEqual(quicAndRules, expectedQuicRules, `QUIC ${TRAFFIC_OPTIONS.quicPolicy} emits exactly the selected UDP/443 rules`);
+  const quicAnchor = rules.indexOf('DST-PORT,7680,REJECT');
+  record.expect(quicAnchor !== -1, 'QUIC policy insertion anchor remains present');
+  if (expectedQuicRules.length) {
+    record.expectArrayEqual(rules.slice(quicAnchor - expectedQuicRules.length, quicAnchor), expectedQuicRules, 'QUIC rules retain their priority before the application port guard');
+    record.expect(fusedAd !== -1 && fusedAd < quicAnchor - expectedQuicRules.length, 'ad and threat guards stay before dedicated QUIC rules');
+  } else {
+    record.expect(!rules.some(function(r) { return /(?:DST|DEST)-PORT,443/.test(String(r)) && /NETWORK,UDP/.test(String(r)); }), 'follow-rules has no dedicated UDP/443 override');
+  }
   const fusedRustDeskGuard = firstFusedRuleIndex(rules, 'work-domain', '🧑‍💼 会议协作');
   const githubApiProcessIndexes = [
     'AND,((PROCESS-NAME,Code Helper),(DOMAIN,api.github.com)),🤖 AI 服务',

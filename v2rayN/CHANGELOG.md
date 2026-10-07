@@ -7,6 +7,11 @@
 
 ---
 
+## v6.0.15-v2n.6 (2026-10-07)
+
+- Xray 路由产物随海外 UDP/443 策略选择同步；测速由使用的客户端或核心另行管理。
+- 切换命令、平台能力及验证方法见 [测速与 QUIC 策略选项](../docs/traffic-options.md)。
+
 ## v6.0.14-v2n.5 (2026-09-29)
 
 - SYNC：Xray fallback 第 001 RuleObject 加入微信 HTTPDNS 两个精确域名并保持 direct 出站。
