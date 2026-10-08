@@ -7,6 +7,19 @@
 
 ---
 
+## v6.0.15-dns.17 / v6.0.15-normal.18 (2026-10-08)
+
+- PRIVATE-AI-GROUP：新增独立 `AI专属` Smart/url-test 组，私有节点（来自 `__SCKI_PRIVATE_AI__` 标记组）可独立测速择路。
+- UI-ORDER：AI/Gemini 业务组前置到全球节点之前，`AI专属` 组紧跟全球节点，方便快速切换。
+- 对齐 FlClash 版的私有节点注入逻辑：`AI专属` 组引用同时加入 `🤖 AI 服务` 和 `✨ Gemini 服务` 候选列表。
+
+## v6.0.15-dns.16 / v6.0.15-normal.17 (2026-10-08)
+
+- RU-REGION：从 EU 区域拆出独立俄罗斯 (RU) 区域（🇷🇺 俄罗斯节点 / 🏡 俄罗斯家宽），对齐 gemini AI 版分类粒度。
+- AI-EXCLUDE：`buildAiGlobalNodes` 接受 5 参数（含 ruNodes），通过区域分类排除俄罗斯节点，替代 regex `AI_EXCLUDED_NODE_PATTERN`。
+- FALLBACK：AI 排除后若结果为空则回落全量节点，避免 AI 组空置。
+- TEST：验证脚本 `validate-js-overwrites.js` 更新预期组顺序（含 RU 组与 Gemini 业务组）。
+
 ## v6.0.15-dns.14 / v6.0.15-normal.15 (2026-10-08)
 
 - PRIVATE-NODES：Smart/Normal 从独立 YAML 的 `__SCKI_PRIVATE_AI__` 标记组读取节点名，私有节点不参与区域分类，只加入 `🤖 AI 服务`。

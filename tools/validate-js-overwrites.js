@@ -68,16 +68,21 @@ const SMART_GROUPS = [
   '🏡 美国家宽',
   '🇪🇺 欧洲节点',
   '🏡 欧洲家宽',
+  '🇷🇺 俄罗斯节点',
+  '🏡 俄罗斯家宽',
   '🌎 美洲节点',
   '🏡 美洲家宽',
   '🌍 非洲节点',
   '🏡 非洲家宽',
   '🌏 其他节点',
   '🏡 其他家宽',
+  '🌍 全球节点（AI排除港台澳俄）',
+  '🏡 全球家宽（AI排除港台澳俄）',
 ];
 
 const BIZ_GROUPS = [
   '🤖 AI 服务',
+  '✨ Gemini 服务',
   '💰 加密货币',
   '🏦 金融支付',
   '💬 即时通讯',
@@ -113,18 +118,17 @@ const BIZ_GROUPS = [
 ];
 
 const EXPECTED_GROUP_ORDER = [SMART_GROUPS[0], ...BIZ_GROUPS, ...SMART_GROUPS.slice(1)];
-const FLCLASH_AI_GEMINI_GROUP_ORDER = [
+const SMART_AI_GEMINI_GROUP_ORDER = [
   BIZ_GROUPS[0],
   '✨ Gemini 服务',
   SMART_GROUPS[0],
-  ...BIZ_GROUPS.slice(1),
-  ...SMART_GROUPS.slice(1),
-  '🌍 全球节点（AI排除港台澳俄）',
-  '🏡 全球家宽（AI排除港台澳俄）',
+  'AI专属',
+  ...BIZ_GROUPS.slice(2),  // 跳过 Gemini（已在前面显示），从 💰 加密货币 开始
+  ...SMART_GROUPS.slice(1), // 区域组（含 RU），不含全球节点
 ];
 const flclashTarget = TARGETS.find((target) => target.id === 'flclash');
 Object.assign(flclashTarget, {
-  expectedGroupOrder: FLCLASH_AI_GEMINI_GROUP_ORDER,
+  expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,
   expectedFusedRules: EXPECTED_FUSED_RULES + 22,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
@@ -139,6 +143,26 @@ Object.assign(flclashTarget, {
       || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
   },
 });
+
+// Smart 和 Normal 版包含 AI/Gemini overlay 但不做 front-placement（保持全球节点置顶）
+const smartTarget = TARGETS.find((target) => target.id === 'smart');
+const normalTarget = TARGETS.find((target) => target.id === 'normal');
+[smartTarget, normalTarget].forEach((t) => Object.assign(t, {
+  expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,  // AI/Gemini 前置 + AI专属
+  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
+  expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
+  additionalQuicRules: [
+    'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
+    'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,acc-gemini)),✨ Gemini 服务',
+  ],
+  additionalProviderNames: new Set(['gemini', 'acc-gemini']),
+  allowInlineRule(rule) {
+    const text = String(rule);
+    return text.endsWith(',✨ Gemini 服务')
+      || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
+      || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
+  },
+}));
 const DIRECT_POLICIES = new Set(['DIRECT', 'REJECT', 'REJECT-DROP', 'PASS']);
 const INFO_NODES = new Set(['剩余流量 10G', '官网 example.com', 'USE 100GB']);
 const EXTRA_INFO_NODES = new Set(['距离下次重置 12 天', '套餐到期 2026-06-01', 'Panel Channel Author',
@@ -309,6 +333,8 @@ function makeFixtureConfig() {
       makeProxy('USA 01 Home IP x1', { type: 'trojan', tls: true }),
       makeProxy('US 09 Standard x1'),
       makeProxy('DE Frankfurt Home x1'),
+      makeProxy('RU Moscow x1'),
+      makeProxy('RU Vladivostok Home x1'),
       makeProxy('CA Toronto Residential x1'),
       makeProxy('EG Cairo Home x1'),
       makeProxy('Mystery Home IP x1'),
@@ -333,10 +359,14 @@ function makeFixtureConfig() {
       makeProxy('FAQ'),
       // v5.4.20 #6 合法名守卫——"Signal" 含 "Sign" 但有词边界保护，必须保留并分类到 HK
       makeProxy('Signal 香港 IEPL x1'),
+      // 私有 AI 节点（匹配 __SCKI_PRIVATE_AI__ 标记组）
+      makeProxy('Private AI Node 01'),
+      makeProxy('Private AI Home 02'),
     ],
     'proxy-groups': [
       { name: '机场自动选择', type: 'url-test', proxies: ['HKG 01 IEPL x1'] },
       { name: 'Netflix', type: 'select', proxies: ['机场自动选择'] },
+      { name: '__SCKI_PRIVATE_AI__', type: 'select', proxies: ['Private AI Node 01', 'Private AI Home 02'] },
     ],
     rules: ['DOMAIN-SUFFIX,legacy.example,机场自动选择', 'MATCH,机场自动选择'],
     'rule-providers': {
