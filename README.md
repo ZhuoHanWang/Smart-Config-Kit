@@ -285,6 +285,10 @@ Sub-Store 是客户端导入前的订阅聚合层，**不是第 15 个正式客�
 
 ## 📌 适用人群
 
+### 个人 Fork、jsDelivr 与私有节点
+
+需要保留个人 JS 修改并持续获取源作者更新时，使用个人 Fork 作为 `origin`，将源作者仓库配置为 `upstream`；FlClash 的发布地址使用个人 Fork 的 jsDelivr URL。实际节点不要写进公开 JS，复制 `Clash Party/private-nodes.example.yaml` 为本地 `private-nodes.yaml`，作为单独 YAML 覆写导入。完整的 remote 配置、同步命令和冲突处理见 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)。
+
 - 想“一套配置跑多端”的用户；
 - 不想手工维护大量策略组但又追求精细分流的用户；
 - 希望借助 AI 持续优化配置工程质量的用户。

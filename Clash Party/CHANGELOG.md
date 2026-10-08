@@ -7,6 +7,12 @@
 
 ---
 
+## v6.0.15-dns.14 / v6.0.15-normal.15 (2026-10-08)
+
+- PRIVATE-NODES：Smart/Normal 从独立 YAML 的 `__SCKI_PRIVATE_AI__` 标记组读取节点名，私有节点不参与区域分类，只加入 `🤖 AI 服务`。
+- SECURITY：公开 JS 与历史记录不保留节点凭据；模板、Fork 发布和 upstream 同步见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
+- UPSTREAM：基于 v6.0.15 保留测速档位及 QUIC 运行时选项；FlClash 同构读取私有节点，其他客户端没有此 JS 覆写输入点。
+
 ## v6.0.15-dns.13 / v6.0.15-normal.14 (2026-10-07)
 
 - Smart/Normal 的默认 `standard` 档维持 300 秒并设 `lazy: true`；`power-save` 仍为 900 秒加 `lazy: true`。QUIC 默认策略不变。
@@ -75,6 +81,40 @@
 
 - ROUTING：仅 `gemini` 与 `acc-gemini` 融合段改为 `🔍 Google 服务`；`szkane-ai` 仍为 `🤖 AI 服务`，且保持原有相对顺序。
 - VERIFY：Gemini、Generative Language、Google APIs 与 DeepMind 首命中固定为 Google；`cerebras.ai` 保持 AI，`static.doubleclick.net` 保持广告优先。
+## v6.0.10-dns.6 / v6.0.10-normal.7 (2026-10-08)
+
+- FIX-RUNTIME-ARRAY-IDENTITY：清理订阅组和规则时改用原地 `splice`，保留客户端运行时持有的数组引用。
+
+## v6.0.10-dns.5 / v6.0.10-normal.6 (2026-10-07)
+
+- FEAT-PRIVATE-NODES：Smart/Normal JS 从独立 YAML 覆写的 `__SCKI_PRIVATE_AI__` 标记组读取私有节点名称。
+  - 私有节点不参与区域分类，Smart/Normal 仅将其加入 `🤖 AI 服务` 候选，不增加代理组数量。
+  - 标记组在清理订阅原生组时移除；没有私有 YAML 时公共订阅行为不变。
+- SECURITY：公开 JS 不包含 UUID、服务器地址或 Reality 凭据。
+
+## v6.0.10-ai-gemini.7 (2026-10-05)
+
+- FEAT-AI-UI-FRONT：AI/Gemini 代理组 UI 选项卡前置到全球节点之前，方便快速切换。
+  - 修改 `sortProxyGroups`：从 bizGroups 提取 `🤖 AI 服务` / `✨ Gemini 服务`，排在 `🌍 全球节点` 之前。
+  - 不影响规则匹配顺序、不影响主线和 ai-exclude 变体。
+
+## v6.0.10-ru4.5 / v6.0.10-ai-exclude.5 (2026-08-20)
+
+- FEAT-JMS-GOOGLE：JMS `AI专属` 组追加到 🔍 Google 服务 业务组候选末尾（不改默认首选），与 AI/Gemini 同构。
+  - 同节点机制：`AI专属` 是共享的 smart 组实例，多个业务组同时选中它时，当前选中节点全局共享——Google / Gemini / AI 服务都选 `AI专属` 后天然走同一个 JMS 节点，sticky-sessions 保持节点稳定。
+  - VERIFY：`.smoke-test.js` 新增 Google 服务候选包含 `AI专属` 的断言，两变体全绿。
+
+## v6.0.10-ru4.4 / v6.0.10-ai-exclude.4 (2026-08-20)
+
+- FIX-JMS-REALITY-KEY（历史）：修正旧版静态 AI 节点的 Reality 公钥；具体密钥、UUID、服务器和导出字段不在公开日志保存。
+  - VERIFY：旧版静态节点回归通过；后续版本改由本地私有 YAML 提供节点数据。
+
+## v6.0.10-ru4.3 / v6.0.10-ai-exclude.3 (2026-08-20)
+
+- FEAT-JMS-AI-ONLY（历史）：新增静态 AI 专属组 `AI专属`，曾将固定 VLESS Reality 节点硬编码注入；节点数据不在公开日志保存，现已由本地私有 YAML 解耦。
+  - ISOLATION：历史实现中的专属节点不参与区域分类，也不进入全球/家宽组。
+  - BIZ：历史变体曾把 `AI专属` 追加到 AI/Gemini 业务候选；当前行为由私有 YAML 是否导入决定。
+  - VERIFY：历史静态组回归通过；公开版本不再携带其节点凭据。
 
 ## v6.0.10-dns.4 / v6.0.10-normal.5 (2026-08-08)
 
@@ -614,7 +654,7 @@
   - 同步修正：原 alpha-3 `HKG` 已在 HK 列表，验证无误
   - 影响：此前该类机场的台湾/日韩组会因全部 UNCLASSIFIED + fallback 到 `apacNodes` / `c.ALL` 而掺入 HK 等节点（见 FIX#25）
 
-- ★ **FIX#25-P0**：统一空区域不建 Smart 组，消除 HK/全节点污染 🇹🇼 / 🇯🇵 组
+- ★ **FIX#25-P0**：统一空区域不建 Smart 组，消除 HK/全节点污染 / 🇯🇵 组
   - 现象（issue 截图）：🇹🇼 台湾节点 与 🇯🇵 日韩节点 Smart 组里出现 `HKG 01~04` + `SGP 01` + `KOR 01` 等一共 11 个节点（等于 `c.ALL`），
     原因是原 fallback `c.TW.length > 0 ? c.TW : apacNodes.length > 0 ? apacNodes : c.ALL` 在 TW/JP/KR 区域为空时
     silently 把 `apacNodes`（含 HK）或 `c.ALL` 塞进去

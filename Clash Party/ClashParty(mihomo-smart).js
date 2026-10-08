@@ -1,5 +1,5 @@
 // Clash Smart 内核覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-dns.13 (2026-10-07)
+// 版本：v6.0.15-dns.14 (2026-10-08)
 // 架构：SUB-STORE 多机场融合 + 22 Smart 区域组（11 全部 + 11 家宽）+ 33 业务策略组 + 132 融合 rule-providers / 151 rules
 // 规则源：rulesets/source/routing-graph.js v6.0.15（同策略规范化与语义去重）
 // 变更历史：见 `Clash Party/CHANGELOG.md`
@@ -8,7 +8,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-dns.13'
+const VERSION = 'v6.0.15-dns.14'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变 55 组、规则或仓库 DNS 基线。
@@ -262,7 +262,7 @@ function isResidentialNode(name) {
 const REGION_DB = [
   // v5.2.6 FIX#24-P0: 补齐 ISO alpha-3 代码（TWN/JPN/KOR/SGP/USA/CHN/HKG），
   //   避免 "TWN 01"、"JPN 01"、"KOR 01"、"SGP 01" 命名的节点被归为 UNCLASSIFIED
-  //   进而触发 apacNodes / c.ALL fallback，把 HK 等节点塞入 🇹🇼 台湾节点 / 🇯🇵 日韩节点
+  //   进而触发 apacNodes / c.ALL fallback，把 HK 等节点塞入 台湾节点 / 🇯🇵 日韩节点
   { id: 'HK', kw: ['香港', 'hong kong', 'hongkong', 'hkg', '港'], iso: ['HK'] },
   { id: 'TW', kw: ['台湾', '台北', '台中', '高雄', '新北', '桃园', 'taiwan', 'taipei', 'taichung', 'kaohsiung', 'tpe', 'twn'], iso: ['TW'] },
   { id: 'CN', kw: ['中国', '大陆', '国内', '中国大陆', 'china', 'mainland', '回国节点', '回国专线', '回国线路', '回国加速', '回国服务', '直连国内', '国内直连', '中转国内', '落地国内', '北京', '上海', '广州', '深圳', 'beijing', 'shanghai', 'guangzhou', 'shenzhen', '成都', '重庆', '杭州', '南京', '武汉', '天津', '苏州', '西安', '长沙', 'chengdu', 'chongqing', 'hangzhou', 'nanjing', 'wuhan', 'tianjin', 'suzhou', 'xian', 'changsha', '沈阳', '青岛', '郑州', '大连', '东莞', '宁波', '厦门', '济南', '无锡', '合肥', '昆明', '福州', '哈尔滨', '佛山', '长春', '石家庄', '太原', '南宁', '贵阳', '乌鲁木齐', '兰州', '海口', '银川', '西宁', '拉萨', '呼和浩特', '电信', '联通', '移动', '铁通', 'chinatelecom', 'chinaunicom', 'chinamobile', 'chn', 'pek', 'pkx', 'pvg', 'szx', 'ctu', 'ckg', 'hgh', 'nkg', 'wuh', 'tsn', 'syx', 'xiy', 'csx', 'kmg', 'hak', 'dlc', 'tao', 'she', 'hrb', 'cgo'], iso: ['CN'] },
@@ -480,6 +480,38 @@ function buildSeaProxies() {
   return withResidential(['SG', 'APAC', 'GLOBAL', 'HK', 'JPKR', 'US']).concat('DIRECT')
 }
 
+// Optional private nodes are supplied by a separate YAML override. The marker
+// group is read before subscription groups are cleared and never survives output.
+const PRIVATE_AI_GROUP_NAME = '__SCKI_PRIVATE_AI__'
+
+function collectPrivateAiNodeNames(config) {
+  var proxies = Array.isArray(config.proxies) ? config.proxies : []
+  var proxyNames = new Set(proxies.map(function(p) { return p && typeof p.name === 'string' ? p.name : '' }))
+  var groups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : []
+  var marker = groups.find(function(g) { return g && g.name === PRIVATE_AI_GROUP_NAME })
+  var requested = marker && Array.isArray(marker.proxies) ? marker.proxies : []
+  // Reprocessing a generated config must preserve private-node isolation, but
+  // never trust an arbitrary subscription group that happens to be named AI.
+  if (!marker) {
+    var generatedAi = groups.find(function(g) { return g && g.name === BIZ.AI })
+    var members = generatedAi && Array.isArray(generatedAi.proxies) ? generatedAi.proxies : []
+    var publicMembers = members.filter(function(name) { return Object.values(SMART).indexOf(name) !== -1 || name === 'DIRECT' })
+    var expectedPublicMembers = buildHomeFirstProxies(REGION_ORDER).filter(function(name) { return publicMembers.indexOf(name) !== -1 })
+    var generatedShape = publicMembers.length > 0
+      && publicMembers.indexOf('DIRECT') !== -1
+      && publicMembers.length === expectedPublicMembers.length
+      && publicMembers.every(function(name, index) { return name === expectedPublicMembers[index] })
+    if (generatedShape) requested = members
+  }
+  var names = []
+  var seen = new Set()
+  for (var i = 0; i < requested.length; i++) {
+    var name = typeof requested[i] === 'string' ? requested[i] : ''
+    if (name && proxyNames.has(name) && !seen.has(name)) { names.push(name); seen.add(name) }
+  }
+  return names
+}
+
 // ================================================================
 //  模块 E：Smart 组创建
 // ================================================================
@@ -495,12 +527,15 @@ function upsertSmartGroup(config, name, proxies) {
 //  模块 F：业务策略组注入（33组）
 // ================================================================
 
-function injectBusinessGroups(config, activeSmartNames) {
+function injectBusinessGroups(config, activeSmartNames, privateAiNodeNames) {
   function filterActive(arr) {
     if (!activeSmartNames) return arr.slice()
     return arr.filter(function(p) { return activeSmartNames.has(p) })
   }
   var aiProxies = filterActive(buildHomeFirstProxies(REGION_ORDER))
+  ;(Array.isArray(privateAiNodeNames) ? privateAiNodeNames : []).slice().reverse().forEach(function(name) {
+    if (aiProxies.indexOf(name) === -1) aiProxies.unshift(name)
+  })
   var standardProxies = filterActive(buildStandardProxies())
   var streamUsProxies = filterActive(buildRegionPreferredProxies('US'))
   var streamHkProxies = filterActive(buildRegionPreferredProxies('HK'))
@@ -1392,14 +1427,19 @@ function sanitizeFakeIpFilterEntries(list) {
 function cleanupSubscription(config) {
   // v5.2.6 FIX#26-P0: 清空订阅自带的所有 proxy-groups
   //   原 4 关键词黑名单（负载均衡/自动选择/手动选择/节点选择）只能清除部分机场模板，
-  //   机场若提供地区组（🇭🇰 香港 / 🇹🇼 台湾 / …）或流媒体组，会和本脚本 18 Smart + 31 业务组共存，
+  //   机场若提供地区组（🇭🇰 香港 / 台湾 / …）或流媒体组，会和本脚本 18 Smart + 31 业务组共存，
   //   用户端会看到 70+ 甚至 80+ 代理组（本脚本期望恰好 53 个）。
   //   本脚本 53 个组是唯一权威来源：业务组只引用 SMART.* / DIRECT / REJECT，Smart 组只引用
   //   config.proxies 里的节点名，不依赖任何订阅原生组，所以可以安全地整体清空。
   var removed = (config['proxy-groups'] || []).length
-  config['proxy-groups'] = []
+  if (Array.isArray(config['proxy-groups'])) {
+    config['proxy-groups'].splice(0, config['proxy-groups'].length)
+  } else {
+    config['proxy-groups'] = []
+  }
   if (removed > 0) console.log(`[${VERSION}] Removed ${removed} subscription proxy-groups`)
-  config.rules = []
+  if (Array.isArray(config.rules)) config.rules.splice(0, config.rules.length)
+  else config.rules = []
   config['rule-providers'] = {}
 }
 
@@ -1498,13 +1538,15 @@ function main(config) {
     if (!Array.isArray(config['proxy-groups'])) config['proxy-groups'] = []
     if (!Array.isArray(config.rules)) config.rules = []
     logClashPartyDnsGuardBoundary(config)
+    var privateAiNodeNames = collectPrivateAiNodeNames(config)
+    var privateAiNameSet = new Set(privateAiNodeNames)
     var activeNodeServers = collectActiveSubscriptionNodeServers(config.proxies)
     var nodeDnsHints = SckiSubscriptionAdapter.captureNodeDns(config, activeNodeServers, SCKI_SUBSCRIPTION_ADAPTER_PROFILE)
     var nodeDnsReport = overwriteGeneral(config, nodeDnsHints)
     logSubscriptionAdapterReport(nodeDnsReport)
     cleanupSubscription(config)
     injectSmartFingerprint(config)
-    var c = classifyAllNodes(config.proxies)
+    var c = classifyAllNodes(config.proxies.filter(function(p) { return p && !privateAiNameSet.has(p.name) }))
     console.log(`[${VERSION}] Classification: ALL=${c.ALL.length} HOME_ALL=${c.HOME_ALL.length} HK=${c.HK.length}/${c.HOME_HK.length} TW=${c.TW.length}/${c.HOME_TW.length} CN=${c.CN.length}/${c.HOME_CN.length} JP=${c.JP.length}/${c.HOME_JP.length} KR=${c.KR.length}/${c.HOME_KR.length} SG=${c.SG.length}/${c.HOME_SG.length} US=${c.US.length}/${c.HOME_US.length} EU=${c.EU.length}/${c.HOME_EU.length} AM=${c.AM.length}/${c.HOME_AM.length} AF=${c.AF.length}/${c.HOME_AF.length} APAC_OTHER=${c.APAC_OTHER.length}/${c.HOME_APAC_OTHER.length} OTHER=${c.OTHER.length}/${c.HOME_OTHER.length}`)
     var jpkrNodes = c.JP.concat(c.KR)
     // v5.4.1 FIX: SG 同时存在于狮城组（独立）和亚太组（对标 US 在 美洲组）
@@ -1517,7 +1559,7 @@ function main(config) {
     else config['proxy-groups'].push({ name: SMART.GLOBAL, type: 'select', proxies: ['REJECT'] })
     if (c.HOME_ALL.length > 0) upsertSmartGroup(config, SMART.GLOBAL_HOME, c.HOME_ALL)
     // v5.2.6 FIX#25-P0: 统一空区域不建组（原 HK/TW/JPKR/APAC/US fallback 到 apacNodes/c.ALL
-    //   会把 HK/全节点 silently 塞入 🇹🇼 台湾节点 / 🇯🇵 日韩节点 —— 区域污染）
+    //   会把 HK/全节点 silently 塞入 台湾节点 / 🇯🇵 日韩节点 —— 区域污染）
     //   SMART.GLOBAL 始终存在作为兜底；业务组对 STANDARD_PROXIES 的 filterProxies 会自动剔除未创建的组引用
     if (c.HK.length > 0) upsertSmartGroup(config, SMART.HK, c.HK)
     if (c.HOME_HK.length > 0) upsertSmartGroup(config, SMART.HK_HOME, c.HOME_HK)
@@ -1546,7 +1588,7 @@ function main(config) {
     activeSmartNames.add(SMART.GLOBAL)
     console.log(`[${VERSION}] Active Smart groups: ${[...activeSmartNames].filter(function(n) { return n !== 'DIRECT' && n !== 'REJECT' }).join(', ')}`)
 
-    injectBusinessGroups(config, activeSmartNames)
+    injectBusinessGroups(config, activeSmartNames, privateAiNodeNames)
     applyMihomoFusedRuleSets(config)
     SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE, 'smart')
     SckiTrafficOptions.applyQuicPolicy(config.rules, SCKI_QUIC_POLICY)

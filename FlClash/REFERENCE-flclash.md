@@ -2,13 +2,15 @@
 
 > 同日补充：在 FlClash JS 执行边界内展平仅含 type/payload 的 inline 代理集合，沿用 [Mihomo 集合字段](https://wiki.metacubex.one/config/proxy-providers/)。direct/reject 对象保留供依赖引用，只从测速分类剔除。数组引用、未知协议字段、共享 payload 与 JSON 序列化均以实际 main 回归读回；未代替设备上的 App patch 验收。
 
+> 更新于 2026-10-08：官方最新稳定版为 [v0.8.99](https://github.com/chen08209/FlClash/releases/tag/v0.8.99)。该版本 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/providers/actions/setup.dart#L335-L393) 对脚本类型调用 `handleEvaluate(scriptContent, rawConfig)`，再把结果交给 `makeRealProfileTask`；[配置生成器](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/common/task.dart#L109-L160) 从脚本结果构建最终 Mihomo 配置。本次仍只使用 `main(config)`、`proxy-groups`、`rules`、`rule-providers` 和 `url-test`，未增加 FlClash 专属字段，v0.8.85 的最低版本要求不变。
+
 > 更新于 2026-09-30（上次核对 2026-08-31）：实时 release 为 [v0.8.98](https://github.com/chen08209/FlClash/releases/tag/v0.8.98)（2026-09-14）。复核该 tag 的 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.98/lib/providers/actions/setup.dart#L315-L368) 和 [配置 patch](https://github.com/chen08209/FlClash/blob/v0.8.98/lib/common/task.dart#L109-L245)，仍先执行脚本，再应用 App patch；DNS 覆写/追加系统 DNS 的边界延续下述说明。本次节点预检和倍率筛选只使用已有 JS 语法并保持数组引用；未抬高声明的 v0.8.85 最低版本。本次验证为 VM 回归，未代替设备上的 App patch 验收。
 
 > 来源：https://github.com/chen08209/FlClash
 > 获取日期：2026-05-03
 > 更新于 2026-07-25（复查）：FlClash 最新版 v0.8.94（2026-07-11）。相对 v0.8.93 未见影响本仓库 JS 覆写入口、DNS 配置对象或订阅关联流程的 breaking change；当前基线兼容。
 > 更新于 2026-08-31：核对稳定版 v0.8.96（2026-08-17），commit `e2f678909dd9738015a5c032a8e25288ed79d4f1`。纠正脚本与 App patch 的先后顺序、DNS 整体替换、系统 DNS 追加及 Android HTTP 代理边界。
-> 版本：v0.8.96（本次核对的最新稳定版；未将这一行为无条件外推至所有旧版或预发布版）
+> 版本：v0.8.99（本次核对的最新稳定版；未将这一行为无条件外推至所有旧版或预发布版）
 
 ---
 

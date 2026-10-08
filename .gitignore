@@ -5,3 +5,11 @@ UsersUserDocumentsGitHubGithub-API-scan/
 # 内部全量审查过程文件，不参与规则生成或发布
 .full-review/
 cache.db
+# Private node material and local experiments must never enter a public Fork.
+**/private-nodes.yaml
+**/*.bak
+Clash Party/.smoke-test.js
+Clash Party/*-ai*.js
+Clash Party/*-ru4.js
+MERGE-PLAN.md
+.js

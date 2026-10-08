@@ -17,6 +17,14 @@
 - 选项生成复用已发布融合资产，并改进 Windows 上生成文件的原子写入可靠性；规则源变更仍走完整构建链。
 - 各客户端实现与版本记录见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[CMFA](./Clash%20Meta%20For%20Android/CHANGELOG.md)、[OpenClash](./OpenClash/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 及其他对应目录的 CHANGELOG。
 
+## v6.0.15-personal.1 — 私有节点 YAML 与个人 FlClash overlay (2026-10-08)
+
+- Clash Party Smart/Normal 与 FlClash 从独立 YAML 的 `__SCKI_PRIVATE_AI__` 标记组读取节点名，凭据留在被忽略的本地文件；FlClash 保留个人 Gemini/AI overlay。
+- 将私有节点回归和规则合同校验接到上游 v6.0.15 的测速/QUIC 选项实现；其他静态客户端没有该 YAML 运行时入口，继续使用上游生成产物。
+- 增加个人 Fork、`upstream` 同步与 jsDelivr 发布说明；旧静态 AI 节点的实际凭据不写入公开历史。
+
+详见 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)、[Clash Party](Clash%20Party/CHANGELOG.md) 与 [FlClash](FlClash/CHANGELOG.md)。
+
 ## v6.0.14 — inline 订阅兼容与测速候选隔离 (2026-09-30)
 
 - 横向研究 HotKids、Repcz 与其他高星脚本后，五个订阅处理器支持受控 inline payload 展平；具名直连/拒绝出站保留依赖但不进入测速组。CMFA 同步原生类型过滤，Stash 明确平台限制，Egern 刷新派生清单。
@@ -73,6 +81,7 @@
 - AUTOMATION：Issue 自动回复切换至 Xiaomi MiMo，统一首轮 / 追问模型与可选 Token Plan 端点配置；本次不修改规则源或客户端产物版本。
 
 ## v6.0.10 网易游戏精确直连修复 (2026-08-08)
+
 
 - FIX#179-NETEASE-GAME-DIRECT：`drpf-g10.proxima.nie.netease.com` 与 `sigma-performance-g10.proxima.nie.netease.com` 加入仓库自有的首段精确直连规则集。
   - 此前两个主机会落入 `DOMAIN-SUFFIX,netease.com` 的“国内游戏”宽规则；现在在规则开头命中 `DIRECT`，不再继承该策略组的手动代理选择。

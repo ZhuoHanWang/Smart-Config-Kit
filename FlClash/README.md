@@ -7,7 +7,7 @@
 > 覆写脚本：`FlClash(mihomo).js`
 > 适用客户端：**FlClash**（Android / Windows / macOS / Linux）
 > 内核要求：FlClash >= **v0.8.85**
-> 当前版本：**v6.0.15-flclash.15**（22 url-test 区域组 + 33 业务策略组 + 132 融合 rule-providers / 151 rules；变更历史见 `FlClash/CHANGELOG.md`）
+> 当前版本：**v6.0.15-flclash-ai-gemini.1**（22 url-test 区域组 + 33 业务组 + 基线 132 providers / 151 rules；Gemini overlay 额外 2 providers / 22 rules；私有节点 YAML 可选；变更历史见 `FlClash/CHANGELOG.md`）
 >
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 等小写 ISO 两位码加编号会自动进入区域组；不对普通小写词做宽泛国家码匹配。
 
@@ -39,11 +39,23 @@
 2. 点右上角 **+**
 3. 输入名称（如 `Smart分流`），选择加载方式：
    - **URL**：填入 `https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/FlClash/FlClash%28mihomo%29.js`
-   - **jsdelivr CDN**（备用，速度与可达性取决于网络）：`https://cdn.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js`
+   - **源仓库 jsdelivr CDN**（备用，速度与可达性取决于网络）：`https://cdn.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js`
+   - **个人 Fork jsdelivr**：`https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js`
    - **粘贴**：浏览器打开 Raw 链接，全选复制粘贴；第一行必须是 `// FlClash 覆写脚本`
 4. 保存
 
 > 如果 FlClash 弹出 `SyntaxError: unexpected token '<'`，说明当前导入内容是 HTML 页面，不是 JS 脚本。删除这个覆写脚本，改用上面的 Raw / jsdelivr 链接重新创建。
+
+### 可选：单独导入私有节点 YAML
+
+如果需要把自己的 VLESS / Trojan / VMess 节点用于 `AI专属`，请复制仓库中的
+`Clash Party/private-nodes.example.yaml` 为本地 `private-nodes.yaml`，只在其中保存节点凭据。
+在 YAML 覆写中填写 `proxies`，并把节点名称写入 `__SCKI_PRIVATE_AI__` 的 `proxies` 列表。
+
+在 FlClash 中先创建并启用这个 YAML 覆写，再启用上面的 JS 覆写。JS 会在执行前读取该标记组，
+创建 `AI专属` url-test 组，并在完成后移除内部标记组。没有私有 YAML 时，公共订阅仍按原有规则运行。
+
+`private-nodes.yaml` 不应上传到 GitHub、Issue 或 jsDelivr；其中的 UUID、密码、服务器地址和 Reality 密钥都属于凭据。
 
 ### 第 2 步：关联到订阅
 

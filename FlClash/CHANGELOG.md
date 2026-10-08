@@ -1,9 +1,16 @@
 # FlClash — 变更日志
 
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
-> 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party Normal 对齐。
+> 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
 ---
+
+## v6.0.15-flclash-ai-gemini.1 (2026-10-08)
+
+- UPSTREAM：保留 v6.0.15 的 `standard` / `power-save` 测速档和可选 UDP/443 策略；Gemini 专属 QUIC 规则仍排在通用规则前。
+- PRIVATE-NODES：从独立 YAML 的 `__SCKI_PRIVATE_AI__` 标记组读取节点名，仅在有有效私有节点时创建 `AI专属`；重复执行不会把普通订阅同名组误认成私有输入。
+- OVERLAY：保留 Gemini 的 2 个 provider、Gemini/自定义直连规则和 AI/Gemini 业务组；FlClash 原地更新规则与代理组数组，兼容 Dart bridge 引用。
+- SECURITY/VERIFY：公开脚本与日志不保存节点凭据；回归覆盖凭据保留、区域隔离、伪造组、无 YAML fallback、QUIC 顺序和重复执行。
 
 ## v6.0.15-flclash.15 (2026-10-07)
 
@@ -63,6 +70,28 @@
 ## v6.0.11-flclash.6 (2026-08-22)
 
 - ROUTING：与 Clash Party Normal 同步 132 个融合 provider / 151 条规则；Gemini 与 Accademia Gemini 改走 `🔍 Google 服务`，szkane AI 规则保持原位。
+## v6.0.10-flclash-ai-gemini.3 (2026-10-08)
+
+- FIX-RUNTIME-ARRAY-IDENTITY：Gemini 前置规则改为原地插入，避免 QuickJS ↔ Dart 桥接层继续引用旧规则数组。
+
+## v6.0.10-flclash-ai-gemini.2 (2026-10-07)
+
+- SECURITY/DECOUPLE：移除公开 JS 中的 JMS 静态节点、UUID、服务器和 Reality 凭据。
+- FEAT-PRIVATE-NODES：从独立 YAML 覆写的 `__SCKI_PRIVATE_AI__` 标记组读取已存在节点名称，按需生成 `AI专属` url-test 组；没有该 YAML 时保持公共订阅行为。
+- DOCS：增加 `private-nodes.example.yaml` 模板以及个人 Fork、upstream、jsDelivr 同步说明。
+
+---
+
+## v6.0.10-flclash-ai-gemini.1 (2026-10-06)
+
+- ★ FEAT：从 Clash Party ai-gemini 变体迁移 AI/Gemini 功能到 FlClash
+  - RU 拆分为独立区域组（原与 EU 合并，含关键字 + 🇷🇺 俄罗斯节点 / 🏡 俄罗斯家宽 url-test 组）
+  - 新增 ✨ Gemini 服务 业务组（34 组，含 Gemini 独立）
+  - 新增 🌍 全球节点（AI排除港台澳俄）/ 🏡 全球家宽（AI排除港台澳俄）url-test 组
+  - 新增 AI专属 url-test 组（历史静态 VLESS Reality 节点；具体节点数据不记录）
+  - 新增 Gemini rule-providers（blackmatrix7 + Accademia）+ 20 条前置精确路由规则（含 QUIC 前置豁免）
+  - AI/Gemini 业务组选项卡前置到全球节点之前
+  - 注入自定义直连域名（muyuan.do / anyrouter.top）
 
 ## v6.0.10-flclash.6 (2026-08-08)
 

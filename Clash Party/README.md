@@ -5,8 +5,8 @@
 > 目录简介：这里是 Mihomo Smart/Normal 覆写脚本的事实基线，面向 Clash Party、Clash Verge Rev、Mihomo Party 等桌面客户端。
 >
 > 覆写脚本：**两份二选一**，规则 100% 等价，仅 22 区域组（11 全部 + 11 家宽）的内核选路算法不同
-> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.13**，2026-10-07）— Smart 内核 + LightGBM ML 评估
-> - `ClashParty(mihomo).js`（**v6.0.15-normal.14**，2026-10-07）— 普通内核 url-test 延迟选路
+> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.14**，2026-10-08）— Smart 内核 + LightGBM ML 评估
+> - `ClashParty(mihomo).js`（**v6.0.15-normal.15**，2026-10-08）— 普通内核 url-test 延迟选路
 >
 > UI 补充配置：已整合到本文「四、粘贴 UI 补充配置」章节
 > 架构：**SUB-STORE 多机场融合** + 22 区域组（11 全部 + 11 家宽）+ 33 业务策略组 + **132 融合 rule-providers / 151 rules**（源 514 providers / 973 rules）
@@ -23,6 +23,10 @@
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 这类小写 ISO 两位码加编号可正常归类。仅此形式放宽大小写，普通文本中的 us / in 不会被误判为地区。
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
+
+> 私有节点：复制 [`private-nodes.example.yaml`](private-nodes.example.yaml) 为本地 `private-nodes.yaml`，将节点名称写入 `__SCKI_PRIVATE_AI__` 标记组后作为 YAML 覆写导入，再启用本 JS。私有节点只加入 `🤖 AI 服务`，不参与区域组；实际 YAML 已被 `.gitignore` 忽略，不要上传到公开 Fork、Issue 或 jsDelivr。
+
+> 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 
 <sub>💖 [支持本项目](../docs/donate.md) · ⭐ [Star](https://github.com/ivansolis1989/Smart-Config-Kit) · 🐛 [Issue](https://github.com/ivansolis1989/Smart-Config-Kit/issues)</sub>
 
@@ -341,7 +345,8 @@ sniffer:
 1. **代理组（Proxies）页面**
    - 应看到 **22 区域组**（🌍 全球 / 🏡 全球家宽 / 🇭🇰 香港 / 🏡 香港家宽 / 🇹🇼 台湾 / 🏡 台湾家宽 / 🇸🇬 狮城 / 🏡 狮城家宽 / 🇯🇵 日韩 / 🏡 日韩家宽 / 🌏 亚太 / 🏡 亚太家宽 / 🇺🇸 美国 / 🏡 美国家宽 / 🇪🇺 欧洲 / 🏡 欧洲家宽 / 🌎 美洲 / 🏡 美洲家宽 / 🌍 非洲 / 🏡 非洲家宽 / 🌏 其他 / 🏡 其他家宽），Smart 版显示为 `smart`，普通版显示为 `url-test`；
    - 每个区域组下方有对应地区的所有节点；
-   - **33 个业务策略组**（AI 服务、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择。
+   - **33 个业务策略组**（AI 服务、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择；
+   - 导入私有节点 YAML 后，才会出现额外的 **`AI专属`** Smart 组；该组只供 🤖 AI 服务使用，不进全球/家宽组。没有私有 YAML 时不会创建此组。
 
 2. **连接（Connections）页面**
    - 访问 `https://chat.openai.com`：Rule 应命中「🤖 AI 服务 → 🇺🇸 美国节点 → 某个 US 节点」；
@@ -364,7 +369,7 @@ sniffer:
 
 | 业务组 | 推荐上游 |
 |--------|----------|
-| 🤖 AI 服务 | 🇺🇸 美国节点（必须避开 HK / CN） |
+| 🤖 AI 服务 | 🇺🇸 美国节点 或 AI专属（来自本地私有 YAML；必须避开 HK / CN） |
 | 💰 加密货币 | 🇭🇰 香港节点（币安合规） |
 | 🏦 金融支付 | DIRECT |
 | 💬 即时通讯 | 🇭🇰 香港 / 🇯🇵 日韩 |

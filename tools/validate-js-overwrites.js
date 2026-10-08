@@ -113,6 +113,32 @@ const BIZ_GROUPS = [
 ];
 
 const EXPECTED_GROUP_ORDER = [SMART_GROUPS[0], ...BIZ_GROUPS, ...SMART_GROUPS.slice(1)];
+const FLCLASH_AI_GEMINI_GROUP_ORDER = [
+  BIZ_GROUPS[0],
+  '✨ Gemini 服务',
+  SMART_GROUPS[0],
+  ...BIZ_GROUPS.slice(1),
+  ...SMART_GROUPS.slice(1),
+  '🌍 全球节点（AI排除港台澳俄）',
+  '🏡 全球家宽（AI排除港台澳俄）',
+];
+const flclashTarget = TARGETS.find((target) => target.id === 'flclash');
+Object.assign(flclashTarget, {
+  expectedGroupOrder: FLCLASH_AI_GEMINI_GROUP_ORDER,
+  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
+  expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
+  additionalQuicRules: [
+    'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
+    'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,acc-gemini)),✨ Gemini 服务',
+  ],
+  additionalProviderNames: new Set(['gemini', 'acc-gemini']),
+  allowInlineRule(rule) {
+    const text = String(rule);
+    return text.endsWith(',✨ Gemini 服务')
+      || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
+      || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
+  },
+});
 const DIRECT_POLICIES = new Set(['DIRECT', 'REJECT', 'REJECT-DROP', 'PASS']);
 const INFO_NODES = new Set(['剩余流量 10G', '官网 example.com', 'USE 100GB']);
 const EXTRA_INFO_NODES = new Set(['距离下次重置 12 天', '套餐到期 2026-06-01', 'Panel Channel Author',
@@ -565,9 +591,10 @@ function validateGroups(target, output, record) {
   const groupsByName = groupByName(output);
   const proxyNames = new Set(output.proxies.map((proxy) => proxy.name));
 
-  record.expectEqual(groups.length, EXPECTED_GROUP_ORDER.length, 'emits exactly the expected JS overwrite group count');
+  const expectedGroupOrder = target.expectedGroupOrder || EXPECTED_GROUP_ORDER;
+  record.expectEqual(groups.length, expectedGroupOrder.length, 'emits exactly the expected JS overwrite group count');
   record.expectEqual(uniqueValues(groupNames).length, groupNames.length, 'does not emit duplicate proxy-group names');
-  record.expectArrayEqual(groupNames, EXPECTED_GROUP_ORDER, 'keeps global, business, then region group order stable');
+  record.expectArrayEqual(groupNames, expectedGroupOrder, 'keeps global, business, then region group order stable');
 
   for (const name of BIZ_GROUPS) {
     const group = groupsByName.get(name);
@@ -622,9 +649,12 @@ function validateRulesAndProviders(output, record, target) {
   const providerNames = new Set(Object.keys(providers));
   const groupNames = new Set((output['proxy-groups'] || []).map((group) => group.name));
 
-  record.expectEqual(rules.length, EXPECTED_FUSED_RULES, `injects the fused ruleset`);
-  record.expectEqual(providerNames.size, EXPECTED_FUSED_PROVIDERS, `injects the fused rule-provider set`);
-  record.expect([...providerNames].every((name) => name.startsWith('scki-fused-')), 'final rule-providers are generated fused providers only');
+  const expectedRules = target.expectedFusedRules || EXPECTED_FUSED_RULES;
+  const expectedProviders = target.expectedFusedProviders || EXPECTED_FUSED_PROVIDERS;
+  const additionalProviderNames = target.additionalProviderNames || new Set();
+  record.expectEqual(rules.length, expectedRules, `injects the fused ruleset`);
+  record.expectEqual(providerNames.size, expectedProviders, `injects the fused rule-provider set`);
+  record.expect([...providerNames].every((name) => name.startsWith('scki-fused-') || additionalProviderNames.has(name)), 'final rule-providers are generated fused providers plus declared variant providers');
   record.expectEqual(rules[rules.length - 1], 'MATCH,🐟 漏网之鱼', 'keeps MATCH as the final fallback');
   record.expect(!rules.slice(0, -1).some((rule) => String(rule).startsWith('MATCH,')), 'does not place MATCH before the final rule');
   record.expect(!rules.some((rule) => String(rule).includes('机场自动选择')), 'subscription-native rules are removed');
@@ -672,7 +702,7 @@ function validateRulesAndProviders(output, record, target) {
   record.expect(fusedCnGame !== -1 && fusedIntlGame !== -1 && fusedCnGame < fusedIntlGame, 'CN game fused segment stays before wide international game segment');
 
   record.expect(!rules.some((rule) => /^RULE-SET,(scholar|tiktok|amap|proxy|scki-(?!fused)[^,]+|remotedesktop|acc-rustdesk|acc-parsec),/.test(String(rule))), 'legacy individual rule-set names are not emitted in the main rule list');
-  record.expect(!rules.some((rule) => /^DOMAIN(-SUFFIX|-KEYWORD)?[,]/.test(String(rule))), 'foldable domain rules are not emitted inline');
+  record.expect(!rules.some((rule) => /^DOMAIN(-SUFFIX|-KEYWORD)?[,]/.test(String(rule)) && !(target.allowInlineRule && target.allowInlineRule(rule))), 'foldable domain rules are not emitted inline');
   record.expect(!rules.some((rule) => /^IP-CIDR6?[,]/.test(String(rule))), 'foldable IP-CIDR rules are not emitted inline');
   record.expect(!rules.some((rule) => /^PROCESS-NAME[,]/.test(String(rule))), 'process rules are not emitted inline');
 
@@ -699,14 +729,15 @@ function validateRulesAndProviders(output, record, target) {
   // QUIC policy is sourced from the routing graph; both modes have exact rule contracts.
   const quicAndRules = rules.filter(function(r) { return String(r).startsWith('AND,((DST-PORT,443),(NETWORK,UDP),'); });
   const expectedQuicRules = getQuicRules(TRAFFIC_OPTIONS.quicPolicy);
-  record.expectArrayEqual(quicAndRules, expectedQuicRules, `QUIC ${TRAFFIC_OPTIONS.quicPolicy} emits exactly the selected UDP/443 rules`);
+  const additionalQuicRules = target.additionalQuicRules || [];
+  record.expectArrayEqual(quicAndRules, additionalQuicRules.concat(expectedQuicRules), `QUIC ${TRAFFIC_OPTIONS.quicPolicy} and target-specific exceptions are exact`);
   const quicAnchor = rules.indexOf('DST-PORT,7680,REJECT');
   record.expect(quicAnchor !== -1, 'QUIC policy insertion anchor remains present');
   if (expectedQuicRules.length) {
     record.expectArrayEqual(rules.slice(quicAnchor - expectedQuicRules.length, quicAnchor), expectedQuicRules, 'QUIC rules retain their priority before the application port guard');
     record.expect(fusedAd !== -1 && fusedAd < quicAnchor - expectedQuicRules.length, 'ad and threat guards stay before dedicated QUIC rules');
   } else {
-    record.expect(!rules.some(function(r) { return /(?:DST|DEST)-PORT,443/.test(String(r)) && /NETWORK,UDP/.test(String(r)); }), 'follow-rules has no dedicated UDP/443 override');
+    record.expectArrayEqual(quicAndRules, additionalQuicRules, 'follow-rules has no extra UDP/443 override beyond target-specific exceptions');
   }
   const fusedRustDeskGuard = firstFusedRuleIndex(rules, 'work-domain', '🧑‍💼 会议协作');
   const githubApiProcessIndexes = [

@@ -1,7 +1,8 @@
 // FlClash 覆写脚本 — 标准 Mihomo 内核动态分流版
-// 版本：v6.0.15-flclash.15 (2026-10-07)
-// 架构：22 url-test 区域组（11 全部 + 11 家宽）+ 33 业务策略组 + 132 融合 rule-providers / 151 rules
-// 规则源：rulesets/source/routing-graph.js v6.0.15（规则等价；区域组为 url-test — FlClash 内核为标准 Mihomo，不支持 smart + LightGBM）
+// 版本：v6.0.15-flclash-ai-gemini.1 (2026-10-08)
+// 架构：22 url-test 区域组 + 33 业务策略组 + 132 融合 providers / 151 rules；另含 Gemini overlay 与私有节点 YAML 入口
+// 规则源：rulesets/source/routing-graph.js v6.0.15（基线规则等价；区域组为 url-test — FlClash 标准 Mihomo 不支持 smart + LightGBM）
+// 变体：保留个人 Gemini/AI 业务组；私有节点由独立 YAML 标记组提供
 // 适用：FlClash >= v0.8.85（覆盖脚本功能自该版本引入）；其他使用标准 Mihomo 内核的客户端
 // 变更历史：见 `FlClash/CHANGELOG.md`
 //
@@ -13,7 +14,8 @@
 //   FlClash → 配置 →「覆写脚本」→ 右上角 + → 输入名称
 //   方式 A（URL）：填入 https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/FlClash/FlClash%28mihomo%29.js
 //   方式 B（粘贴）：打开上方 Raw 链接，全选复制粘贴；第一行必须是 `// FlClash 覆写脚本`
-//   方式 C（jsdelivr）：https://cdn.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js
+//   方式 C（源仓库 jsdelivr）：https://cdn.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js
+//   方式 D（个人 Fork jsdelivr）：https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js
 //   保存。
 //
 // 【第 2 步：关联到订阅】
@@ -35,7 +37,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-flclash.15'
+const VERSION = 'v6.0.15-flclash-ai-gemini.1'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变 55 组、规则或仓库 DNS 基线。
@@ -299,7 +301,8 @@ const REGION_DB = [
   { id: 'KR', kw: ['韩国', '首尔', '釜山', '仁川', '大田', '大邱', '光州', '济州', 'korea', 'seoul', 'busan', 'incheon', 'daejeon', 'daegu', 'gwangju', 'jeju', 'kor', 'icn', 'gmp', 'pus'], iso: ['KR'] },
   { id: 'SG', kw: ['新加坡', 'singapore', 'sgp', 'sin'], iso: ['SG'] },
   { id: 'US', kw: ['美国', 'united states', 'america', 'usa', '洛杉矶', 'los angeles', '圣何塞', 'san jose', '旧金山', '三藩市', 'san francisco', '西雅图', 'seattle', '纽约', 'new york', '芝加哥', 'chicago', '达拉斯', 'dallas', '丹佛', 'denver', '凤凰城', 'phoenix', '亚特兰大', 'atlanta', '迈阿密', 'miami', '波士顿', 'boston', '华盛顿', 'washington', '费城', 'philadelphia', '休斯顿', 'houston', '圣地亚哥', 'san diego', '拉斯维加斯', 'las vegas', '波特兰', 'portland', '硅谷', 'silicon valley', '弗吉尼亚', 'virginia', '夏洛特', 'charlotte', '奥斯汀', 'austin', '纳什维尔', 'nashville', '盐湖城', 'salt lake', '明尼阿波利斯', 'minneapolis', '圣路易斯', 'st louis', '堪萨斯', 'kansas city', '底特律', 'detroit', '匹兹堡', 'pittsburgh', '克利夫兰', 'cleveland', '檀香山', 'honolulu', '安克雷奇', 'anchorage', 'lax', 'sjc', 'sfo', 'sea', 'jfk', 'ewr', 'ord', 'dfw', 'iad', 'atl', 'mia', 'bos', 'den', 'phx', 'iah', 'msp', 'dtw', 'phl', 'san', 'las', 'slc', 'pdx', 'clt', 'hnl', 'anc'], iso: ['US'] },
-  { id: 'EU', kw: ['欧洲', 'europe', '英国', 'united kingdom', 'england', 'britain', 'london', '伦敦', 'manchester', '曼彻斯特', 'birmingham', 'glasgow', 'edinburgh', 'liverpool', 'leeds', 'bristol', 'lhr', 'lgw', 'man', 'edi', '爱尔兰', 'ireland', 'dublin', '都柏林', '法国', 'france', 'paris', '巴黎', 'marseille', '马赛', 'lyon', '里昂', 'nice', 'toulouse', 'cdg', 'ory', '德国', 'germany', 'frankfurt', '法兰克福', 'berlin', '柏林', 'munich', '慕尼黑', 'hamburg', '汉堡', 'dusseldorf', 'cologne', 'fra', 'muc', 'ber', '荷兰', 'netherlands', 'holland', 'amsterdam', '阿姆斯特丹', 'rotterdam', 'ams', '比利时', 'belgium', 'brussels', '布鲁塞尔', '卢森堡', 'luxembourg', '瑞士', 'switzerland', 'zurich', '苏黎世', 'geneva', '日内瓦', 'bern', 'zrh', '奥地利', 'austria', 'vienna', '维也纳', 'vie', '列支敦士登', 'liechtenstein', '摩纳哥', 'monaco', '丹麦', 'denmark', 'copenhagen', '哥本哈根', '冰岛', 'iceland', 'reykjavik', '挪威', 'norway', 'oslo', '奥斯陆', '瑞典', 'sweden', 'stockholm', '斯德哥尔摩', '芬兰', 'finland', 'helsinki', '赫尔辛基', '爱沙尼亚', 'estonia', 'tallinn', '塔林', '拉脱维亚', 'latvia', 'riga', '里加', '立陶宛', 'lithuania', 'vilnius', '维尔纽斯', '意大利', 'italy', 'rome', '罗马', 'milan', '米兰', 'naples', 'florence', 'fco', 'mxp', '西班牙', 'spain', 'madrid', '马德里', 'barcelona', '巴塞罗那', 'mad', 'bcn', '葡萄牙', 'portugal', 'lisbon', '里斯本', '希腊', 'greece', 'athens', '雅典', '马耳他', 'malta', '安道尔', 'andorra', '圣马力诺', 'san marino', '波兰', 'poland', 'warsaw', '华沙', 'krakow', 'waw', '捷克', 'czech', 'prague', '布拉格', '斯洛伐克', 'slovakia', 'bratislava', '匈牙利', 'hungary', 'budapest', '布达佩斯', '罗马尼亚', 'romania', 'bucharest', '布加勒斯特', '保加利亚', 'bulgaria', 'sofia', '索菲亚', '俄罗斯', 'russia', 'moscow', '莫斯科', 'svo', 'dme', '乌克兰', 'ukraine', 'kiev', 'kyiv', '基辅', '白俄罗斯', 'belarus', 'minsk', '明斯克', '摩尔多瓦', 'moldova', 'chisinau', '塞尔维亚', 'serbia', 'belgrade', '贝尔格莱德', '黑山', 'montenegro', '克罗地亚', 'croatia', 'zagreb', '斯洛文尼亚', 'slovenia', 'ljubljana', '波黑', 'bosnia', 'herzegovina', 'sarajevo', '马其顿', 'macedonia', 'skopje', '阿尔巴尼亚', 'albania', 'tirana', '科索沃', 'kosovo', 'pristina', '塞浦路斯', 'cyprus', 'nicosia', '格鲁吉亚', 'georgia', 'tbilisi', '第比利斯'], iso: ['GB', 'UK', 'IE', 'FR', 'DE', 'NL', 'LU', 'CH', 'DK', 'SE', 'FI', 'EE', 'LV', 'LT', 'ES', 'PT', 'GR', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'RU', 'UA', 'MD', 'RS', 'HR', 'SI', 'MK', 'XK', 'CY', 'GE', 'EU'] },
+  { id: 'EU', kw: ['欧洲', 'europe', '英国', 'united kingdom', 'england', 'britain', 'london', '伦敦', 'manchester', '曼彻斯特', 'birmingham', 'glasgow', 'edinburgh', 'liverpool', 'leeds', 'bristol', 'lhr', 'lgw', 'man', 'edi', '爱尔兰', 'ireland', 'dublin', '都柏林', '法国', 'france', 'paris', '巴黎', 'marseille', '马赛', 'lyon', '里昂', 'nice', 'toulouse', 'cdg', 'ory', '德国', 'germany', 'frankfurt', '法兰克福', 'berlin', '柏林', 'munich', '慕尼黑', 'hamburg', '汉堡', 'dusseldorf', 'cologne', 'fra', 'muc', 'ber', '荷兰', 'netherlands', 'holland', 'amsterdam', '阿姆斯特丹', 'rotterdam', 'ams', '比利时', 'belgium', 'brussels', '布鲁塞尔', '卢森堡', 'luxembourg', '瑞士', 'switzerland', 'zurich', '苏黎世', 'geneva', '日内瓦', 'bern', 'zrh', '奥地利', 'austria', 'vienna', '维也纳', 'vie', '列支敦士登', 'liechtenstein', '摩纳哥', 'monaco', '丹麦', 'denmark', 'copenhagen', '哥本哈根', '冰岛', 'iceland', 'reykjavik', '挪威', 'norway', 'oslo', '奥斯陆', '瑞典', 'sweden', 'stockholm', '斯德哥尔摩', '芬兰', 'finland', 'helsinki', '赫尔辛基', '爱沙尼亚', 'estonia', 'tallinn', '塔林', '拉脱维亚', 'latvia', 'riga', '里加', '立陶宛', 'lithuania', 'vilnius', '维尔纽斯', '意大利', 'italy', 'rome', '罗马', 'milan', '米兰', 'naples', 'florence', 'fco', 'mxp', '西班牙', 'spain', 'madrid', '马德里', 'barcelona', '巴塞罗那', 'mad', 'bcn', '葡萄牙', 'portugal', 'lisbon', '里斯本', '希腊', 'greece', 'athens', '雅典', '马耳他', 'malta', '安道尔', 'andorra', '圣马力诺', 'san marino', '波兰', 'poland', 'warsaw', '华沙', 'krakow', 'waw', '捷克', 'czech', 'prague', '布拉格', '斯洛伐克', 'slovakia', 'bratislava', '匈牙利', 'hungary', 'budapest', '布达佩斯', '罗马尼亚', 'romania', 'bucharest', '布加勒斯特', '保加利亚', 'bulgaria', 'sofia', '索菲亚', '乌克兰', 'ukraine', 'kiev', 'kyiv', '基辅', '白俄罗斯', 'belarus', 'minsk', '明斯克', '摩尔多瓦', 'moldova', 'chisinau', '塞尔维亚', 'serbia', 'belgrade', '贝尔格莱德', '黑山', 'montenegro', '克罗地亚', 'croatia', 'zagreb', '斯洛文尼亚', 'slovenia', 'ljubljana', '波黑', 'bosnia', 'herzegovina', 'sarajevo', '马其顿', 'macedonia', 'skopje', '阿尔巴尼亚', 'albania', 'tirana', '科索沃', 'kosovo', 'pristina', '塞浦路斯', 'cyprus', 'nicosia', '格鲁吉亚', 'georgia', 'tbilisi', '第比利斯'], iso: ['GB', 'UK', 'IE', 'FR', 'DE', 'NL', 'LU', 'CH', 'DK', 'SE', 'FI', 'EE', 'LV', 'LT', 'ES', 'PT', 'GR', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'UA', 'MD', 'RS', 'HR', 'SI', 'MK', 'XK', 'CY', 'GE', 'EU'] },
+  { id: 'RU', kw: ['俄罗斯', 'russia', 'moscow', '莫斯科', 'svo', 'dme', '圣彼得堡', 'st petersburg', 'led', '新西伯利亚', 'novosibirsk', '叶卡捷琳堡', 'yekaterinburg', '喀山', 'kazan', '海参崴', 'vladivostok', 'vvo'], iso: ['RU'] },
   { id: 'AM', kw: ['美洲', 'americas', '拉丁美洲', 'latin america', '南美', 'south america', '中美洲', 'central america', '加勒比', 'caribbean', '加拿大', 'canada', 'toronto', '多伦多', 'vancouver', '温哥华', 'montreal', '蒙特利尔', 'ottawa', '渥太华', 'calgary', '卡尔加里', 'edmonton', 'winnipeg', 'yyz', 'yvr', 'yul', '墨西哥', 'mexico', 'mexico city', '墨西哥城', 'cancun', '坎昆', 'guadalajara', 'monterrey', 'mex', '危地马拉', 'guatemala', '伯利兹', 'belize', '萨尔瓦多', 'el salvador', '洪都拉斯', 'honduras', '尼加拉瓜', 'nicaragua', '哥斯达黎加', 'costa rica', '巴拿马', 'panama', '古巴', 'cuba', '牙买加', 'jamaica', '多米尼加', 'dominican republic', '波多黎各', 'puerto rico', '巴哈马', 'bahamas', '巴巴多斯', 'barbados', '特立尼达', 'trinidad', '海地', 'haiti', '巴西', 'brazil', 'sao paulo', '圣保罗', 'rio de janeiro', '里约热内卢', 'gru', 'gig', '阿根廷', 'argentina', 'buenos aires', '布宜诺斯艾利斯', 'eze', '智利', 'chile', 'santiago', '秘鲁', 'peru', 'lima', '利马', '哥伦比亚', 'colombia', 'bogota', '波哥大', 'medellin', '委内瑞拉', 'venezuela', '厄瓜多尔', 'ecuador', '玻利维亚', 'bolivia', '巴拉圭', 'paraguay', '乌拉圭', 'uruguay', 'montevideo', '圭亚那', 'guyana', '苏里南', 'suriname'], iso: ['CA', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'CU', 'JM', 'PR', 'BS', 'BB', 'TT', 'HT', 'BR', 'AR', 'CL', 'PE', 'CO', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR'] },
   { id: 'AF', kw: ['非洲', 'africa', '埃及', 'egypt', 'cairo', '开罗', 'cai', '苏丹', 'sudan', '南苏丹', 'south sudan', '利比亚', 'libya', '突尼斯', 'tunisia', '阿尔及利亚', 'algeria', '摩洛哥', 'morocco', 'casablanca', '埃塞俄比亚', 'ethiopia', '索马里', 'somalia', '肯尼亚', 'kenya', 'nairobi', 'nbo', '坦桑尼亚', 'tanzania', '乌干达', 'uganda', '卢旺达', 'rwanda', '布隆迪', 'burundi', '厄立特里亚', 'eritrea', '吉布提', 'djibouti', '马达加斯加', 'madagascar', '毛里求斯', 'mauritius', '莫桑比克', 'mozambique', '塞舌尔', 'seychelles', '赞比亚', 'zambia', '津巴布韦', 'zimbabwe', '马拉维', 'malawi', '喀麦隆', 'cameroon', '刚果', 'congo', '安哥拉', 'angola', '加蓬', 'gabon', '乍得', 'chad', '中非', 'central african', '赤道几内亚', 'equatorial guinea', '南非', 'south africa', 'johannesburg', '约翰内斯堡', 'cape town', '开普敦', 'pretoria', 'jnb', 'cpt', '纳米比亚', 'namibia', '博茨瓦纳', 'botswana', '莱索托', 'lesotho', '斯威士兰', 'eswatini', 'swaziland', '尼日利亚', 'nigeria', 'lagos', 'abuja', '加纳', 'ghana', 'accra', '塞内加尔', 'senegal', 'dakar', '马里', 'mali', '布基纳法索', 'burkina faso', '几内亚', 'guinea', '科特迪瓦', 'ivory coast', "cote d'ivoire", '塞拉利昂', 'sierra leone', '利比里亚', 'liberia', '多哥', 'togo', '贝宁', 'benin', '尼日尔', 'niger', '毛里塔尼亚', 'mauritania', '冈比亚', 'gambia', '佛得角', 'cape verde'], iso: ['EG', 'SD', 'SS', 'LY', 'TN', 'DZ', 'ET', 'KE', 'TZ', 'UG', 'RW', 'MG', 'MU', 'MZ', 'ZM', 'ZW', 'MW', 'CM', 'CD', 'CG', 'AO', 'GA', 'TD', 'ZA', 'BW', 'LS', 'SZ', 'NG', 'GH', 'SN', 'ML', 'BF', 'GN', 'CI', 'SL', 'LR', 'TG', 'BJ', 'NE', 'MR', 'GM', 'CV'] },
   { id: 'APAC_OTHER', kw: ['马来','亚太', 'apac', 'asia pacific', 'asia', '亚洲', '大洋洲', 'oceania', 'iplc', 'iepl', '专线', '低延迟', 'cn2', 'gia', '马来西亚', 'malaysia', 'kuala lumpur', '吉隆坡', 'kul', '印度尼西亚', '印尼', 'indonesia', 'jakarta', '雅加达', '泰国', 'thailand', 'bangkok', '曼谷', 'bkk', '越南', 'vietnam', 'hanoi', '河内', 'ho chi minh', '胡志明', 'saigon', 'sgn', 'han', '菲律宾', 'philippines', 'manila', '马尼拉', 'mnl', '柬埔寨', 'cambodia', 'phnom penh', '金边', '缅甸', 'myanmar', 'yangon', '老挝', 'laos', 'vientiane', '文莱', 'brunei', '东帝汶', 'timor-leste', '印度', 'india', 'mumbai', '孟买', 'delhi', '新德里', 'bangalore', '班加罗尔', 'chennai', 'hyderabad', 'kolkata', 'bom', 'del', 'blr', '巴基斯坦', 'pakistan', 'karachi', 'islamabad', '孟加拉', 'bangladesh', 'dhaka', '斯里兰卡', 'sri lanka', 'colombo', '尼泊尔', 'nepal', 'kathmandu', '马尔代夫', 'maldives', '不丹', 'bhutan', '阿富汗', 'afghanistan', '土耳其', 'turkey', 'turkiye', 'istanbul', '伊斯坦布尔', 'ankara', 'ist', '以色列', 'israel', 'tel aviv', 'tlv', '沙特', 'saudi', 'riyadh', '阿联酋', 'uae', 'emirates', 'dubai', '迪拜', 'abu dhabi', 'dxb', 'auh', '卡塔尔', 'qatar', 'doha', 'doh', '科威特', 'kuwait', '巴林', 'bahrain', '阿曼', 'oman', 'muscat', '伊拉克', 'iraq', 'baghdad', '伊朗', 'iran', 'tehran', '约旦', 'jordan', 'amman', '黎巴嫩', 'lebanon', 'beirut', '叙利亚', 'syria', '也门', 'yemen', '巴勒斯坦', 'palestine', '亚美尼亚', 'armenia', 'yerevan', '阿塞拜疆', 'azerbaijan', 'baku', '哈萨克斯坦', 'kazakhstan', 'almaty', 'astana', '乌兹别克斯坦', 'uzbekistan', 'tashkent', '吉尔吉斯斯坦', 'kyrgyzstan', '土库曼斯坦', 'turkmenistan', '塔吉克斯坦', 'tajikistan', '澳门', 'macau', 'macao', '蒙古', 'mongolia', 'ulaanbaatar', '澳大利亚', 'australia', 'sydney', '悉尼', 'melbourne', '墨尔本', 'brisbane', 'perth', 'adelaide', 'syd', 'mel', '新西兰', 'new zealand', 'auckland', '奥克兰', 'wellington', 'akl', '斐济', 'fiji', '巴布亚新几内亚', 'papua new guinea', '关岛', 'guam', '新喀里多尼亚', 'new caledonia'], iso: ['IN','IND','MY','ID', 'TH', 'VN', 'PH', 'KH', 'MM', 'BN', 'TL', 'PK', 'BD', 'LK', 'NP', 'MV', 'BT', 'AF', 'TR', 'IL', 'AE', 'QA', 'KW', 'BH', 'OM', 'IQ', 'IR', 'JO', 'LB', 'SY', 'YE', 'PS', 'AZ', 'KZ', 'UZ', 'KG', 'TM', 'TJ', 'MO', 'MN', 'AU', 'NZ', 'FJ', 'PG', 'GU', 'NC', 'PF'] },
@@ -371,8 +374,8 @@ function classifyNode(name) {
 
 function classifyAllNodes(proxies) {
   var result = {
-    HK: [], TW: [], CN: [], JP: [], KR: [], SG: [], US: [], EU: [], AM: [], AF: [], APAC_OTHER: [], OTHER: [], ALL: [],
-    HOME_HK: [], HOME_TW: [], HOME_CN: [], HOME_JP: [], HOME_KR: [], HOME_SG: [], HOME_US: [], HOME_EU: [], HOME_AM: [], HOME_AF: [], HOME_APAC_OTHER: [], HOME_OTHER: [], HOME_ALL: [],
+    HK: [], TW: [], CN: [], JP: [], KR: [], SG: [], US: [], EU: [], RU: [], AM: [], AF: [], APAC_OTHER: [], OTHER: [], ALL: [],
+    HOME_HK: [], HOME_TW: [], HOME_CN: [], HOME_JP: [], HOME_KR: [], HOME_SG: [], HOME_US: [], HOME_EU: [], HOME_RU: [], HOME_AM: [], HOME_AF: [], HOME_APAC_OTHER: [], HOME_OTHER: [], HOME_ALL: [],
   }
   for (var i = 0; i < proxies.length; i++) {
     var p = proxies[i]
@@ -408,13 +411,19 @@ const SMART = {
   APAC: '🌏 亚太节点', APAC_HOME: '🏡 亚太家宽',
   US: '🇺🇸 美国节点', US_HOME: '🏡 美国家宽',
   EU: '🇪🇺 欧洲节点', EU_HOME: '🏡 欧洲家宽',
+  RU: '🇷🇺 俄罗斯节点', RU_HOME: '🏡 俄罗斯家宽',
   AMERICAS: '🌎 美洲节点', AMERICAS_HOME: '🏡 美洲家宽',
   AFRICA: '🌍 非洲节点', AFRICA_HOME: '🏡 非洲家宽',
   OTHER: '🌏 其他节点', OTHER_HOME: '🏡 其他家宽',
 }
 
+const SMART_AI = {
+  GLOBAL: '🌍 全球节点（AI排除港台澳俄）',
+  GLOBAL_HOME: '🏡 全球家宽（AI排除港台澳俄）',
+}
+
 const BIZ = {
-  AI: '🤖 AI 服务', CRYPTO: '💰 加密货币', PAYMENTS: '🏦 金融支付',
+  AI: '🤖 AI 服务', GEMINI: '✨ Gemini 服务', CRYPTO: '💰 加密货币', PAYMENTS: '🏦 金融支付',
   IM: '💬 即时通讯', SOCIAL: '📱 社交媒体',
   WORK: '🧑‍💼 会议协作', CNMEDIA: '📺 国内流媒体',
   TOK: '🎵 TikTok',
@@ -465,11 +474,11 @@ function applyMihomoFusedRuleSets(config) {
 }
 // END AUTO-GENERATED MIHOMO FUSED RULE-SETS
 
-const REGION_ORDER = ['GLOBAL', 'HK', 'TW', 'SG', 'JPKR', 'APAC', 'US', 'EU', 'AMERICAS', 'AFRICA', 'OTHER']
+const REGION_ORDER = ['GLOBAL', 'HK', 'TW', 'SG', 'JPKR', 'APAC', 'US', 'EU', 'RU', 'AMERICAS', 'AFRICA', 'OTHER']
 const REGION_HOME_MAP = {
   GLOBAL: 'GLOBAL_HOME', HK: 'HK_HOME', TW: 'TW_HOME',
   SG: 'SG_HOME', JPKR: 'JPKR_HOME', APAC: 'APAC_HOME', US: 'US_HOME',
-  EU: 'EU_HOME', AMERICAS: 'AMERICAS_HOME', AFRICA: 'AFRICA_HOME',
+  EU: 'EU_HOME', RU: 'RU_HOME', AMERICAS: 'AMERICAS_HOME', AFRICA: 'AFRICA_HOME',
   OTHER: 'OTHER_HOME',
 }
 
@@ -521,6 +530,76 @@ function buildSeaProxies() {
 }
 
 // ================================================================
+//  模块 D2：AI/Gemini 排除港台澳俄
+// ================================================================
+
+const MACAU_NODE_PATTERN = /澳门|macau|macao/i
+
+function buildAiGlobalNodes(allNodes, hkNodes, twNodes, apacOtherNodes, ruNodes) {
+  var all = Array.isArray(allNodes) ? allNodes : []
+  var hk = Array.isArray(hkNodes) ? hkNodes : []
+  var tw = Array.isArray(twNodes) ? twNodes : []
+  var apacOther = Array.isArray(apacOtherNodes) ? apacOtherNodes : []
+  var ru = Array.isArray(ruNodes) ? ruNodes : []
+  var excluded = new Set(hk.concat(tw).concat(ru))
+  for (var i = 0; i < apacOther.length; i++) {
+    var nodeName = String(apacOther[i] || '')
+    if (MACAU_NODE_PATTERN.test(nodeName)) excluded.add(apacOther[i])
+  }
+  var filtered = all.filter(function(name) { return !excluded.has(name) })
+  return filtered.length > 0 ? filtered : all.slice()
+}
+
+function applyAiGlobalPreference(proxies, activeSmartNames) {
+  var hasAiGlobal = !activeSmartNames || activeSmartNames.has(SMART_AI.GLOBAL)
+  var hasAiGlobalHome = !activeSmartNames || activeSmartNames.has(SMART_AI.GLOBAL_HOME)
+  var aiGlobal = hasAiGlobal ? SMART_AI.GLOBAL : SMART.GLOBAL
+  var aiGlobalHome = hasAiGlobalHome ? SMART_AI.GLOBAL_HOME : SMART.GLOBAL_HOME
+  return proxies.map(function(name) {
+    if (name === SMART.GLOBAL) return aiGlobal
+    if (name === SMART.GLOBAL_HOME) return aiGlobalHome
+    return name
+  })
+}
+
+// ================================================================
+//  模块 D3：私有 AI 节点（由独立 YAML 覆写提供）
+// ================================================================
+
+const PRIVATE_AI_GROUP_NAME = '__SCKI_PRIVATE_AI__'
+const SMART_PRIVATE_AI = { NAME: 'AI专属' }
+
+function collectPrivateAiNodeNames(config) {
+  var proxies = Array.isArray(config.proxies) ? config.proxies : []
+  var proxyNames = new Set(proxies.map(function(p) { return p && typeof p.name === 'string' ? p.name : '' }))
+  var groups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : []
+  var marker = groups.find(function(g) { return g && g.name === PRIVATE_AI_GROUP_NAME })
+  // Reprocessing a generated config must preserve private-node isolation, but
+  // an arbitrary subscription group named AI专属 is not private-node input.
+  if (!marker) {
+    var generatedPrivate = groups.find(function(g) { return g && g.name === SMART_PRIVATE_AI.NAME })
+    var generatedAi = groups.find(function(g) { return g && g.name === BIZ.AI })
+    var generatedAiMembers = generatedAi && Array.isArray(generatedAi.proxies) ? generatedAi.proxies : []
+    if (generatedPrivate && generatedPrivate.type === 'url-test' && generatedAiMembers.indexOf(SMART_PRIVATE_AI.NAME) !== -1) {
+      marker = generatedPrivate
+    }
+  }
+  var requested = marker && Array.isArray(marker.proxies) ? marker.proxies : []
+  var names = []
+  var seen = new Set()
+  for (var i = 0; i < requested.length; i++) {
+    var name = typeof requested[i] === 'string' ? requested[i] : ''
+    if (name && proxyNames.has(name) && !seen.has(name)) {
+      names.push(name)
+      seen.add(name)
+    }
+  }
+  if (requested.length > names.length) log(`[${VERSION}] Ignored ${requested.length - names.length} invalid private AI node references`)
+  if (names.length > 0) log(`[${VERSION}] Loaded ${names.length} private AI nodes from ${PRIVATE_AI_GROUP_NAME}`)
+  return names
+}
+
+// ================================================================
 //  模块 E：区域组创建（url-test，非 Smart 内核等价写法）
 // ================================================================
 
@@ -532,7 +611,7 @@ function upsertUrlTestGroup(config, name, proxies) {
 }
 
 // ================================================================
-//  模块 F：业务策略组注入（33组）
+//  模块 F：业务策略组注入（34组）
 // ================================================================
 
 function injectBusinessGroups(config, activeSmartNames) {
@@ -540,7 +619,14 @@ function injectBusinessGroups(config, activeSmartNames) {
     if (!activeSmartNames) return arr.slice()
     return arr.filter(function(p) { return activeSmartNames.has(p) })
   }
-  var aiProxies = filterActive(buildHomeFirstProxies(REGION_ORDER))
+  var geminiProxies = filterActive(applyAiGlobalPreference(buildHomeFirstProxies(REGION_ORDER), activeSmartNames))
+  var aiProxies = filterActive(applyAiGlobalPreference(buildHomeFirstProxies(REGION_ORDER), activeSmartNames))
+  var googleProxies = filterActive(buildStandardProxies())
+  if (activeSmartNames && activeSmartNames.has(SMART_PRIVATE_AI.NAME)) {
+    aiProxies.push(SMART_PRIVATE_AI.NAME)
+    geminiProxies.push(SMART_PRIVATE_AI.NAME)
+    googleProxies.push(SMART_PRIVATE_AI.NAME)
+  }
   var standardProxies = filterActive(buildStandardProxies())
   var streamUsProxies = filterActive(buildRegionPreferredProxies('US'))
   var streamHkProxies = filterActive(buildRegionPreferredProxies('HK'))
@@ -552,6 +638,7 @@ function injectBusinessGroups(config, activeSmartNames) {
   var seaProxies = filterActive(buildSeaProxies())
   var groups = [
     { name: BIZ.AI, type: 'select', proxies: aiProxies.slice() },
+    { name: BIZ.GEMINI, type: 'select', proxies: geminiProxies.slice() },
     { name: BIZ.CRYPTO, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.PAYMENTS, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.IM, type: 'select', proxies: standardProxies.slice() },
@@ -573,7 +660,7 @@ function injectBusinessGroups(config, activeSmartNames) {
     { name: BIZ.STREAM_OTHER, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.GAME_CN, type: 'select', proxies: directFirstProxies.slice() },
     { name: BIZ.GAME_INTL, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.GOOGLE, type: 'select', proxies: standardProxies.slice() },
+    { name: BIZ.GOOGLE, type: 'select', proxies: googleProxies.slice() },
     { name: BIZ.TOOLS, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.MS, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.APPLE, type: 'select', proxies: directFirstProxies.slice() },
@@ -585,7 +672,7 @@ function injectBusinessGroups(config, activeSmartNames) {
     { name: BIZ.FINAL, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.AD, type: 'select', proxies: ['REJECT', 'DIRECT'] },
   ]
-  var _smartNameSet = new Set(Object.values(SMART))
+  var _smartNameSet = new Set(Object.values(SMART).concat(Object.values(SMART_AI)).concat([SMART_PRIVATE_AI.NAME]))
   var firstSmartIdx = config['proxy-groups'].findIndex(function(g) { return g && _smartNameSet.has(g.name) })
   groups.forEach(function(group, i) {
     var existIdx = config['proxy-groups'].findIndex(function(g) { return g && g.name === group.name })
@@ -1436,7 +1523,7 @@ function injectSmartFingerprint(config) {
 function sortProxyGroups(config) {
   const bizGroups = [], smartGroups = [], otherGroups = []
   const bizNames = new Set(Object.values(BIZ))
-  const smartNames = new Set(Object.values(SMART))
+  const smartNames = new Set(Object.values(SMART).concat(Object.values(SMART_AI)).concat([SMART_PRIVATE_AI.NAME]))
   config['proxy-groups'].forEach(g => {
     if (!g || !g.name) return
     if (bizNames.has(g.name)) { bizGroups.push(g) }
@@ -1445,19 +1532,42 @@ function sortProxyGroups(config) {
   })
   const bizOrder = Object.values(BIZ)
   bizGroups.sort((a, b) => bizOrder.indexOf(a.name) - bizOrder.indexOf(b.name))
-  const smartOrder = Object.values(SMART)
+  var smartOrder = Object.values(SMART).concat(Object.values(SMART_AI)).concat([SMART_PRIVATE_AI.NAME])
   smartGroups.sort((a, b) => { const ia = smartOrder.indexOf(a.name); const ib = smartOrder.indexOf(b.name); return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) })
+  // AI/Gemini 业务组前置到全球节点之前，方便快速切换
+  var aiGroups = []
+  var restBizGroups = []
+  bizGroups.forEach(function(g) {
+    if (g.name === BIZ.AI || g.name === BIZ.GEMINI) {
+      aiGroups.push(g)
+    } else {
+      restBizGroups.push(g)
+    }
+  })
   // FlClash: 必须原地修改，不能重新赋值（QuickJS FFI 桥接层限制）
   var globalGroup = null, restSmartGroups = []
   for (var s = 0; s < smartGroups.length; s++) {
     if (smartGroups[s].name === SMART.GLOBAL) { globalGroup = smartGroups[s] }
     else { restSmartGroups.push(smartGroups[s]) }
   }
+  // AI专属组紧跟全球节点
+  var aiExclusiveGroups = []
+  var finalRestSmart = []
+  for (var t = 0; t < restSmartGroups.length; t++) {
+    if (restSmartGroups[t].name === SMART_PRIVATE_AI.NAME) {
+      aiExclusiveGroups.push(restSmartGroups[t])
+    } else {
+      finalRestSmart.push(restSmartGroups[t])
+    }
+  }
   config['proxy-groups'].splice(0, config['proxy-groups'].length)
+  // 顺序：AI/Gemini → 全球节点 → AI专属 → 其余业务组 → 其余区域组 → 其他
+  for (var a = 0; a < aiGroups.length; a++) { config['proxy-groups'].push(aiGroups[a]) }
   if (globalGroup) { config['proxy-groups'].push(globalGroup) }
-  for (var i = 0; i < bizGroups.length; i++) { config['proxy-groups'].push(bizGroups[i]) }
-  for (var j = 0; j < restSmartGroups.length; j++) { config['proxy-groups'].push(restSmartGroups[j]) }
-  for (var k = 0; k < otherGroups.length; k++) { config['proxy-groups'].push(otherGroups[k]) }
+  for (var b = 0; b < aiExclusiveGroups.length; b++) { config['proxy-groups'].push(aiExclusiveGroups[b]) }
+  for (var c = 0; c < restBizGroups.length; c++) { config['proxy-groups'].push(restBizGroups[c]) }
+  for (var d = 0; d < finalRestSmart.length; d++) { config['proxy-groups'].push(finalRestSmart[d]) }
+  for (var e = 0; e < otherGroups.length; e++) { config['proxy-groups'].push(otherGroups[e]) }
 }
 
 // ================================================================
@@ -1483,14 +1593,17 @@ function main(config) {
     log(`[${VERSION}] Start processing, ${config.proxies.length} proxies`)
     if (!Array.isArray(config['proxy-groups'])) config['proxy-groups'] = []
     if (!Array.isArray(config.rules)) config.rules = []
+    var privateAiNodeNames = collectPrivateAiNodeNames(config)
     var activeNodeServers = collectActiveSubscriptionNodeServers(config.proxies)
     var nodeDnsHints = SckiSubscriptionAdapter.captureNodeDns(config, activeNodeServers, SCKI_SUBSCRIPTION_ADAPTER_PROFILE)
     var nodeDnsReport = overwriteGeneral(config, nodeDnsHints)
     logSubscriptionAdapterReport(nodeDnsReport)
     cleanupSubscription(config)
     injectSmartFingerprint(config)
-    var c = classifyAllNodes(config.proxies)
-    log(`[${VERSION}] Classification: ALL=${c.ALL.length} HOME_ALL=${c.HOME_ALL.length} HK=${c.HK.length}/${c.HOME_HK.length} TW=${c.TW.length}/${c.HOME_TW.length} CN=${c.CN.length}/${c.HOME_CN.length} JP=${c.JP.length}/${c.HOME_JP.length} KR=${c.KR.length}/${c.HOME_KR.length} SG=${c.SG.length}/${c.HOME_SG.length} US=${c.US.length}/${c.HOME_US.length} EU=${c.EU.length}/${c.HOME_EU.length} AM=${c.AM.length}/${c.HOME_AM.length} AF=${c.AF.length}/${c.HOME_AF.length} APAC_OTHER=${c.APAC_OTHER.length}/${c.HOME_APAC_OTHER.length} OTHER=${c.OTHER.length}/${c.HOME_OTHER.length}`)
+    // 私有节点不参与区域分类，天然不进 🌍 全球节点 / 🏡 全球家宽 / 任何区域组
+    var privateAiNameSet = new Set(privateAiNodeNames)
+    var c = classifyAllNodes(config.proxies.filter(function(p) { return p && !privateAiNameSet.has(p.name) }))
+    log(`[${VERSION}] Classification: ALL=${c.ALL.length} HOME_ALL=${c.HOME_ALL.length} HK=${c.HK.length}/${c.HOME_HK.length} TW=${c.TW.length}/${c.HOME_TW.length} CN=${c.CN.length}/${c.HOME_CN.length} JP=${c.JP.length}/${c.HOME_JP.length} KR=${c.KR.length}/${c.HOME_KR.length} SG=${c.SG.length}/${c.HOME_SG.length} US=${c.US.length}/${c.HOME_US.length} EU=${c.EU.length}/${c.HOME_EU.length} RU=${c.RU.length}/${c.HOME_RU.length} AM=${c.AM.length}/${c.HOME_AM.length} AF=${c.AF.length}/${c.HOME_AF.length} APAC_OTHER=${c.APAC_OTHER.length}/${c.HOME_APAC_OTHER.length} OTHER=${c.OTHER.length}/${c.HOME_OTHER.length}`)
     var jpkrNodes = c.JP.concat(c.KR)
     // v5.4.1 FIX: SG 同时存在于狮城组（独立）和亚太组（对标 US 在 美洲组）
     var apacNodes = c.HK.concat(c.TW, c.CN, c.JP, c.KR, c.SG, c.APAC_OTHER)
@@ -1517,6 +1630,8 @@ function main(config) {
     if (c.HOME_US.length > 0) upsertUrlTestGroup(config, SMART.US_HOME, c.HOME_US)
     if (c.EU.length > 0) upsertUrlTestGroup(config, SMART.EU, c.EU)
     if (c.HOME_EU.length > 0) upsertUrlTestGroup(config, SMART.EU_HOME, c.HOME_EU)
+    if (c.RU.length > 0) upsertUrlTestGroup(config, SMART.RU, c.RU)
+    if (c.HOME_RU.length > 0) upsertUrlTestGroup(config, SMART.RU_HOME, c.HOME_RU)
     if (americasNodes.length > 0) upsertUrlTestGroup(config, SMART.AMERICAS, americasNodes)
     if (homeAmericasNodes.length > 0) upsertUrlTestGroup(config, SMART.AMERICAS_HOME, homeAmericasNodes)
     if (c.AF.length > 0) upsertUrlTestGroup(config, SMART.AFRICA, c.AF)
@@ -1524,7 +1639,16 @@ function main(config) {
     if (c.OTHER.length > 0) upsertUrlTestGroup(config, SMART.OTHER, c.OTHER)
     if (c.HOME_OTHER.length > 0) upsertUrlTestGroup(config, SMART.OTHER_HOME, c.HOME_OTHER)
 
-    // 收集实际创建的区域组名（按 SMART 常量名匹配），过滤业务组的 proxy 引用
+    // AI/Gemini 排除港台澳俄全局组
+    var aiGlobalNodes = buildAiGlobalNodes(c.ALL, c.HK, c.TW, c.APAC_OTHER, c.RU)
+    var aiGlobalHomeNodes = buildAiGlobalNodes(c.HOME_ALL, c.HOME_HK, c.HOME_TW, c.HOME_APAC_OTHER, c.HOME_RU)
+    if (aiGlobalNodes.length > 0) upsertUrlTestGroup(config, SMART_AI.GLOBAL, aiGlobalNodes)
+    if (aiGlobalHomeNodes.length > 0) upsertUrlTestGroup(config, SMART_AI.GLOBAL_HOME, aiGlobalHomeNodes)
+
+    // 私有 AI 节点存在时才创建 AI专属组；没有私有 YAML 时保持公共订阅的原有组数量。
+    if (privateAiNodeNames.length > 0) upsertUrlTestGroup(config, SMART_PRIVATE_AI.NAME, privateAiNodeNames)
+
+    // 收集实际创建的 url-test 组名（含 SMART + SMART_AI + 私有 AI），过滤业务组的 proxy 引用
     var activeSmartNames = new Set(config['proxy-groups'].filter(function(g) { return g && g.type === 'url-test' }).map(function(g) { return g.name }))
     activeSmartNames.add('DIRECT'); activeSmartNames.add('REJECT')
     activeSmartNames.add(SMART.GLOBAL)
@@ -1534,6 +1658,54 @@ function main(config) {
     applyMihomoFusedRuleSets(config)
     SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE, 'normal')
     SckiTrafficOptions.applyQuicPolicy(config.rules, SCKI_QUIC_POLICY)
+
+    // Gemini 独立规则——额外 rule-providers + 前置规则确保精确路由
+    if (!config['rule-providers']) config['rule-providers'] = {}
+    config['rule-providers']['gemini'] = {
+      type: 'http', behavior: 'domain', format: 'yaml',
+      url: 'https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml',
+      path: './ruleset/gemini.yaml', interval: 86400,
+      proxy: '🚫 受限网站',
+    }
+    config['rule-providers']['acc-gemini'] = {
+      type: 'http', behavior: 'domain', format: 'yaml',
+      url: 'https://fastly.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@main/Gemini/Gemini.yaml',
+      path: './ruleset/acc-Gemini.yaml', interval: 86400,
+      proxy: '🚫 受限网站',
+    }
+    var geminiRules = [
+      // Gemini QUIC 前置豁免—防止被 GEOSITE:google 宽匹配吞入 GOOGLE（RULE-SET 依赖 sniffer SNI 解析）
+      `AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),${BIZ.GEMINI}`,
+      `AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,acc-gemini)),${BIZ.GEMINI}`,
+      // Gemini 域名精确直写
+      `DOMAIN-SUFFIX,gemini.google.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,bard.google.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,generativelanguage.googleapis.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,aistudio.google.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,ai.google.dev,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,makersuite.google.com,${BIZ.GEMINI}`,
+      `DOMAIN,alkalimakersuite-pa.clients6.google.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,accounts.google.com,${BIZ.GEMINI}`,
+      `DOMAIN,oauth2.googleapis.com,${BIZ.GEMINI}`,
+      `DOMAIN,oauthaccountmanager.googleapis.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,securetoken.googleapis.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,gemini.gstatic.com,${BIZ.GEMINI}`,
+      `DOMAIN,www.gstatic.com,${BIZ.GEMINI}`,
+      `DOMAIN,ssl.gstatic.com,${BIZ.GEMINI}`,
+      `DOMAIN,fonts.gstatic.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,lh3.googleusercontent.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,lh5.googleusercontent.com,${BIZ.GEMINI}`,
+      `DOMAIN-SUFFIX,notebooklm.google,${BIZ.GEMINI}`,
+    ]
+    // 自定义直连域名
+    var customDirectRules = [
+      'DOMAIN-SUFFIX,muyuan.do,DIRECT',
+      'DOMAIN-SUFFIX,anyrouter.top,DIRECT',
+    ]
+    // 将 Gemini 和自定义规则插入到规则列表前端，优先于通用 QUIC 与融合规则。
+    // FlClash 的 Dart bridge 可能持有原数组引用；原地插入才能确保规则更新可见。
+    config.rules.splice.apply(config.rules, [0, 0].concat(geminiRules, customDirectRules))
+
     sortProxyGroups(config)
     log(`[${VERSION}] Done! Groups: ${config['proxy-groups'].length}, Rules: ${config.rules.length}, Providers: ${Object.keys(config['rule-providers']).length}`)
     return config
