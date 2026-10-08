@@ -68,4 +68,4 @@ https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28
 
 ## 私有节点
 
-实际节点保存在被 Git 忽略的 `Clash Party/private-nodes.yaml`，示例在 `Clash Party/private-nodes.example.yaml`。导入 YAML 覆写后再启用 JS；JS 通过 `__SCKI_PRIVATE_AI__` 组读取节点名称，不读取任何远程文件，也不在公开 JS 中保存凭据。
+实际节点保存在被 Git 忽略的 `Clash Party/private-nodes.yaml`，示例在 `Clash Party/private-nodes.clash-party.example.yaml`。导入 YAML 覆写后再启用 JS；JS 通过 `__SCKI_PRIVATE_AI__` 组读取节点名称，不读取任何远程文件，也不在公开 JS 中保存凭据。FlClash 用户参考 `FlClash/private-nodes.flclash.example.yaml`，通过 Sub-Store 组合订阅完成合并。

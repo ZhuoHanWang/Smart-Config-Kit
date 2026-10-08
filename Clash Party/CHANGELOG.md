@@ -7,8 +7,15 @@
 
 ---
 
+## v6.0.15-dns.18 / v6.0.15-normal.19 (2026-10-08)
+
+- YAML-TEMPLATE-FIX：重写 `private-nodes.clash-party.example.yaml`，消除重复 `+proxies`/`+proxy-groups` 键，活跃段使用实际占位符替代空数组；补充 Clash Party YAML 覆写流水线说明（YAML 先于 JS 执行）。
+- FLCLASH-TEMPLATE：新增 `FlClash/private-nodes.flclash.example.yaml`，使用标准 Mihomo YAML（非 Clash Party `+` 语法），配合 Sub-Store 组合订阅完成 FlClash 私有节点合并。
+- DOCS-CLEANUP：删除旧的 `private-nodes.example.yaml`（使用错误语法 `proxies:` 替换数组）；更新 FORKING.md、根 README、FlClash/README、docs/personal-fork-sync.md 中的文件名引用；FlClash CHANGELOG 旧引用同步修正。
+
 ## v6.0.15-dns.17 / v6.0.15-normal.18 (2026-10-08)
 
+- YAML-OVERRIDE：新增 Clash Party 专用私有节点模板，使用官方 `+proxies` / `+proxy-groups` 数组前置合并语法，避免覆盖订阅节点与 JS 生成的策略组。
 - PRIVATE-AI-GROUP：新增独立 `AI专属` Smart/url-test 组，私有节点（来自 `__SCKI_PRIVATE_AI__` 标记组）可独立测速择路。
 - UI-ORDER：AI/Gemini 业务组前置到全球节点之前，`AI专属` 组紧跟全球节点，方便快速切换。
 - 对齐 FlClash 版的私有节点注入逻辑：`AI专属` 组引用同时加入 `🤖 AI 服务` 和 `✨ Gemini 服务` 候选列表。

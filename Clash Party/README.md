@@ -20,11 +20,13 @@
 
 > **Clash Party v2.0.3+ DNS 保护（Issue #183）**：客户端会在执行 JS 覆写前检查原始订阅是否包含 `proxy-server-nameserver`、`proxy-server-nameserver-policy` 或 `nameserver-policy`。如果客户端内置 DNS 控制处于开启状态，可能提示“检测到当前订阅包含自定义 DNS 配置，已自动关闭 DNS 覆写”。这只表示客户端的 `controlDns` 被保护逻辑关闭，不表示本脚本没有执行；本脚本随后仍会写入仓库 DNS 基线和受限节点 DNS。使用本仓库时请保持客户端内置 DNS 覆写关闭，不要把这条提示当作脚本加载失败。背景见 [Clash Party v2.0.3 发布说明](https://github.com/mihomo-party-org/clash-party/releases/tag/v2.0.3) 和 [DNS 覆写保护源码](https://github.com/mihomo-party-org/clash-party/blob/v2.0.3/src/main/core/dnsOverrideGuard.ts)。
 
+> **YAML 数组合并**：Clash Party 的 YAML 覆写默认替换数组。给现有配置增加规则或策略组时，用 `+rules` / `+proxy-groups` 前置，或用 `rules+` / `proxy-groups+` 追加；普通 `rules:` / `proxy-groups:` 会覆盖原数组。覆盖策略组时请确认所有 `rules` 和组候选仍指向存在的组，否则会出现 `proxy ... not found`。详见[官方 YAML 覆写文档](https://clashparty.org/docs/guide/override/yaml)。
+
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 这类小写 ISO 两位码加编号可正常归类。仅此形式放宽大小写，普通文本中的 us / in 不会被误判为地区。
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
-> 私有节点：复制 [`private-nodes.example.yaml`](private-nodes.example.yaml) 为本地 `private-nodes.yaml`，将节点名称写入 `__SCKI_PRIVATE_AI__` 标记组后作为 YAML 覆写导入，再启用本 JS。私有节点只加入 `🤖 AI 服务`，不参与区域组；实际 YAML 已被 `.gitignore` 忽略，不要上传到公开 Fork、Issue 或 jsDelivr。
+> 私有节点：Clash Party 请复制 [`private-nodes.clash-party.example.yaml`](private-nodes.clash-party.example.yaml) 为本地 `private-nodes.yaml`，用 `+proxies` / `+proxy-groups` 前置合并到订阅，再启用本 JS。普通 `proxies` / `proxy-groups` 会替换订阅数组，可能删掉脚本创建的节点和策略组，造成 `proxy not found`。私有节点只加入 `🤖 AI 服务`，不参与区域组；实际 YAML 已被 `.gitignore` 忽略，不要上传到公开 Fork、Issue 或 jsDelivr。
 
 > 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 

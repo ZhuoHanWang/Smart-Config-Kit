@@ -49,11 +49,14 @@
 ### 可选：单独导入私有节点 YAML
 
 如果需要把自己的 VLESS / Trojan / VMess 节点用于 `AI专属`，请复制仓库中的
-`Clash Party/private-nodes.example.yaml` 为本地 `private-nodes.yaml`，只在其中保存节点凭据。
-在 YAML 覆写中填写 `proxies`，并把节点名称写入 `__SCKI_PRIVATE_AI__` 的 `proxies` 列表。
+[`FlClash/private-nodes.flclash.example.yaml`](private-nodes.flclash.example.yaml) 为本地 `private-nodes.yaml`，
+只在其中保存节点凭据。然后在 Sub-Store 中创建"组合订阅"，将机场订阅和此文件分别作为两个来源，
+输出一条 `Clash.Meta(mihomo)` URL；FlClash 以该组合 URL 作为 Profile，再关联 JS 覆写脚本。
 
-在 FlClash 中先创建并启用这个 YAML 覆写，再启用上面的 JS 覆写。JS 会在执行前读取该标记组，
-创建 `AI专属` url-test 组，并在完成后移除内部标记组。没有私有 YAML 时，公共订阅仍按原有规则运行。
+FlClash 没有 Clash Party 的 `+key` YAML 覆写语法。此文件使用标准 `proxies:` / `proxy-groups:` 键；
+不要从 Clash Party 模板复制 `+proxies` / `+proxy-groups` 到 FlClash。JS 会在 Profile 加载后从
+`__SCKI_PRIVATE_AI__` 标记组读取节点名，创建 `AI专属` url-test 组，并在完成后移除标记组。
+没有私有 YAML 时，公共订阅仍按原有规则运行。
 
 `private-nodes.yaml` 不应上传到 GitHub、Issue 或 jsDelivr；其中的 UUID、密码、服务器地址和 Reality 密钥都属于凭据。
 

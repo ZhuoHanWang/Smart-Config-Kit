@@ -1,5 +1,7 @@
 # Mihomo (MetaCubeX) 官方配置文档参考
 
+> Clash Party YAML 覆写复核（2026-10-08）：官方 [YAML 覆写文档](https://clashparty.org/docs/guide/override/yaml) 说明默认对数组直接覆盖；`+key` 前置、`key+` 追加，普通 `proxies` / `proxy-groups` 会替换数组。私有节点必须使用 `+proxies` 与 `+proxy-groups`，否则订阅节点/由 JS 生成的策略组可能丢失，保留的规则就会引用不存在的策略组。
+
 > 同日补充复核：[`type: inline` / `payload`](https://wiki.metacubex.one/config/proxy-providers/) 为正式集合字段，HTTP/file 的 payload 只是失败备份，不代表远端节点已展开。[具名 direct](https://wiki.metacubex.one/config/proxies/direct/) 保留接口/拨号作用，分类时排除；[`PASS-RULE`](https://wiki.metacubex.one/config/proxies/built-in/) 是保留的内置策略。组 `exclude-type` 在 [v1.19.31 GroupBase](https://github.com/MetaCubeX/mihomo/blob/v1.19.31/adapter/outboundgroup/groupbase.go#L211-L225) 对已合并成员过滤，已用 v1.19.29 的 use-provider controller 验证；详见 [验收证据](../docs/research/2026-09-30-routing-runtime-followup.md)。
 
 > 更新于 2026-09-30（上次核对 2026-07-25）：复核 [Mihomo v1.19.31](https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.31) 与 [代理组字段](https://wiki.metacubex.one/config/proxy-groups/)。`use` 引入 provider；`include-all-proxies` 只覆盖显式节点；组内 `url` 不代替 provider 的健康检查。空组的 `empty-fallback` 默认是 `COMPATIBLE`，节点筛选结果为空时使用已有内置策略 `REJECT` 作为显式成员。本次预检/倍率解析仅在 JS 执行，不引入新内核字段；最低版本保持原要求。[DNS 字段](https://wiki.metacubex.one/config/dns/) 的节点解析与业务解析边界保持原设计。

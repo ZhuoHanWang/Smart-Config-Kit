@@ -5,8 +5,15 @@
 
 ---
 
+## v6.0.15-flclash-ai-gemini.2 (2026-10-08)
+
+- YAML-TEMPLATE：新增 `FlClash/private-nodes.flclash.example.yaml`，使用标准 Mihomo YAML 键（`proxies:` / `proxy-groups:`），配合 Sub-Store 组合订阅完成私有节点合并；文件头明确 FlClash 没有 YAML 覆写系统，禁止复制 Clash Party 的 `+key` 语法。
+- DOCS-FIX：FlClash README 修正私有节点章节，停止引用 `Clash Party/private-nodes.example.yaml`；说明 Sub-Store 组合订阅流程替代"FlClash YAML 覆写"（FlClash 无此功能）。
+- UPSTREAM：对齐 Clash Party `private-nodes.clash-party.example.yaml` 重写（消除重复键、活跃段使用占位符）。
+
 ## v6.0.15-flclash-ai-gemini.1 (2026-10-08)
 
+- PRIVATE-NODES-DOCS：明确 FlClash 使用标准 YAML 数组键，与 Clash Party 专用的 `+proxies` / `+proxy-groups` 语法分开；确认按官方 `main(config)` → 应用 patch 流程处理最终配置。
 - UPSTREAM：保留 v6.0.15 的 `standard` / `power-save` 测速档和可选 UDP/443 策略；Gemini 专属 QUIC 规则仍排在通用规则前。
 - PRIVATE-NODES：从独立 YAML 的 `__SCKI_PRIVATE_AI__` 标记组读取节点名，仅在有有效私有节点时创建 `AI专属`；重复执行不会把普通订阅同名组误认成私有输入。
 - OVERLAY：保留 Gemini 的 2 个 provider、Gemini/自定义直连规则和 AI/Gemini 业务组；FlClash 原地更新规则与代理组数组，兼容 Dart bridge 引用。
@@ -78,7 +85,7 @@
 
 - SECURITY/DECOUPLE：移除公开 JS 中的 JMS 静态节点、UUID、服务器和 Reality 凭据。
 - FEAT-PRIVATE-NODES：从独立 YAML 覆写的 `__SCKI_PRIVATE_AI__` 标记组读取已存在节点名称，按需生成 `AI专属` url-test 组；没有该 YAML 时保持公共订阅行为。
-- DOCS：增加 `private-nodes.example.yaml` 模板以及个人 Fork、upstream、jsDelivr 同步说明。
+- DOCS：增加 `private-nodes.flclash.example.yaml` 模板以及个人 Fork、upstream、jsDelivr、Sub-Store 合并同步说明。
 
 ---
 

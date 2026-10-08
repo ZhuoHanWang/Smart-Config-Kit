@@ -4,6 +4,8 @@
 
 > 更新于 2026-10-08：官方最新稳定版为 [v0.8.99](https://github.com/chen08209/FlClash/releases/tag/v0.8.99)。该版本 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/providers/actions/setup.dart#L335-L393) 对脚本类型调用 `handleEvaluate(scriptContent, rawConfig)`，再把结果交给 `makeRealProfileTask`；[配置生成器](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/common/task.dart#L109-L160) 从脚本结果构建最终 Mihomo 配置。本次仍只使用 `main(config)`、`proxy-groups`、`rules`、`rule-providers` 和 `url-test`，未增加 FlClash 专属字段，v0.8.85 的最低版本要求不变。
 
+> 同日 YAML/JS 覆写边界复核：FlClash 官方 [覆写脚本教程](https://github.com/chen08209/FlClash/issues/1510) 的 JS 入口为 `main(config)`；v0.8.99 的 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/providers/actions/setup.dart#L335-L393) 将脚本结果继续交给 [makeRealProfileTask](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/common/task.dart#L109-L160)。仓库私有节点 YAML 继续使用标准 `proxies` / `proxy-groups` 键；Clash Party 文档的 `+key` 数组操作符不属于 FlClash JS 格式。
+
 > 更新于 2026-09-30（上次核对 2026-08-31）：实时 release 为 [v0.8.98](https://github.com/chen08209/FlClash/releases/tag/v0.8.98)（2026-09-14）。复核该 tag 的 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.98/lib/providers/actions/setup.dart#L315-L368) 和 [配置 patch](https://github.com/chen08209/FlClash/blob/v0.8.98/lib/common/task.dart#L109-L245)，仍先执行脚本，再应用 App patch；DNS 覆写/追加系统 DNS 的边界延续下述说明。本次节点预检和倍率筛选只使用已有 JS 语法并保持数组引用；未抬高声明的 v0.8.85 最低版本。本次验证为 VM 回归，未代替设备上的 App patch 验收。
 
 > 来源：https://github.com/chen08209/FlClash
