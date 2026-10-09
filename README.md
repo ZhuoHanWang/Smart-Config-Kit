@@ -1,5 +1,9 @@
 # 🚀 Smart-Config-Kit v6.0.15
 
+> **个人 Fork 维护范围：Clash Party、FlClash 和 SubStore。** 代理从 [AGENTS.md](AGENTS.md) 开始，同步与发布见 [FORKING.md](FORKING.md)。下文保留上游完整项目介绍，按需查阅。
+
+> Clash Party / FlClash 的融合规则与 Gemini 规则使用本 Fork 的版本快照；JS 与规则副本一起发布，源作者后续修改不会自动改变当前快照。恢复和有意升级见 [Fork 指南](FORKING.md#日常同步)。
+
 > 一套以 `rulesets/source/routing-graph.js` 为唯一规则源、同步产出 14 种客户端配置的跨端智能分流体系，覆盖 Windows / macOS / Linux / Android / iOS / OpenWrt。
 >
 > - 🧭 同一 source graph 经 `MRS -> fused -> 原生产物` 生成各端配置，统一规则顺序与分流目标。

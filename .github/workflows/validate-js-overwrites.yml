@@ -19,6 +19,8 @@ on:
       - 'tools/tests/subscription-ai-group.test.js'
       - 'SubStore/templates/scki-jms-ai-mihomo.json'
       - 'tools/validate-js-overwrites.js'
+      - 'tools/use-personal-rule-snapshot.js'
+      - 'Clash Party/rulesets/**'
       - '.github/workflows/validate-js-overwrites.yml'
   push:
     branches: [main]
@@ -39,6 +41,8 @@ on:
       - 'tools/tests/subscription-ai-group.test.js'
       - 'SubStore/templates/scki-jms-ai-mihomo.json'
       - 'tools/validate-js-overwrites.js'
+      - 'tools/use-personal-rule-snapshot.js'
+      - 'Clash Party/rulesets/**'
       - '.github/workflows/validate-js-overwrites.yml'
   workflow_dispatch:
 
@@ -61,6 +65,10 @@ jobs:
 
       - name: Validate JS overwrite contracts
         run: node tools/validate-js-overwrites.js
+
+      - name: Validate personal compiled rule snapshot
+        if: github.repository == 'ZhuoHanWang/Smart-Config-Kit'
+        run: node tools/use-personal-rule-snapshot.js --check
 
       - name: Validate subscription AI pools and automatic JMS groups
         run: node --test tools/tests/subscription-ai-group.test.js

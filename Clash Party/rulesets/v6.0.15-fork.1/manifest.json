@@ -1,0 +1,2424 @@
+{
+  "snapshot": "v6.0.15-fork.1",
+  "baseline_version": "v6.0.15",
+  "captured_at": "2026-10-09T12:50:41.987Z",
+  "providers": {
+    "scki-fused-001-direct-domain": {
+      "file": "scki-fused-001-direct-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-001-direct-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-002-intl-site-domain": {
+      "file": "scki-fused-002-intl-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-002-intl-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-003-payments-domain": {
+      "file": "scki-fused-003-payments-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-003-payments-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-003-payments-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-004-ai-domain": {
+      "file": "scki-fused-004-ai-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-004-ai-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-005-cnmedia-domain": {
+      "file": "scki-fused-005-cnmedia-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-005-cnmedia-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-005-cnmedia-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-006-ad-domain": {
+      "file": "scki-fused-006-ad-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-006-ad-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-006-ad-ipcidr": {
+      "file": "scki-fused-006-ad-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-006-ad-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-006-ad-residual": {
+      "file": "scki-fused-006-ad-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-006-ad-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-007-cn-site-domain": {
+      "file": "scki-fused-007-cn-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-007-cn-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-007-cn-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-008-direct-domain": {
+      "file": "scki-fused-008-direct-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-008-direct-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-008-direct-ipcidr-no-resolve": {
+      "file": "scki-fused-008-direct-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-008-direct-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-008-direct-residual": {
+      "file": "scki-fused-008-direct-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-008-direct-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-009-work-residual": {
+      "file": "scki-fused-009-work-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-009-work-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-009-work-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-010-crypto-domain": {
+      "file": "scki-fused-010-crypto-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-010-crypto-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-010-crypto-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-011-gfw-domain": {
+      "file": "scki-fused-011-gfw-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-011-gfw-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-011-gfw-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-012-youtube-domain": {
+      "file": "scki-fused-012-youtube-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-012-youtube-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-012-youtube-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-013-cn-site-domain": {
+      "file": "scki-fused-013-cn-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-013-cn-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-013-cn-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-014-ai-domain": {
+      "file": "scki-fused-014-ai-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-014-ai-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-014-ai-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-015-google-domain": {
+      "file": "scki-fused-015-google-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-015-google-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-015-google-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-015-google-residual": {
+      "file": "scki-fused-015-google-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-015-google-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-015-google-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-016-work-domain": {
+      "file": "scki-fused-016-work-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-016-work-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-016-work-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-017-ai-domain": {
+      "file": "scki-fused-017-ai-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-017-ai-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-017-ai-ipcidr": {
+      "file": "scki-fused-017-ai-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-017-ai-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-017-ai-residual": {
+      "file": "scki-fused-017-ai-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-017-ai-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-018-intl-site-domain": {
+      "file": "scki-fused-018-intl-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-018-intl-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-018-intl-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-019-im-domain": {
+      "file": "scki-fused-019-im-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-019-im-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-019-im-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-020-work-domain": {
+      "file": "scki-fused-020-work-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-020-work-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-020-work-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-021-download-domain": {
+      "file": "scki-fused-021-download-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-021-download-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-021-download-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-021-download-ipcidr": {
+      "file": "scki-fused-021-download-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-021-download-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-021-download-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-022-google-domain": {
+      "file": "scki-fused-022-google-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-022-google-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-022-google-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-022-google-ipcidr-no-resolve": {
+      "file": "scki-fused-022-google-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-022-google-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-022-google-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-023-tools-domain": {
+      "file": "scki-fused-023-tools-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-023-tools-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-023-tools-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-024-ai-domain": {
+      "file": "scki-fused-024-ai-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-024-ai-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-024-ai-ipcidr-no-resolve": {
+      "file": "scki-fused-024-ai-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-024-ai-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-024-ai-residual": {
+      "file": "scki-fused-024-ai-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-024-ai-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-025-google-domain": {
+      "file": "scki-fused-025-google-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-025-google-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-025-google-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-026-ai-domain": {
+      "file": "scki-fused-026-ai-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-026-ai-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-026-ai-ipcidr-no-resolve": {
+      "file": "scki-fused-026-ai-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-026-ai-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-026-ai-residual": {
+      "file": "scki-fused-026-ai-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-026-ai-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-027-crypto-domain": {
+      "file": "scki-fused-027-crypto-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-027-crypto-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-027-crypto-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-027-crypto-residual": {
+      "file": "scki-fused-027-crypto-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-027-crypto-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-027-crypto-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-028-payments-domain": {
+      "file": "scki-fused-028-payments-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-028-payments-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-028-payments-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-028-payments-residual": {
+      "file": "scki-fused-028-payments-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-028-payments-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-028-payments-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-029-microsoft-domain": {
+      "file": "scki-fused-029-microsoft-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-029-microsoft-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-029-microsoft-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-030-intl-site-domain": {
+      "file": "scki-fused-030-intl-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-030-intl-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-030-intl-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-031-direct-domain": {
+      "file": "scki-fused-031-direct-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-031-direct-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-031-direct-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-032-im-domain": {
+      "file": "scki-fused-032-im-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-032-im-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-032-im-ipcidr": {
+      "file": "scki-fused-032-im-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-032-im-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-032-im-ipcidr-no-resolve": {
+      "file": "scki-fused-032-im-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-032-im-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-032-im-residual": {
+      "file": "scki-fused-032-im-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-032-im-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-033-social-domain": {
+      "file": "scki-fused-033-social-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-033-social-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-033-social-ipcidr": {
+      "file": "scki-fused-033-social-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-033-social-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-033-social-ipcidr-no-resolve": {
+      "file": "scki-fused-033-social-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-033-social-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-033-social-residual": {
+      "file": "scki-fused-033-social-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-033-social-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-034-cn-site-domain": {
+      "file": "scki-fused-034-cn-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-034-cn-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-034-cn-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-035-social-domain": {
+      "file": "scki-fused-035-social-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-035-social-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-035-social-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-036-work-domain": {
+      "file": "scki-fused-036-work-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-036-work-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-036-work-ipcidr": {
+      "file": "scki-fused-036-work-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-036-work-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-036-work-residual": {
+      "file": "scki-fused-036-work-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-036-work-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-037-direct-domain": {
+      "file": "scki-fused-037-direct-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-037-direct-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-037-direct-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-038-cnmedia-domain": {
+      "file": "scki-fused-038-cnmedia-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-038-cnmedia-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-038-cnmedia-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-039-tiktok-domain": {
+      "file": "scki-fused-039-tiktok-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-039-tiktok-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-039-tiktok-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-040-youtube-domain": {
+      "file": "scki-fused-040-youtube-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-040-youtube-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-040-youtube-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-041-netflix-domain": {
+      "file": "scki-fused-041-netflix-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-041-netflix-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-041-netflix-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-041-netflix-ipcidr-no-resolve": {
+      "file": "scki-fused-041-netflix-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-041-netflix-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-041-netflix-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-042-disney-domain": {
+      "file": "scki-fused-042-disney-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-042-disney-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-042-disney-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-042-disney-residual": {
+      "file": "scki-fused-042-disney-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-042-disney-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-042-disney-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-043-hbo-max-domain": {
+      "file": "scki-fused-043-hbo-max-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-043-hbo-max-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-043-hbo-max-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-043-hbo-max-residual": {
+      "file": "scki-fused-043-hbo-max-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-043-hbo-max-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-043-hbo-max-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-044-hulu-domain": {
+      "file": "scki-fused-044-hulu-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-044-hulu-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-044-hulu-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-044-hulu-residual": {
+      "file": "scki-fused-044-hulu-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-044-hulu-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-044-hulu-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-045-prime-video-domain": {
+      "file": "scki-fused-045-prime-video-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-045-prime-video-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-045-prime-video-ipcidr": {
+      "file": "scki-fused-045-prime-video-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-045-prime-video-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-045-prime-video-residual": {
+      "file": "scki-fused-045-prime-video-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-045-prime-video-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-046-music-domain": {
+      "file": "scki-fused-046-music-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-046-music-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-046-music-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-046-music-ipcidr": {
+      "file": "scki-fused-046-music-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-046-music-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-046-music-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-047-stream-hk-domain": {
+      "file": "scki-fused-047-stream-hk-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-047-stream-hk-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-047-stream-hk-ipcidr-no-resolve": {
+      "file": "scki-fused-047-stream-hk-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-047-stream-hk-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-047-stream-hk-residual": {
+      "file": "scki-fused-047-stream-hk-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-047-stream-hk-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-048-stream-tw-domain": {
+      "file": "scki-fused-048-stream-tw-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-048-stream-tw-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-048-stream-tw-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-048-stream-tw-residual": {
+      "file": "scki-fused-048-stream-tw-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-048-stream-tw-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-048-stream-tw-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-049-stream-jpkr-domain": {
+      "file": "scki-fused-049-stream-jpkr-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-049-stream-jpkr-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-049-stream-jpkr-ipcidr": {
+      "file": "scki-fused-049-stream-jpkr-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-049-stream-jpkr-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-049-stream-jpkr-residual": {
+      "file": "scki-fused-049-stream-jpkr-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-049-stream-jpkr-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-050-stream-eu-domain": {
+      "file": "scki-fused-050-stream-eu-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-050-stream-eu-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-050-stream-eu-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-050-stream-eu-residual": {
+      "file": "scki-fused-050-stream-eu-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-050-stream-eu-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-050-stream-eu-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-051-stream-other-domain": {
+      "file": "scki-fused-051-stream-other-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-051-stream-other-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-051-stream-other-ipcidr": {
+      "file": "scki-fused-051-stream-other-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-051-stream-other-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-051-stream-other-residual": {
+      "file": "scki-fused-051-stream-other-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-051-stream-other-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-052-tools-domain": {
+      "file": "scki-fused-052-tools-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-052-tools-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-052-tools-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-053-google-domain": {
+      "file": "scki-fused-053-google-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-053-google-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-053-google-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-054-tools-domain": {
+      "file": "scki-fused-054-tools-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-054-tools-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-054-tools-ipcidr": {
+      "file": "scki-fused-054-tools-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-054-tools-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-054-tools-residual": {
+      "file": "scki-fused-054-tools-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-054-tools-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-055-microsoft-domain": {
+      "file": "scki-fused-055-microsoft-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-055-microsoft-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-055-microsoft-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-055-microsoft-residual": {
+      "file": "scki-fused-055-microsoft-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-055-microsoft-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-055-microsoft-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-056-apple-domain": {
+      "file": "scki-fused-056-apple-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-056-apple-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-056-apple-ipcidr": {
+      "file": "scki-fused-056-apple-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-056-apple-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-056-apple-residual": {
+      "file": "scki-fused-056-apple-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-056-apple-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-057-download-domain": {
+      "file": "scki-fused-057-download-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-057-download-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-057-download-ipcidr": {
+      "file": "scki-fused-057-download-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-057-download-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-057-download-residual": {
+      "file": "scki-fused-057-download-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-057-download-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-058-tracker-domain": {
+      "file": "scki-fused-058-tracker-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-058-tracker-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-058-tracker-ipcidr": {
+      "file": "scki-fused-058-tracker-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-058-tracker-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-058-tracker-residual": {
+      "file": "scki-fused-058-tracker-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-058-tracker-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-059-gfw-domain": {
+      "file": "scki-fused-059-gfw-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-059-gfw-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-059-gfw-ipcidr-no-resolve": {
+      "file": "scki-fused-059-gfw-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-059-gfw-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-059-gfw-residual": {
+      "file": "scki-fused-059-gfw-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-059-gfw-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-060-game-cn-domain": {
+      "file": "scki-fused-060-game-cn-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-060-game-cn-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-060-game-cn-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-061-game-intl-domain": {
+      "file": "scki-fused-061-game-intl-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-061-game-intl-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-061-game-intl-ipcidr": {
+      "file": "scki-fused-061-game-intl-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-061-game-intl-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-061-game-intl-residual": {
+      "file": "scki-fused-061-game-intl-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-061-game-intl-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-062-intl-site-domain": {
+      "file": "scki-fused-062-intl-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-062-intl-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-062-intl-site-ipcidr": {
+      "file": "scki-fused-062-intl-site-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-062-intl-site-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-062-intl-site-residual": {
+      "file": "scki-fused-062-intl-site-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-062-intl-site-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-063-payments-domain": {
+      "file": "scki-fused-063-payments-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-063-payments-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-063-payments-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-064-cnmedia-domain": {
+      "file": "scki-fused-064-cnmedia-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-064-cnmedia-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-064-cnmedia-ipcidr": {
+      "file": "scki-fused-064-cnmedia-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-064-cnmedia-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-064-cnmedia-residual": {
+      "file": "scki-fused-064-cnmedia-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-064-cnmedia-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-065-cn-site-domain": {
+      "file": "scki-fused-065-cn-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-065-cn-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-065-cn-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-065-cn-site-ipcidr-no-resolve": {
+      "file": "scki-fused-065-cn-site-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-065-cn-site-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-065-cn-site-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-066-direct-domain": {
+      "file": "scki-fused-066-direct-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-066-direct-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-066-direct-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-067-cn-site-domain": {
+      "file": "scki-fused-067-cn-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-067-cn-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-067-cn-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-067-cn-site-residual": {
+      "file": "scki-fused-067-cn-site-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-067-cn-site-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-067-cn-site-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-068-intl-site-domain": {
+      "file": "scki-fused-068-intl-site-domain.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-domain.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-068-intl-site-domain.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-068-intl-site-ipcidr": {
+      "file": "scki-fused-068-intl-site-ipcidr.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-ipcidr.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-068-intl-site-ipcidr.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-068-intl-site-ipcidr-no-resolve": {
+      "file": "scki-fused-068-intl-site-ipcidr-no-resolve.mrs",
+      "provider": {
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-ipcidr-no-resolve.mrs?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-068-intl-site-ipcidr-no-resolve.mrs",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-068-intl-site-residual": {
+      "file": "scki-fused-068-intl-site-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-068-intl-site-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-069-im-residual": {
+      "file": "scki-fused-069-im-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-069-im-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-069-im-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-070-netflix-residual": {
+      "file": "scki-fused-070-netflix-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-070-netflix-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-070-netflix-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-071-social-residual": {
+      "file": "scki-fused-071-social-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-071-social-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-071-social-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    },
+    "scki-fused-072-google-residual": {
+      "file": "scki-fused-072-google-residual.yaml",
+      "provider": {
+        "type": "http",
+        "behavior": "classical",
+        "format": "yaml",
+        "url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-072-google-residual.yaml?scki=v6.0.15",
+        "path": "./ruleset/v6.0.15/scki-fused-072-google-residual.yaml",
+        "interval": 86400,
+        "proxy": "🚫 受限网站"
+      }
+    }
+  },
+  "rules": [
+    "RULE-SET,scki-fused-001-direct-domain,DIRECT",
+    "RULE-SET,scki-fused-002-intl-site-domain,🌐 国外网站",
+    "RULE-SET,scki-fused-003-payments-domain,🏦 金融支付",
+    "RULE-SET,scki-fused-004-ai-domain,🤖 AI 服务",
+    "RULE-SET,scki-fused-005-cnmedia-domain,📺 国内流媒体",
+    "RULE-SET,scki-fused-006-ad-domain,🛑 广告拦截",
+    "RULE-SET,scki-fused-006-ad-ipcidr,🛑 广告拦截",
+    "RULE-SET,scki-fused-006-ad-residual,🛑 广告拦截",
+    "RULE-SET,scki-fused-007-cn-site-domain,🏠 国内网站",
+    "AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,youtube)),📹 YouTube",
+    "AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,google)),🔍 Google 服务",
+    "AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,microsoft)),Ⓜ️ 微软服务",
+    "AND,((DST-PORT,443),(NETWORK,UDP),(GEOSITE,apple)),🍎 苹果服务",
+    "AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT",
+    "DST-PORT,7680,REJECT",
+    "RULE-SET,scki-fused-008-direct-domain,DIRECT",
+    "RULE-SET,scki-fused-008-direct-ipcidr-no-resolve,DIRECT,no-resolve",
+    "RULE-SET,scki-fused-008-direct-residual,DIRECT",
+    "RULE-SET,scki-fused-009-work-residual,🧑‍💼 会议协作",
+    "DST-PORT,26880,DIRECT",
+    "DST-PORT,6540,DIRECT",
+    "DST-PORT,33068,DIRECT",
+    "DST-PORT,123,DIRECT",
+    "DST-PORT,3478,DIRECT",
+    "DST-PORT,3479,DIRECT",
+    "DST-PORT,5349,DIRECT",
+    "DST-PORT,19302,DIRECT",
+    "DST-PORT,19305,DIRECT",
+    "DST-PORT,19307,DIRECT",
+    "RULE-SET,scki-fused-010-crypto-domain,💰 加密货币",
+    "RULE-SET,scki-fused-011-gfw-domain,🚫 受限网站",
+    "RULE-SET,scki-fused-012-youtube-domain,📹 YouTube",
+    "RULE-SET,scki-fused-013-cn-site-domain,🏠 国内网站",
+    "RULE-SET,scki-fused-014-ai-domain,🤖 AI 服务",
+    "RULE-SET,scki-fused-015-google-domain,🔍 Google 服务",
+    "RULE-SET,scki-fused-015-google-residual,🔍 Google 服务",
+    "RULE-SET,scki-fused-016-work-domain,🧑‍💼 会议协作",
+    "RULE-SET,scki-fused-017-ai-domain,🤖 AI 服务",
+    "RULE-SET,scki-fused-017-ai-ipcidr,🤖 AI 服务",
+    "RULE-SET,scki-fused-017-ai-residual,🤖 AI 服务",
+    "RULE-SET,scki-fused-018-intl-site-domain,🌐 国外网站",
+    "RULE-SET,scki-fused-019-im-domain,💬 即时通讯",
+    "RULE-SET,scki-fused-020-work-domain,🧑‍💼 会议协作",
+    "RULE-SET,scki-fused-021-download-domain,📥 下载更新",
+    "RULE-SET,scki-fused-021-download-ipcidr,📥 下载更新",
+    "RULE-SET,scki-fused-022-google-domain,🔍 Google 服务",
+    "RULE-SET,scki-fused-022-google-ipcidr-no-resolve,🔍 Google 服务,no-resolve",
+    "AND,((PROCESS-NAME,Code Helper),(DOMAIN,api.github.com)),🤖 AI 服务",
+    "AND,((PROCESS-NAME,Code Helper (Plugin)),(DOMAIN,api.github.com)),🤖 AI 服务",
+    "RULE-SET,scki-fused-023-tools-domain,🔧 工具与服务",
+    "RULE-SET,scki-fused-024-ai-domain,🤖 AI 服务",
+    "RULE-SET,scki-fused-024-ai-ipcidr-no-resolve,🤖 AI 服务,no-resolve",
+    "RULE-SET,scki-fused-024-ai-residual,🤖 AI 服务",
+    "RULE-SET,scki-fused-025-google-domain,🔍 Google 服务",
+    "RULE-SET,scki-fused-026-ai-domain,🤖 AI 服务",
+    "RULE-SET,scki-fused-026-ai-ipcidr-no-resolve,🤖 AI 服务,no-resolve",
+    "RULE-SET,scki-fused-026-ai-residual,🤖 AI 服务",
+    "RULE-SET,scki-fused-027-crypto-domain,💰 加密货币",
+    "RULE-SET,scki-fused-027-crypto-residual,💰 加密货币",
+    "RULE-SET,scki-fused-028-payments-domain,🏦 金融支付",
+    "RULE-SET,scki-fused-028-payments-residual,🏦 金融支付",
+    "RULE-SET,scki-fused-029-microsoft-domain,Ⓜ️ 微软服务",
+    "RULE-SET,scki-fused-030-intl-site-domain,🌐 国外网站",
+    "RULE-SET,scki-fused-031-direct-domain,DIRECT",
+    "RULE-SET,scki-fused-032-im-domain,💬 即时通讯",
+    "RULE-SET,scki-fused-032-im-ipcidr,💬 即时通讯",
+    "RULE-SET,scki-fused-032-im-ipcidr-no-resolve,💬 即时通讯,no-resolve",
+    "RULE-SET,scki-fused-032-im-residual,💬 即时通讯",
+    "RULE-SET,scki-fused-033-social-domain,📱 社交媒体",
+    "RULE-SET,scki-fused-033-social-ipcidr,📱 社交媒体",
+    "RULE-SET,scki-fused-033-social-ipcidr-no-resolve,📱 社交媒体,no-resolve",
+    "RULE-SET,scki-fused-033-social-residual,📱 社交媒体",
+    "RULE-SET,scki-fused-034-cn-site-domain,🏠 国内网站",
+    "RULE-SET,scki-fused-035-social-domain,📱 社交媒体",
+    "RULE-SET,scki-fused-036-work-domain,🧑‍💼 会议协作",
+    "RULE-SET,scki-fused-036-work-ipcidr,🧑‍💼 会议协作",
+    "RULE-SET,scki-fused-036-work-residual,🧑‍💼 会议协作",
+    "RULE-SET,scki-fused-037-direct-domain,DIRECT",
+    "RULE-SET,scki-fused-038-cnmedia-domain,📺 国内流媒体",
+    "RULE-SET,scki-fused-039-tiktok-domain,🎵 TikTok",
+    "RULE-SET,scki-fused-040-youtube-domain,📹 YouTube",
+    "RULE-SET,scki-fused-041-netflix-domain,🎥 Netflix",
+    "RULE-SET,scki-fused-041-netflix-ipcidr-no-resolve,🎥 Netflix,no-resolve",
+    "RULE-SET,scki-fused-042-disney-domain,🎬 Disney+",
+    "RULE-SET,scki-fused-042-disney-residual,🎬 Disney+",
+    "RULE-SET,scki-fused-043-hbo-max-domain,📡 HBO/Max",
+    "RULE-SET,scki-fused-043-hbo-max-residual,📡 HBO/Max",
+    "RULE-SET,scki-fused-044-hulu-domain,📺 Hulu",
+    "RULE-SET,scki-fused-044-hulu-residual,📺 Hulu",
+    "RULE-SET,scki-fused-045-prime-video-domain,🎬 Prime Video",
+    "RULE-SET,scki-fused-045-prime-video-ipcidr,🎬 Prime Video",
+    "RULE-SET,scki-fused-045-prime-video-residual,🎬 Prime Video",
+    "RULE-SET,scki-fused-046-music-domain,🎵 音乐流媒体",
+    "RULE-SET,scki-fused-046-music-ipcidr,🎵 音乐流媒体",
+    "RULE-SET,scki-fused-047-stream-hk-domain,🇭🇰 香港流媒体",
+    "RULE-SET,scki-fused-047-stream-hk-ipcidr-no-resolve,🇭🇰 香港流媒体,no-resolve",
+    "RULE-SET,scki-fused-047-stream-hk-residual,🇭🇰 香港流媒体",
+    "RULE-SET,scki-fused-048-stream-tw-domain,🇹🇼 台湾流媒体",
+    "RULE-SET,scki-fused-048-stream-tw-residual,🇹🇼 台湾流媒体",
+    "RULE-SET,scki-fused-049-stream-jpkr-domain,🇯🇵 日韩流媒体",
+    "RULE-SET,scki-fused-049-stream-jpkr-ipcidr,🇯🇵 日韩流媒体",
+    "RULE-SET,scki-fused-049-stream-jpkr-residual,🇯🇵 日韩流媒体",
+    "RULE-SET,scki-fused-050-stream-eu-domain,🇪🇺 欧洲流媒体",
+    "RULE-SET,scki-fused-050-stream-eu-residual,🇪🇺 欧洲流媒体",
+    "RULE-SET,scki-fused-051-stream-other-domain,🌐 其他国外流媒体",
+    "RULE-SET,scki-fused-051-stream-other-ipcidr,🌐 其他国外流媒体",
+    "RULE-SET,scki-fused-051-stream-other-residual,🌐 其他国外流媒体",
+    "RULE-SET,scki-fused-052-tools-domain,🔧 工具与服务",
+    "RULE-SET,scki-fused-053-google-domain,🔍 Google 服务",
+    "RULE-SET,scki-fused-054-tools-domain,🔧 工具与服务",
+    "RULE-SET,scki-fused-054-tools-ipcidr,🔧 工具与服务",
+    "RULE-SET,scki-fused-054-tools-residual,🔧 工具与服务",
+    "RULE-SET,scki-fused-055-microsoft-domain,Ⓜ️ 微软服务",
+    "RULE-SET,scki-fused-055-microsoft-residual,Ⓜ️ 微软服务",
+    "RULE-SET,scki-fused-056-apple-domain,🍎 苹果服务",
+    "RULE-SET,scki-fused-056-apple-ipcidr,🍎 苹果服务",
+    "RULE-SET,scki-fused-056-apple-residual,🍎 苹果服务",
+    "RULE-SET,scki-fused-057-download-domain,📥 下载更新",
+    "RULE-SET,scki-fused-057-download-ipcidr,📥 下载更新",
+    "RULE-SET,scki-fused-057-download-residual,📥 下载更新",
+    "RULE-SET,scki-fused-058-tracker-domain,🛰️ BT/PT Tracker",
+    "RULE-SET,scki-fused-058-tracker-ipcidr,🛰️ BT/PT Tracker",
+    "RULE-SET,scki-fused-058-tracker-residual,🛰️ BT/PT Tracker",
+    "RULE-SET,scki-fused-059-gfw-domain,🚫 受限网站",
+    "RULE-SET,scki-fused-059-gfw-ipcidr-no-resolve,🚫 受限网站,no-resolve",
+    "RULE-SET,scki-fused-059-gfw-residual,🚫 受限网站",
+    "RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏",
+    "RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏",
+    "RULE-SET,scki-fused-061-game-intl-ipcidr,🎮 国外游戏",
+    "RULE-SET,scki-fused-061-game-intl-residual,🎮 国外游戏",
+    "RULE-SET,scki-fused-062-intl-site-domain,🌐 国外网站",
+    "RULE-SET,scki-fused-062-intl-site-ipcidr,🌐 国外网站",
+    "RULE-SET,scki-fused-062-intl-site-residual,🌐 国外网站",
+    "RULE-SET,scki-fused-063-payments-domain,🏦 金融支付",
+    "RULE-SET,scki-fused-064-cnmedia-domain,📺 国内流媒体",
+    "RULE-SET,scki-fused-064-cnmedia-ipcidr,📺 国内流媒体",
+    "RULE-SET,scki-fused-064-cnmedia-residual,📺 国内流媒体",
+    "RULE-SET,scki-fused-065-cn-site-domain,🏠 国内网站",
+    "RULE-SET,scki-fused-065-cn-site-ipcidr-no-resolve,🏠 国内网站,no-resolve",
+    "RULE-SET,scki-fused-066-direct-domain,DIRECT",
+    "RULE-SET,scki-fused-067-cn-site-domain,🏠 国内网站",
+    "RULE-SET,scki-fused-067-cn-site-residual,🏠 国内网站",
+    "RULE-SET,scki-fused-068-intl-site-domain,🌐 国外网站",
+    "RULE-SET,scki-fused-068-intl-site-ipcidr,🌐 国外网站",
+    "RULE-SET,scki-fused-068-intl-site-ipcidr-no-resolve,🌐 国外网站,no-resolve",
+    "RULE-SET,scki-fused-068-intl-site-residual,🌐 国外网站",
+    "RULE-SET,scki-fused-069-im-residual,💬 即时通讯",
+    "RULE-SET,scki-fused-070-netflix-residual,🎥 Netflix",
+    "RULE-SET,scki-fused-071-social-residual,📱 社交媒体",
+    "RULE-SET,scki-fused-072-google-residual,🔍 Google 服务",
+    "MATCH,🐟 漏网之鱼"
+  ],
+  "gemini": {
+    "gemini": {
+      "file": "gemini-bm7.yaml"
+    },
+    "acc-gemini": {
+      "file": "gemini-acc.yaml"
+    }
+  },
+  "files": {
+    "scki-fused-001-direct-domain.mrs": {
+      "bytes": 316,
+      "sha256": "17afa56618211e8127642e36d575bd53b447f69bee91032b4641ea0268fd93a5",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-002-intl-site-domain.mrs": {
+      "bytes": 72,
+      "sha256": "1af73a0f270b24af17f92d300dbf8e8bbf4dea3f1aa03e8143d6965a4c8319cb",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-003-payments-domain.mrs": {
+      "bytes": 53,
+      "sha256": "548ea73257a6714f00c2f250826ca4a15d5c67ef448431737cf4771a57e50fb3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-003-payments-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-004-ai-domain.mrs": {
+      "bytes": 127,
+      "sha256": "84eb39a0ea356e2164afb051a9a0a58aa8f09459e7e8dd1135de9014c53e53a8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-005-cnmedia-domain.mrs": {
+      "bytes": 154,
+      "sha256": "b978326e5c7a6dfd492a059fcdacd0e543e6be68cdc813080dd56e83f1ce5904",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-005-cnmedia-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-006-ad-domain.mrs": {
+      "bytes": 3368933,
+      "sha256": "f3399fa3b069f0410cae61c5eb28d935e46bb7b2e9696be1db2df2f8baacd524",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-006-ad-ipcidr.mrs": {
+      "bytes": 1823,
+      "sha256": "04edaab9dd400ab8fa4fca233b2e7587a2958bea3bc2f677b2c17036c0edbc75",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-006-ad-residual.yaml": {
+      "bytes": 10689,
+      "sha256": "1ef49402888c8281c973ce97c2b2ad2dede00c7af24e42ef5eabc25773a8c43d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-006-ad-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-007-cn-site-domain.mrs": {
+      "bytes": 159,
+      "sha256": "5ad292806616100cb05c465e96c7e92b679d22281dc1caf914e9efc33a8b4381",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-007-cn-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-008-direct-domain.mrs": {
+      "bytes": 791,
+      "sha256": "2c3fc4d3c1f368cb49a167d51bc10ec482a28c71038955566db255efd93a5205",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-008-direct-ipcidr-no-resolve.mrs": {
+      "bytes": 51,
+      "sha256": "4dcd5213906d267121d495b04c44c4a1b425e9e07b0fa78c5fcb04f9972dd4ea",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-008-direct-residual.yaml": {
+      "bytes": 2689,
+      "sha256": "3b53babd596d872395bc701a8c1e6f6675064f4e07ac666a0a28b0a268e75b93",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-008-direct-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-009-work-residual.yaml": {
+      "bytes": 129,
+      "sha256": "e5602a76a7f64c1a0cd0e59e32d9a71d46a1cc9558b14026f5599400a93262ee",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-009-work-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-010-crypto-domain.mrs": {
+      "bytes": 99,
+      "sha256": "5d70ad6e82e825c81e7dc3a459a7404226b0872777cb9ec98fb6884fc36148cd",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-010-crypto-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-011-gfw-domain.mrs": {
+      "bytes": 103,
+      "sha256": "1f0dcac2e498d0c2f9a3887c3362974c25eb52c3ba71309091330d2978e831d8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-011-gfw-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-012-youtube-domain.mrs": {
+      "bytes": 150,
+      "sha256": "9a062b12cd4dd2200f21ddead3dc4ea30270ea5bb330046a9c12d89963b38f74",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-012-youtube-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-013-cn-site-domain.mrs": {
+      "bytes": 104,
+      "sha256": "131b44ee88aa9d2469fe3009eabc9106aa900cddcbcb26fad63ee05a3e3c695f",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-013-cn-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-014-ai-domain.mrs": {
+      "bytes": 407,
+      "sha256": "8ec9f40a95cb34b1495c3b5058702d967d3bc359ff22061bf59eba5e7ba24cb8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-014-ai-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-015-google-domain.mrs": {
+      "bytes": 208,
+      "sha256": "7f76a0d949963ed15e6db9d86edad39c28dbdc353f5c2a4ceeedd7c0d825bc88",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-015-google-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-015-google-residual.yaml": {
+      "bytes": 115,
+      "sha256": "83918f03969936ae4d43b66c4758556b69f5864dd92930764f1ae88f3a3901ef",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-015-google-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-016-work-domain.mrs": {
+      "bytes": 55,
+      "sha256": "57aa60a35be23fb48b6011ca74ccb53daffe840d834cfdb4ca7e6c798326e374",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-016-work-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-017-ai-domain.mrs": {
+      "bytes": 710,
+      "sha256": "6c7ed767373c8d0f76c1f34e9557e359d59b56df70725a7005bff82e4dcf3a10",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-017-ai-ipcidr.mrs": {
+      "bytes": 53,
+      "sha256": "f395f8f030637bbc9fea291f99ab25d4249522ae2c744e976ac6bd65267c6564",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-017-ai-residual.yaml": {
+      "bytes": 82,
+      "sha256": "6b56f685e8612e86cb641991c0c650cc7d58789b39885b7051c2a15bdc11df99",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-017-ai-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-018-intl-site-domain.mrs": {
+      "bytes": 94,
+      "sha256": "e47e5318027a009e7e41edcfaf22601b7d1178b0c404625887fee952aafe41ae",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-018-intl-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-019-im-domain.mrs": {
+      "bytes": 60,
+      "sha256": "10d5d3ae8a6b5918c95e81b026eb05d4e48ae8818961ec6b37c4ce68f90fcbac",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-019-im-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-020-work-domain.mrs": {
+      "bytes": 87,
+      "sha256": "00d447efea95634ae0d640294c6bfd20ffb185fcadc3e95eef944d12bf9d1fbb",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-020-work-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-021-download-domain.mrs": {
+      "bytes": 243,
+      "sha256": "0bc4f2367be38256c970649dbed67241d906ea7a361d946af7c9f26fe6bae36d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-021-download-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-021-download-ipcidr.mrs": {
+      "bytes": 123,
+      "sha256": "b949967cb3fb796c8c7c456634f3c67167cc9a536425f2946a5c9425cb41c267",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-021-download-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-022-google-domain.mrs": {
+      "bytes": 6621,
+      "sha256": "0430d8c26e3934c57633fc9549667e363e57234794636e179e719690e37d961b",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-022-google-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-022-google-ipcidr-no-resolve.mrs": {
+      "bytes": 8295,
+      "sha256": "5cd473b3c74a3c5bdff89cc1baf39edfb7384151c83fbcd6f5e2b9adc4b9ca80",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-022-google-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-023-tools-domain.mrs": {
+      "bytes": 55,
+      "sha256": "fb1fba97ef198c62701935da54b0a4c934828cd674e363a20e96c32ef09a216a",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-023-tools-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-024-ai-domain.mrs": {
+      "bytes": 1744,
+      "sha256": "c66178e45a1bca4b75e32871aecac0c297fe89097764dd03a9e04ebcc64255e7",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-024-ai-ipcidr-no-resolve.mrs": {
+      "bytes": 104,
+      "sha256": "8750d3cde28bafce2c46a7402da2f6216e4cd33880d8d124013a7184fb5fe771",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-024-ai-residual.yaml": {
+      "bytes": 1336,
+      "sha256": "91dd31c1513192f4f467ff149c6ee71b60e433d07a210744440e3dae1e9270f0",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-024-ai-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-025-google-domain.mrs": {
+      "bytes": 517,
+      "sha256": "edafdd0d9bbafb02acdb7083f3c46dd54eb39358c452661a139d4356358fbdf0",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-025-google-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-026-ai-domain.mrs": {
+      "bytes": 1726,
+      "sha256": "2ee11b0d5ff91dcc47b4b31030530071ad635ac72627d5300a676ecad11c2313",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-026-ai-ipcidr-no-resolve.mrs": {
+      "bytes": 97,
+      "sha256": "839c4a6d89910572f193135af201ef7ca9b6eebfcd8f2af1061066c65710d39c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-026-ai-residual.yaml": {
+      "bytes": 1040,
+      "sha256": "0f18d0c543a691a61c0d9c56d6991ed6396857b39636a8ee084ea4de5916a50e",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-026-ai-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-027-crypto-domain.mrs": {
+      "bytes": 2559,
+      "sha256": "7c8654ee38a0806b3f11171a3970e477fc9896e26a59e3dc37ae538fa0c5943e",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-027-crypto-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-027-crypto-residual.yaml": {
+      "bytes": 264,
+      "sha256": "eaaf72cbb63fc859491531ee8f2d141334e7c99c92447e5c593717fbff3de3d3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-027-crypto-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-028-payments-domain.mrs": {
+      "bytes": 5083,
+      "sha256": "c9f4bfe21422e516abe2874185ce606f14ecb1af4bc60a0c33d799df777e757f",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-028-payments-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-028-payments-residual.yaml": {
+      "bytes": 247,
+      "sha256": "e6f2dcb48798a969b7a41ecbe200976c61a4bb3b1c42225d73fc7507ef9c875a",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-028-payments-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-029-microsoft-domain.mrs": {
+      "bytes": 80,
+      "sha256": "798ef1a66518a3980305768111ccbd9fedb495f97bbb8b8ab529b88692a47cbf",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-029-microsoft-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-030-intl-site-domain.mrs": {
+      "bytes": 399,
+      "sha256": "325c7d50b65b23b7e06851cdca4cc5b328c2e996ba2fb9372c31690cadb48d40",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-030-intl-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-031-direct-domain.mrs": {
+      "bytes": 122,
+      "sha256": "11d624ffab525543df90f7d13cb0ccdc1ade9f023b073ad2ba8ef166c775220d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-031-direct-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-032-im-domain.mrs": {
+      "bytes": 1033,
+      "sha256": "0d2274a04821a7b362b6728615a0173808234ad93a65b8beb281104696048fab",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-032-im-ipcidr.mrs": {
+      "bytes": 303,
+      "sha256": "3da8bad5888aaf45ed06275527bcce6eb82239d3aaac8fea21883152383dc610",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-032-im-ipcidr-no-resolve.mrs": {
+      "bytes": 145,
+      "sha256": "d121af95b9aeca3d8c29b2112d5e6685b2a6716383df8ae31b5fbb3408c527b3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-032-im-residual.yaml": {
+      "bytes": 78,
+      "sha256": "afa1ee269dee8846bfec33a0b3e29e2d6f21889ee908cd07d93ec1ec3f125036",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-032-im-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-033-social-domain.mrs": {
+      "bytes": 5924,
+      "sha256": "fbb13346a177ace2c841421f7c6d6bcdaaee13b41413fba730416287591d1763",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-033-social-ipcidr.mrs": {
+      "bytes": 175,
+      "sha256": "6e41c4b5dbb2b75f0c04114122d5484729946dbc9fae0861cf377fef1fdf7a8c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-033-social-ipcidr-no-resolve.mrs": {
+      "bytes": 974,
+      "sha256": "3ec65a29b1bd50ba3004ab3873a5d20e2761da235e76bdde238600b096c9b1d3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-033-social-residual.yaml": {
+      "bytes": 116,
+      "sha256": "8379b58eff2a12057e4dba1409cb50e347636d393fe0d5e6a232a3168e027189",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-033-social-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-034-cn-site-domain.mrs": {
+      "bytes": 388,
+      "sha256": "4ff0a389c0b7a210ba52b308cf070fb6b26235f7408fe308e4efdd1d257fc430",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-034-cn-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-035-social-domain.mrs": {
+      "bytes": 195,
+      "sha256": "9f8741db0089b321e74901058b043fcea5deff92164e1d44a5d539ee097b82e8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-035-social-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-036-work-domain.mrs": {
+      "bytes": 883,
+      "sha256": "0ea81f6269e961b92772ad8eaf1c364677c62cb75fbd79a63171382d6c6165c4",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-036-work-ipcidr.mrs": {
+      "bytes": 105,
+      "sha256": "2ffaebe7c18da695c2f023bb67e526a7a3d5c575e5a9cc4d3a2c008067073ec1",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-036-work-residual.yaml": {
+      "bytes": 216,
+      "sha256": "4d7aecdba33fcfbfe18763f3c4127281c70a879e29ab613e71f205c9bba2b2aa",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-036-work-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-037-direct-domain.mrs": {
+      "bytes": 107,
+      "sha256": "f6ba44e92924be9c9688cec40ee3bfc2b8a4694dc2554f19c7b84677c68ef2d3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-037-direct-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-038-cnmedia-domain.mrs": {
+      "bytes": 523,
+      "sha256": "5f5329b62eb0f4f27d900f15b085e1d89dd01f21c2613835fbc76fcecf86e0b8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-038-cnmedia-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-039-tiktok-domain.mrs": {
+      "bytes": 435,
+      "sha256": "83eecbbbe547f77ac4a655735fa7edee3ba43323581e53a2b55dd8bf59f2a9f9",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-039-tiktok-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-040-youtube-domain.mrs": {
+      "bytes": 167,
+      "sha256": "fe4b56a7088b64335501ba22de50bd0f6c6b5fa1a993451e7a50c75b48004230",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-040-youtube-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-041-netflix-domain.mrs": {
+      "bytes": 292,
+      "sha256": "a6fea26ce2168e069fe865f269e86e5e031a51b5b3855fe297e1bc004a3170bd",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-041-netflix-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-041-netflix-ipcidr-no-resolve.mrs": {
+      "bytes": 4700,
+      "sha256": "0e9ea19aff4576a2a2412262db4bc99a69204d08ba6073da9694360190f4df8d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-041-netflix-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-042-disney-domain.mrs": {
+      "bytes": 2084,
+      "sha256": "72b3ee8cb0fb4e71b44187dac5c2e3313740295180883ce05adaea7faddd01ad",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-042-disney-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-042-disney-residual.yaml": {
+      "bytes": 112,
+      "sha256": "3bcbeafdac260712915f805f585b683c5dedff6cd4c56533385149cc4e5fae5c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-042-disney-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-043-hbo-max-domain.mrs": {
+      "bytes": 624,
+      "sha256": "b023f5ff275e3b420f2039a5c63977826e0208894e8434ffaaf0278fd44f83a1",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-043-hbo-max-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-043-hbo-max-residual.yaml": {
+      "bytes": 43,
+      "sha256": "fe52c969cec679ae8b875dc965a6d3c9042475408ce547cde34ed6f19a341589",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-043-hbo-max-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-044-hulu-domain.mrs": {
+      "bytes": 652,
+      "sha256": "e2dcf6e6ffcff53d9a5cb4f65df97582807f9ca4920711c43426dfca6fab7df8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-044-hulu-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-044-hulu-residual.yaml": {
+      "bytes": 42,
+      "sha256": "f69b63d808c5b3c3af39d66b9fd2d12eed910583c67be263926a5735dd14dd67",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-044-hulu-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-045-prime-video-domain.mrs": {
+      "bytes": 2012,
+      "sha256": "999d63e07283526bd70ff7fe37052630b91eb7120abd894cb6a62736809078db",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-045-prime-video-ipcidr.mrs": {
+      "bytes": 150,
+      "sha256": "93fda7e4588c7acced45eb1a51460392c18601c8a66e433480af4bd57fa43f67",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-045-prime-video-residual.yaml": {
+      "bytes": 92,
+      "sha256": "eb816e29c8fdcb9e52c5b6c7f881194ef37b25816535563f7933b579af1d3172",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-045-prime-video-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-046-music-domain.mrs": {
+      "bytes": 991,
+      "sha256": "67b25e9e41a91965e9bbe70a07cf421e4be84f43973f12d58fba21677f164a07",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-046-music-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-046-music-ipcidr.mrs": {
+      "bytes": 53,
+      "sha256": "2e3f89d2280fb965c9b3629df621ef14cc72c9a79e3c622c9436b96e33d5c384",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-046-music-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-047-stream-hk-domain.mrs": {
+      "bytes": 650,
+      "sha256": "6e16ef1c82eb16ed3926f57c4447ab3665239110abcb2aa8b3a3492fa1dd1bb2",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-047-stream-hk-ipcidr-no-resolve.mrs": {
+      "bytes": 103,
+      "sha256": "cecd59785b2c0716f0e6006f65b8da71fb631ae6a36db180b5f3dd8329a13031",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-047-stream-hk-residual.yaml": {
+      "bytes": 69,
+      "sha256": "8f2caf47b83ab47221cb89c8d95c1eeff9dd17e8a5d26946af3a9e41b928f116",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-047-stream-hk-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-048-stream-tw-domain.mrs": {
+      "bytes": 361,
+      "sha256": "4ba29ddf14ed100005eb47cc375b8b3f1febdcaa01ddf385c7cdffa079a77cb1",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-048-stream-tw-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-048-stream-tw-residual.yaml": {
+      "bytes": 93,
+      "sha256": "a34928a92501a6071e78c28a747eeb9d4e553b9e379a57fd12cdb55bfd860d5d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-048-stream-tw-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-049-stream-jpkr-domain.mrs": {
+      "bytes": 1199,
+      "sha256": "b11db1457821959064919f14a27a321bd0e2e731ec12815541c1e655ffd8537e",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-049-stream-jpkr-ipcidr.mrs": {
+      "bytes": 52,
+      "sha256": "ae64babc1a068a54eeec1b7bcff8a17816b1a0a730138ac9708b115bc9fd79c3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-049-stream-jpkr-residual.yaml": {
+      "bytes": 95,
+      "sha256": "9946911b4cda8741b45218de84568aa408480ba53f5af46c1e99e74cddeda07a",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-049-stream-jpkr-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-050-stream-eu-domain.mrs": {
+      "bytes": 881,
+      "sha256": "1884d67b14cc328822bfe3b76d7afa1a3f5cefaaf2e0c137d3471394fa5251bf",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-050-stream-eu-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-050-stream-eu-residual.yaml": {
+      "bytes": 151,
+      "sha256": "f0472300e8dacec9439716ff6b68e2a7ffe1e4d03944d32a5ba330abb6f4ab62",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-050-stream-eu-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-051-stream-other-domain.mrs": {
+      "bytes": 5191,
+      "sha256": "580c53fdf64fc1deb6a392af6c5bbe8a4a90024ae276b54fe1cae84fc93a6f54",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-051-stream-other-ipcidr.mrs": {
+      "bytes": 259,
+      "sha256": "210454849ed7abd6322db963112b53ea67e8fe6ecc9c2e656fb4f8e62f630b39",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-051-stream-other-residual.yaml": {
+      "bytes": 685,
+      "sha256": "1948535fb09eaf6c2bd0846d659ca0dc12fb27e886142b1bb197370cfc7860a0",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-051-stream-other-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-052-tools-domain.mrs": {
+      "bytes": 241,
+      "sha256": "e346075ed7193043558e6427c0f230f96a1ddcb0476be5e5d61605386b6ca894",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-052-tools-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-053-google-domain.mrs": {
+      "bytes": 2250,
+      "sha256": "6bfc98f35963085b30d5f91935b2aab86a487a630c8aa84aec68d1ed5786f8c2",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-053-google-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-054-tools-domain.mrs": {
+      "bytes": 7897,
+      "sha256": "e978d981cd8bd084e8f94f00bc3812e72a4e86458c8385f4b3d3c60cb9612b00",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-054-tools-ipcidr.mrs": {
+      "bytes": 183,
+      "sha256": "a0accedd735b7ba37cf9ce87d3e8dfdbb17ed7b4e97fd70f8c476bfa6a8dcdaa",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-054-tools-residual.yaml": {
+      "bytes": 167,
+      "sha256": "396f0fa5f57b76afca3820161bbc8254717b7bc214494abd8c141925560ba7c5",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-054-tools-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-055-microsoft-domain.mrs": {
+      "bytes": 5439,
+      "sha256": "61051f0a0e3cb0869217c1b3bb198c10cb8605814cbfd5e9df1905453eaedd83",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-055-microsoft-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-055-microsoft-residual.yaml": {
+      "bytes": 2064,
+      "sha256": "95c5f19fd798ae7a9de7894255fe0520d43ec32803b3f8fd80a44adfc7f8dde7",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-055-microsoft-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-056-apple-domain.mrs": {
+      "bytes": 15832,
+      "sha256": "dc5b03018043f11c665b3113d239476c7bf319d65d31f7c4c0c9413333b95943",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-056-apple-ipcidr.mrs": {
+      "bytes": 48,
+      "sha256": "02bbc25da607152726caee9d2b5924548b8e7859b990de6f8f1da6e01bb81b9b",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-056-apple-residual.yaml": {
+      "bytes": 803,
+      "sha256": "0dfdd02fcf898b45b41e9e852662e16b882251827b65dcf6a4c0e3e54cadef18",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-056-apple-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-057-download-domain.mrs": {
+      "bytes": 10595,
+      "sha256": "3cdb1bda7725f6c50e6bab1e1dc4bfb360e98c26c3539dc1e37aaf84b1e8590f",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-057-download-ipcidr.mrs": {
+      "bytes": 200,
+      "sha256": "6e90d81a69b25471b8d5fe0ab8182c7f626982b72bcc0d864aceaaf53028688f",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-057-download-residual.yaml": {
+      "bytes": 1031,
+      "sha256": "06e019b5bd8b2cd8bfd170e5b977bb81ece436a880f823a70b40b891aae2be9b",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-057-download-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-058-tracker-domain.mrs": {
+      "bytes": 2655,
+      "sha256": "b587c0b990dbc4dd408aa21430e0648153a422dc3dd389ecff499afc8adfed65",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-058-tracker-ipcidr.mrs": {
+      "bytes": 277,
+      "sha256": "d3b192676ae74c57f76f345e77599f0cfeaac349891440a6c2d8d5451bb17b93",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-058-tracker-residual.yaml": {
+      "bytes": 125,
+      "sha256": "9d738a139591f922187e6bb71dcb717d27722da229f6265de5529b9f354faca9",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-058-tracker-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-059-gfw-domain.mrs": {
+      "bytes": 43393,
+      "sha256": "163f220a013edf873c77090f60c39284ef11b59ad8c4cc257f8645fb0ab2d4b8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-059-gfw-ipcidr-no-resolve.mrs": {
+      "bytes": 335,
+      "sha256": "6c56081a25471ca69aba5d041428205c328c2915c6f8c6cbcf2cdf27996bc190",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-059-gfw-residual.yaml": {
+      "bytes": 467,
+      "sha256": "c41d7bdb3854089561c6195ac2d026168296ce31a39f30004bb769808e74f6d1",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-059-gfw-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-060-game-cn-domain.mrs": {
+      "bytes": 961,
+      "sha256": "7f20835aada070a1072041e6cea1609345fcf1b8d409060f599683b691e24f1d",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-060-game-cn-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-061-game-intl-domain.mrs": {
+      "bytes": 11077,
+      "sha256": "f632e537b6db5b6c72b31003591044eb1b9b5524caa7a587de2514285923b6ba",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-061-game-intl-ipcidr.mrs": {
+      "bytes": 241,
+      "sha256": "2f8e1f0e4b80e8b31e04e8a7c26474dcf8166c5380f237e8a9d04fba83048127",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-061-game-intl-residual.yaml": {
+      "bytes": 114,
+      "sha256": "eb61be960f277b345cd6c4cb95c843cca1e5f63da86fa7f74e14a1fee488594c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-061-game-intl-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-062-intl-site-domain.mrs": {
+      "bytes": 3700,
+      "sha256": "3dcbc851ca987a03dc0826d4d195e0fdf327ec3765d2bbce2ebb04cbec2f74a0",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-062-intl-site-ipcidr.mrs": {
+      "bytes": 303,
+      "sha256": "2f267a91b5e223021829a316e53bc8e08fde7d3c42e590b132bf9750de03b7fc",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-062-intl-site-residual.yaml": {
+      "bytes": 3754,
+      "sha256": "bffeed38871996adc4c99410c4bd9968f8288ed08221234416581d8d3d41c9c2",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-062-intl-site-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-063-payments-domain.mrs": {
+      "bytes": 174,
+      "sha256": "d95850db36b3d7fb3ba5cae8aaf5dd80a760c74b122885e23f7a3dc84febc44c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-063-payments-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-064-cnmedia-domain.mrs": {
+      "bytes": 21431,
+      "sha256": "3c38bcf8de014376e356ca1f2acf8c2d07ff6c71e6817ea5dd19a08f8af1d1f1",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-064-cnmedia-ipcidr.mrs": {
+      "bytes": 2804,
+      "sha256": "e39363563f64867cd4c8f6049ce176c54e1ba7949df6b26569be9ed185dbfca9",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-064-cnmedia-residual.yaml": {
+      "bytes": 379,
+      "sha256": "0eeca768ccd49568a5bf01115dff4d02aedb02a2c554ce0c3261dc9b7f8e24e9",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-064-cnmedia-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-065-cn-site-domain.mrs": {
+      "bytes": 556097,
+      "sha256": "72792d7e7bc2d758bc010b6cfebf4e2eea951c6d81fa87bc53d0296680322bf8",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-065-cn-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-065-cn-site-ipcidr-no-resolve.mrs": {
+      "bytes": 37675,
+      "sha256": "d8573e8435f16116a4ba7ef7bfe914d9615e43a812eb2a348694ef21b20e0ed3",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-065-cn-site-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-066-direct-domain.mrs": {
+      "bytes": 50,
+      "sha256": "1730e75a1f37d0c9e55b0e25c02c0e7b7e3a61ef627a13013f41dd4290604523",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-066-direct-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-067-cn-site-domain.mrs": {
+      "bytes": 108,
+      "sha256": "87bd877cb0ced158261691983a07e260dd093f4887ba85010a7176caed019d2a",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-067-cn-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-067-cn-site-residual.yaml": {
+      "bytes": 72,
+      "sha256": "6133b8fe15b7d219c7f66daf70bec0913d002bfbb4a82ff3202e2acdaf359f61",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-067-cn-site-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-068-intl-site-domain.mrs": {
+      "bytes": 91654,
+      "sha256": "b167aa2a6404c3b12c27c028cb5200523871bafab1f46df0119d64d027fbf256",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-domain.mrs?scki=v6.0.15"
+    },
+    "scki-fused-068-intl-site-ipcidr.mrs": {
+      "bytes": 328,
+      "sha256": "dff1642ec54908d9f871ba758dbac92bfe9e16b1d388b4be87d462048e6db293",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-ipcidr.mrs?scki=v6.0.15"
+    },
+    "scki-fused-068-intl-site-ipcidr-no-resolve.mrs": {
+      "bytes": 6021,
+      "sha256": "65c286093cc158ce019741a3fc74d9e61c509f7241cf0427273261c226969bd7",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-ipcidr-no-resolve.mrs?scki=v6.0.15"
+    },
+    "scki-fused-068-intl-site-residual.yaml": {
+      "bytes": 6465,
+      "sha256": "f38987d2c019349366104b6ab99fea342fe5e098bb8ff0361566d85a93a1f5bf",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-068-intl-site-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-069-im-residual.yaml": {
+      "bytes": 41,
+      "sha256": "7b60f761ec9ba8a876183c2117fbde4f071b769c589dcf0fae0487e12fa8125c",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-069-im-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-070-netflix-residual.yaml": {
+      "bytes": 40,
+      "sha256": "575f04da869bb7bc37960506ba83c640e86659b54a700774d03e1222b23076bd",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-070-netflix-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-071-social-residual.yaml": {
+      "bytes": 72,
+      "sha256": "9cc17ddb5c9018583ea5113e7a0404050a47371ad1e7517590a8384adb4fb24f",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-071-social-residual.yaml?scki=v6.0.15"
+    },
+    "scki-fused-072-google-residual.yaml": {
+      "bytes": 39,
+      "sha256": "fa7500fcb0cc80a55ed312e90fa091b4a49616fc92cfe917bdae34bde4b1b9b6",
+      "source_url": "https://fastly.jsdelivr.net/gh/IvanSolis1989/Smart-Config-Kit@main/rulesets/generated/fused/mihomo/scki-fused-072-google-residual.yaml?scki=v6.0.15"
+    },
+    "gemini-bm7.yaml": {
+      "bytes": 666,
+      "sha256": "d76e9822f72a69860b7d3086db61bbbef53014c57e3dc12472150c62a4f6434b",
+      "source_url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml"
+    },
+    "gemini-acc.yaml": {
+      "bytes": 2531,
+      "sha256": "f8f4fa703795fbe78d19cc7db531193a79c18ba7f0fc5ca717f7eed97ac19136",
+      "source_url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/main/Gemini/Gemini.yaml"
+    }
+  }
+}

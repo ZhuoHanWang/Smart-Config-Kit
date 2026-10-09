@@ -3,6 +3,12 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.6 (2026-10-09)
+
+- PERSONAL-SNAPSHOT：FlClash 的 132 个融合 provider 和两份 Gemini provider 固定指向个人 Fork 的 `v6.0.15-fork.1` 文件快照。
+- REPRODUCE：新增快照 manifest / SHA-256 合同校验，便于上游合并后恢复当前规则，或复制已编译的新规则版本。
+- VERIFY：Clash Party 与 FlClash 三个正式脚本同步同一规则内容；分组、路由顺序、DNS 和个人节点逻辑不变。
+
 ## v6.0.15-flclash-ai-gemini.5 (2026-10-09)
 
 - FIX-JMS-AI：默认 Sub-Store 组合订阅包含 JMS 节点但没有专属组时，自动生成 `AI专属` url-test 组；AI/Gemini 首选、区域隔离与其他业务默认沿用现有逻辑。

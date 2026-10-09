@@ -1,5 +1,7 @@
 # Mihomo (MetaCubeX) 官方配置文档参考
 
+> 规则快照复核（2026-10-09）：在线读取 [rule-providers](https://wiki.metacubex.one/config/rule-providers/)，Last-Modified 2026-10-03。`type: http` 的 `url` 可指向个人 Fork 文件，`path` 为本地缓存路径，`interval` 单位秒，`proxy` 指定下载出站；`mrs` 仍仅支持 `domain` / `ipcidr`。本次只更换三份 JS 的 URL/缓存路径，保留 behavior/format/interval/proxy。
+
 > 复核于 2026-10-09：在线读取 [代理组通用字段](https://wiki.metacubex.one/config/proxy-groups/) 与 [url-test](https://wiki.metacubex.one/config/proxy-groups/url-test/)，页面 Last-Modified 为 2026-10-03，晚于字段初次核对日期。本次可选 JMS 池在 JS 中展开为精确 `proxies`，再复用现有 Smart/url-test 构造器；未新增内核字段或改变最低版本要求。
 
 > Clash Party YAML 覆写复核（2026-10-08）：官方 [YAML 覆写文档](https://clashparty.org/docs/guide/override/yaml) 说明默认对数组直接覆盖；`+key` 前置、`key+` 追加，普通 `proxies` / `proxy-groups` 会替换数组。私有节点必须使用 `+proxies` 与 `+proxy-groups`，否则订阅节点/由 JS 生成的策略组可能丢失，保留的规则就会引用不存在的策略组。

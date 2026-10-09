@@ -5,6 +5,18 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.22 / v6.0.15-normal.23 (2026-10-09)
+
+- PERSONAL-SNAPSHOT：Clash Party Smart / Normal 使用个人 Fork 的 `v6.0.15-fork.1` 快照，固定 132 个融合 provider 与两份 Gemini 规则；上游日后重排/删除融合文件不再影响当前配置。
+- REPRODUCE：新增 `tools/use-personal-rule-snapshot.js`，按 manifest 校验 134 个文件的 SHA-256，并在上游合并后恢复或有意创建新快照。
+- FLOW：个人 Fork 跳过原作者专用的定时全端生成工作流；FlClash 与 Clash Party CI 检查 JS 和快照引用一致。
+- DOCS：更新个人 Fork 同步、升级、发布说明；无需自行编译上游规则集。
+
+### v6.0.15-ai-gemini-local.1（本地旧变体）
+
+- 同步到当前 132 个融合 provider / 151 条基础规则和个人 Fork 快照，修复旧文件名导致的规则下载失败。
+- 台湾流媒体组名补齐 `🇹🇼`，与当前融合 rules 的目标一致；保留原本 Gemini / AI 分组定制。文件继续被 Git 忽略。
+
 ## v6.0.15-dns.21 / v6.0.15-normal.22 (2026-10-09)
 
 - FIX-JMS-AI：Sub-Store 默认模板只聚合节点、没有 `AI专属` 组时，Smart/Normal 自动从预检后的有效代理中识别独立 `JMS` 名称标识并生成专属组；例如四个 `JMS LA c33s2`～`c33s5`。

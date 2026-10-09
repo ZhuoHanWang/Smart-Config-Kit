@@ -5,8 +5,8 @@
 > 目录简介：这里是 Mihomo Smart/Normal 覆写脚本的事实基线，面向 Clash Party、Clash Verge Rev、Mihomo Party 等桌面客户端。
 >
 > 覆写脚本：**两份二选一**，规则 100% 等价，仅 24 区域组（12 全部 + 12 家宽）的内核选路算法不同
-> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.21**，2026-10-09）— Smart 内核 + LightGBM ML 评估
-> - `ClashParty(mihomo).js`（**v6.0.15-normal.22**，2026-10-09）— 普通内核 url-test 延迟选路
+> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.22**，2026-10-09）— Smart 内核 + LightGBM ML 评估
+> - `ClashParty(mihomo).js`（**v6.0.15-normal.23**，2026-10-09）— 普通内核 url-test 延迟选路
 >
 > UI 补充配置：已整合到本文「四、粘贴 UI 补充配置」章节
 > 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 34 业务策略组 + **134 rule-providers / 173 rules**（含 Gemini overlay）；`AI专属` 可由订阅提供或自动识别 JMS 节点生成
@@ -29,6 +29,8 @@
 > JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，组加入所有业务候选；AI/Gemini 默认优先 `AI专属`，国内业务默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
 > 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
+
+> 规则文件：Smart/Normal 与 FlClash 的 134 个 provider 共用个人 Fork 的 [`v6.0.15-fork.1` 快照](./rulesets/v6.0.15-fork.1/manifest.json)，包含已编译的融合 `.mrs` / YAML 与两份 Gemini YAML。规则每 24 小时尝试下载，但副本保持不变时内容不会跟随源作者变化。发布时 JS 与快照目录必须一起推送；上游合并后恢复当前快照或有意升级，见 [Fork 指南](../FORKING.md#日常同步)。本地旧 `ai-gemini.js` 需重新粘贴修复后的本地全文，不在公开仓库发布。
 
 <sub>💖 [支持本项目](../docs/donate.md) · ⭐ [Star](https://github.com/ivansolis1989/Smart-Config-Kit) · 🐛 [Issue](https://github.com/ivansolis1989/Smart-Config-Kit/issues)</sub>
 

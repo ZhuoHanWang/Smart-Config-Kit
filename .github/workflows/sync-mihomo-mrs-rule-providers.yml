@@ -18,6 +18,8 @@ concurrency:
 
 jobs:
   sync:
+    # Personal forks publish reviewed JS + rule snapshots instead of rebuilding on a timer.
+    if: github.repository == 'IvanSolis1989/Smart-Config-Kit'
     runs-on: ubuntu-latest
     timeout-minutes: 60
 

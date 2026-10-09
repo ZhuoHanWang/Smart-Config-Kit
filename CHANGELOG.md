@@ -4,6 +4,12 @@
 > 主版本号由 `rulesets/source/routing-graph.js` 的 `SOURCE_GRAPH_VERSION` 与客户端产物版本共同维护；规则权威源是 `rulesets/source/routing-graph.js`。
 > 覆盖 14 个客户端形态的等价实现：Clash Party JS / CMFA / Stash / OpenClash(Normal+Smart) / Shadowrocket / Surge / Loon / Quantumult X / SingBox / Egern / v2rayN / Passwall / Passwall2 / FlClash。
 
+## v6.0.15-personal.4 — Clash Party / FlClash 个人规则快照 (2026-10-09)
+
+- 将三个正式 JS 的 132 个融合规则文件与 Gemini 上游文件复制到个人 Fork 的不可变版本目录，避免规则重排和 CDN 上游变更影响当前路由。
+- 增加快照恢复 / 升级工具、SHA-256 校验和 Fork 工作流保护；保留旧 Gemini AI 排除变体为本地私有脚本并修正台湾流媒体组名。
+- 详见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 与 [Fork 指南](./FORKING.md)。
+
 ---
 
 ## v6.0.15-personal.3 — 聚合 JMS 自动生成 AI专属 (2026-10-09)
