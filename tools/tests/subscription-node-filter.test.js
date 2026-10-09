@@ -300,7 +300,7 @@ test('FlClash replaces malformed rule-provider container before fused output', (
     const serialized = JSON.parse(JSON.stringify(input));
     assert.equal(Array.isArray(serialized['rule-providers']), false);
     assert.equal(typeof serialized['rule-providers'], 'object');
-    assert.equal(Object.keys(serialized['rule-providers']).length, 132);
-    assert.equal(serialized.rules.length, 146 + getQuicRules(getTrafficOptions().quicPolicy).length);
+    assert.equal(Object.keys(serialized['rule-providers']).length, 134);
+    assert.equal(serialized.rules.length, 168 + getQuicRules(getTrafficOptions().quicPolicy).length);
   }
 });

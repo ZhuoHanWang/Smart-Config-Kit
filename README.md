@@ -4,7 +4,7 @@
 >
 > - 🧭 同一 source graph 经 `MRS -> fused -> 原生产物` 生成各端配置，统一规则顺序与分流目标。
 > - 🎯 国内策略优先，关键域名、API 和本地工具按明确策略分流；各内核使用适合自身能力的规则格式。
-> - 🧩 22 个区域组 + 33 个业务组，提供 Smart / Normal 两种内核。
+> - 🧩 24 个区域组 + 最多 2 个 AI 排除组 + 34 个业务组，提供 Smart / Normal 两种内核；JMS AI 节点由 Sub-Store 独立维护。
 > - 🧹 订阅覆写入口提供节点预检、inline payload 展平和可选倍率上限；具名直连依赖保留并排除测速，详见 [节点筛选指南](./docs/subscription-node-filter.md)。
 > - ⚙️ Mihomo/Stash 默认测速组 300 秒并启用 `lazy`，可选 900 秒；海外 UDP/443 的 QUIC 策略也可切换。命令、平台差异与验证方法见[测速与 QUIC 策略选项](./docs/traffic-options.md)。
 > - 🔎 设计依据见 [GitHub 分流脚本横向研究](./docs/research/2026-09-30-github-routing-script-comparison.md)，包含按 star 排序的搜索快照、源码对比和采用边界。
@@ -285,9 +285,9 @@ Sub-Store 是客户端导入前的订阅聚合层，**不是第 15 个正式客�
 
 ## 📌 适用人群
 
-### 个人 Fork、jsDelivr 与私有节点
+### 个人 Fork、jsDelivr 与 JMS AI 节点
 
-需要保留个人 JS 修改并持续获取源作者更新时，使用个人 Fork 作为 `origin`，将源作者仓库配置为 `upstream`；FlClash 的发布地址使用个人 Fork 的 jsDelivr URL。实际节点不要写进公开 JS，复制 `Clash Party/private-nodes.clash-party.example.yaml`（Clash Party 用户）或 `FlClash/private-nodes.flclash.example.yaml`（FlClash 用户）为本地 `private-nodes.yaml`，按对应平台的 YAML 覆写 / Sub-Store 合并流程导入。完整的 remote 配置、同步命令和冲突处理见 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)。
+需要保留个人 JS 修改并持续获取源作者更新时，使用个人 Fork 作为 `origin`，将源作者仓库配置为 `upstream`；FlClash 的发布地址使用个人 Fork 的 jsDelivr URL。JMS 节点与 `AI专属` 组由自己的 Sub-Store Source / Collection 管理，不再写进公开 JS 或 YAML；将仓库模板导入 Cloudflare Sub-Store 并绑定 Collection 即可。完整步骤见 [Sub-Store JMS 模板说明](SubStore/README.md#cloudflare-sub-store-jms-ai-专属组) 与 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)。
 
 - 想“一套配置跑多端”的用户；
 - 不想手工维护大量策略组但又追求精细分流的用户；

@@ -7,7 +7,7 @@
 > 覆写脚本：`FlClash(mihomo).js`
 > 适用客户端：**FlClash**（Android / Windows / macOS / Linux）
 > 内核要求：FlClash >= **v0.8.85**
-> 当前版本：**v6.0.15-flclash-ai-gemini.1**（22 url-test 区域组 + 33 业务组 + 基线 132 providers / 151 rules；Gemini overlay 额外 2 providers / 22 rules；私有节点 YAML 可选；变更历史见 `FlClash/CHANGELOG.md`）
+> 当前版本：**v6.0.15-flclash-ai-gemini.4**（24 个区域组 + 最多 2 个 AI 排除组 + 34 业务组 + 134 providers / 173 rules；JMS `AI专属` 组由 Sub-Store 可选提供；变更历史见 `FlClash/CHANGELOG.md`）
 >
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 等小写 ISO 两位码加编号会自动进入区域组；不对普通小写词做宽泛国家码匹配。
 
@@ -46,19 +46,15 @@
 
 > 如果 FlClash 弹出 `SyntaxError: unexpected token '<'`，说明当前导入内容是 HTML 页面，不是 JS 脚本。删除这个覆写脚本，改用上面的 Raw / jsdelivr 链接重新创建。
 
-### 可选：单独导入私有节点 YAML
+### 可选：JMS 节点与 AI专属组
 
-如果需要把自己的 VLESS / Trojan / VMess 节点用于 `AI专属`，请复制仓库中的
-[`FlClash/private-nodes.flclash.example.yaml`](private-nodes.flclash.example.yaml) 为本地 `private-nodes.yaml`，
-只在其中保存节点凭据。然后在 Sub-Store 中创建"组合订阅"，将机场订阅和此文件分别作为两个来源，
-输出一条 `Clash.Meta(mihomo)` URL；FlClash 以该组合 URL 作为 Profile，再关联 JS 覆写脚本。
+把 JMS 原生订阅添加为 Cloudflare Sub-Store 的 Source，并纳入正在使用的 Collection。随后将仓库模板
+[`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 导入 Worker 的 `/api/templates`，
+再把模板绑定到该 Collection。完整的 API 命令、Token 边界和 JMS 名称匹配条件见
+[Sub-Store JMS 模板说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
-FlClash 没有 Clash Party 的 `+key` YAML 覆写语法。此文件使用标准 `proxies:` / `proxy-groups:` 键；
-不要从 Clash Party 模板复制 `+proxies` / `+proxy-groups` 到 FlClash。JS 会在 Profile 加载后从
-`__SCKI_PRIVATE_AI__` 标记组读取节点名，创建 `AI专属` url-test 组，并在完成后移除标记组。
-没有私有 YAML 时，公共订阅仍按原有规则运行。
-
-`private-nodes.yaml` 不应上传到 GitHub、Issue 或 jsDelivr；其中的 UUID、密码、服务器地址和 Reality 密钥都属于凭据。
+生成的 `AI专属` 组由 JS 转换为 FlClash 的 `url-test` 组，并加入全部业务组；AI/Gemini 默认优先它，
+国内业务仍默认 `DIRECT`。若订阅没有该组或 JMS 节点，脚本继续按公共订阅生成，不需要单独的 YAML 覆写。
 
 ### 第 2 步：关联到订阅
 
@@ -72,8 +68,8 @@ FlClash 没有 Clash Party 的 `+key` YAML 覆写语法。此文件使用标准 
 ### 验证
 
 点「代理」标签，应看到：
-- **最多 22 个区域组**（11 全部 + 11 家宽；空区域自动跳过）：🌍 全球节点、🇭🇰 香港节点、🇸🇬 狮城节点、🌏 其他节点……
-- **33 业务组**：🤖 AI 服务、🎵 TikTok、🎥 Netflix、📱 社交媒体……
+- **24 个区域组 + 最多 2 个 AI 排除组**，空区域自动跳过：🌍 全球节点、🇭🇰 香港节点、🇸🇬 狮城节点、🌏 其他节点……
+- **34 业务组**：🤖 AI 服务、✨ Gemini、🎵 TikTok、🎥 Netflix、📱 社交媒体……
 - 额外检查：按根 README 的 [导入后 60 秒验证清单](../README.md#-导入后-60-秒验证清单) 确认规则下载、GEOSITE 命中与 anti-ad 误伤白名单。
 
 ---
@@ -125,7 +121,7 @@ FlClash 在脚本运行后还会合并应用层配置。开启 `overrideDns` 时
 
 - 顶层 `ipv6: false`；`dns.enable: true`；`dns.ipv6: false`；`dns.prefer-h3: false`。
 - `dns.respect-rules: true`，且 `proxy-server-nameserver` 非空。
-- `nameserver-policy` 同时包含 `geosite:cn` 与 `geosite:geolocation-!cn`；有私有节点时保留脚本生成的精确 `proxy-server-nameserver-policy`。
+- `nameserver-policy` 同时包含 `geosite:cn` 与 `geosite:geolocation-!cn`；存在需要适配 DNS 的订阅节点时，保留脚本生成的精确 `proxy-server-nameserver-policy`。
 - `direct-nameserver` 保持国内 DoH；不要为了 DNS 检测页面把国内 APP 的解析全部搬到海外。
 - `nameserver` 不含应用层追加的 `system://`；顶层 hosts 的同名 UI 覆写也应检查，不能只看 DNS 开关。
 

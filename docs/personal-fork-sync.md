@@ -40,7 +40,7 @@ git stash pop
 ```bash
 node tools/validate-js-overwrites.js --target flclash
 git add .
-git commit -m "feat(private-nodes): load local YAML nodes"
+git commit -m "feat(subscription): add Sub-Store JMS AI group"
 git push -u origin main
 ```
 
@@ -66,6 +66,6 @@ https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28
 
 规则集 URL 仍指向源作者仓库，这是有意设计的：源作者更新融合规则后，你的 JS 不需要复制整套生成产物。需要固定版本时，把 `@main` 改为你的 release tag，例如 `@personal-v1`。
 
-## 私有节点
+## JMS AI 节点
 
-实际节点保存在被 Git 忽略的 `Clash Party/private-nodes.yaml`，示例在 `Clash Party/private-nodes.clash-party.example.yaml`。导入 YAML 覆写后再启用 JS；JS 通过 `__SCKI_PRIVATE_AI__` 组读取节点名称，不读取任何远程文件，也不在公开 JS 中保存凭据。FlClash 用户参考 `FlClash/private-nodes.flclash.example.yaml`，通过 Sub-Store 组合订阅完成合并。
+实际 JMS 订阅 URL、节点参数与凭据保存在你自己的 Sub-Store Source / Collection 中。把 JMS Source 加入组合 Collection，将 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 导入 Cloudflare Worker 的 `/api/templates` 并绑定 Collection。模板按独立 `JMS` 名称标识生成 `AI专属` 代理组；Clash Party Smart/Normal 与 FlClash JS 读取该组并统一完成隔离与业务组接入，不再依赖 YAML 扩展或硬编码节点。Admin token 只用于管理 API，客户端下载链接必须使用 public download token。

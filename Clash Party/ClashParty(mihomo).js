@@ -1,6 +1,6 @@
 // Clash 覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-normal.18 (2026-10-08)
-// 架构：24 url-test 区域组 + 2 AI排除港台澳俄组 + 34 业务策略组 + 134 providers
+// 版本：v6.0.15-normal.21 (2026-10-09)
+// 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属订阅组 + 134 providers
 // 规则源：rulesets/source/routing-graph.js v6.0.15（与 Smart 版规则等价，仅区域组从 smart 改为 url-test）
 // 适用：Mihomo / Clash.Meta 稳定版内核、不支持 smart + LightGBM 的分支；也适用于想完全关闭 ML 评估的用户
 // 变更历史：见 `Clash Party/CHANGELOG.md`
@@ -9,10 +9,10 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-normal.18'
+const VERSION = 'v6.0.15-normal.21'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
-// 不从机场订阅读取；三档均不会改变 55 组、规则或仓库 DNS 基线。
+// 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
 const SCKI_SUBSCRIPTION_ADAPTER_PROFILE = 'adaptive'
 // 仅本地可调；null 关闭倍率筛选，正数才按“倍率 > 阈值”剔除。
 const SCKI_MAX_NODE_MULTIPLIER = null
@@ -391,7 +391,7 @@ const SMART_AI = {
   GLOBAL_HOME: '🏡 全球家宽（AI排除港台澳俄）',
 }
 
-const SMART_PRIVATE_AI = { NAME: 'AI专属' }
+const SUBSCRIPTION_AI_GROUP_NAME = 'AI专属'
 
 const BIZ = {
   AI: '🤖 AI 服务', GEMINI: '✨ Gemini 服务', CRYPTO: '💰 加密货币', PAYMENTS: '🏦 金融支付',
@@ -556,36 +556,22 @@ function applyGeminiOverlay(config) {
   config.rules.splice.apply(config.rules, [0, 0].concat(rules))
 }
 
-// Optional private nodes are supplied by a separate YAML override. The marker
-// group is read before subscription groups are cleared and never survives output.
-const PRIVATE_AI_GROUP_NAME = '__SCKI_PRIVATE_AI__'
-
-function collectPrivateAiNodeNames(config) {
+// Sub-Store expands this group's filter to exact node names before JS runs.
+function collectSubscriptionAiGroup(config) {
   var proxies = Array.isArray(config.proxies) ? config.proxies : []
-  var proxyNames = new Set(proxies.map(function(p) { return p && typeof p.name === 'string' ? p.name : '' }))
+  var proxyNames = new Set(proxies.filter(function(p) { return SckiSubscriptionNodeFilter.isSelectableProxy(p) }).map(function(p) { return p.name }))
   var groups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : []
-  var marker = groups.find(function(g) { return g && g.name === PRIVATE_AI_GROUP_NAME })
-  var requested = marker && Array.isArray(marker.proxies) ? marker.proxies : []
-  // Reprocessing a generated config must preserve private-node isolation, but
-  // never trust an arbitrary subscription group that happens to be named AI.
-  if (!marker) {
-    var generatedAi = groups.find(function(g) { return g && g.name === BIZ.AI })
-    var members = generatedAi && Array.isArray(generatedAi.proxies) ? generatedAi.proxies : []
-    var publicMembers = members.filter(function(name) { return Object.values(SMART).indexOf(name) !== -1 || name === 'DIRECT' })
-    var expectedPublicMembers = buildHomeFirstProxies(REGION_ORDER).filter(function(name) { return publicMembers.indexOf(name) !== -1 })
-    var generatedShape = publicMembers.length > 0
-      && publicMembers.indexOf('DIRECT') !== -1
-      && publicMembers.length === expectedPublicMembers.length
-      && publicMembers.every(function(name, index) { return name === expectedPublicMembers[index] })
-    if (generatedShape) requested = members
-  }
+  var matches = groups.filter(function(g) { return g && g.name === SUBSCRIPTION_AI_GROUP_NAME })
+  if (matches.length !== 1) return null
+  var source = matches[0]
+  if (['select', 'smart', 'url-test', 'fallback'].indexOf(source.type) === -1 || !Array.isArray(source.proxies)) return null
   var names = []
   var seen = new Set()
-  for (var i = 0; i < requested.length; i++) {
-    var name = typeof requested[i] === 'string' ? requested[i] : ''
+  for (var i = 0; i < source.proxies.length; i++) {
+    var name = typeof source.proxies[i] === 'string' ? source.proxies[i] : ''
     if (name && proxyNames.has(name) && !seen.has(name)) { names.push(name); seen.add(name) }
   }
-  return names
+  return names.length ? { name: source.name, type: source.type, proxies: names } : null
 }
 
 // ================================================================
@@ -600,25 +586,21 @@ function upsertUrlTestGroup(config, name, proxies) {
 }
 
 // ================================================================
-//  模块 F：业务策略组注入（33组）
+//  模块 F：业务策略组注入（34组）
 // ================================================================
 
-function injectBusinessGroups(config, activeSmartNames, privateAiNodeNames) {
+function injectBusinessGroups(config, activeSmartNames) {
   function filterActive(arr) {
     if (!activeSmartNames) return arr.slice()
     return arr.filter(function(p) { return activeSmartNames.has(p) })
   }
   var aiProxies = filterActive(applyAiGlobalPreference(buildHomeFirstProxies(REGION_ORDER), activeSmartNames))
   var geminiProxies = aiProxies.slice()
-  ;(Array.isArray(privateAiNodeNames) ? privateAiNodeNames : []).slice().reverse().forEach(function(name) {
-    if (aiProxies.indexOf(name) === -1) aiProxies.unshift(name)
-    if (geminiProxies.indexOf(name) === -1) geminiProxies.unshift(name)
-  })
-  // 私有 AI 的 url-test/smart 组作为候选（用户可切到该组让其自动测速择路）
-  if (activeSmartNames && activeSmartNames.has(SMART_PRIVATE_AI.NAME)) {
-    if (aiProxies.indexOf(SMART_PRIVATE_AI.NAME) === -1) aiProxies.push(SMART_PRIVATE_AI.NAME)
-    if (geminiProxies.indexOf(SMART_PRIVATE_AI.NAME) === -1) geminiProxies.push(SMART_PRIVATE_AI.NAME)
-  }
+  var cryptoProxies = filterActive(buildRegionPreferredProxies('HK'))
+  var paymentProxies = filterActive(buildDirectFirstProxies())
+  var imProxies = filterActive(buildRegionPreferredProxies('HK'))
+  var socialProxies = filterActive(buildRegionPreferredProxies('JPKR'))
+  var workProxies = filterActive(buildRegionPreferredProxies('JPKR'))
   var standardProxies = filterActive(buildStandardProxies())
   var streamUsProxies = filterActive(buildRegionPreferredProxies('US'))
   var streamHkProxies = filterActive(buildRegionPreferredProxies('HK'))
@@ -628,30 +610,31 @@ function injectBusinessGroups(config, activeSmartNames, privateAiNodeNames) {
   var directFirstProxies = filterActive(buildDirectFirstProxies())
   var trackerProxies = filterActive(buildTrackerProxies())
   var seaProxies = filterActive(buildSeaProxies())
+  var intlGameProxies = filterActive(buildRegionPreferredProxies('JPKR'))
   var groups = [
     { name: BIZ.AI, type: 'select', proxies: aiProxies.slice() },
     { name: BIZ.GEMINI, type: 'select', proxies: geminiProxies.slice() },
-    { name: BIZ.CRYPTO, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.PAYMENTS, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.IM, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.SOCIAL, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.WORK, type: 'select', proxies: standardProxies.slice() },
+    { name: BIZ.CRYPTO, type: 'select', proxies: cryptoProxies.slice() },
+    { name: BIZ.PAYMENTS, type: 'select', proxies: paymentProxies.slice() },
+    { name: BIZ.IM, type: 'select', proxies: imProxies.slice() },
+    { name: BIZ.SOCIAL, type: 'select', proxies: socialProxies.slice() },
+    { name: BIZ.WORK, type: 'select', proxies: workProxies.slice() },
     { name: BIZ.CNMEDIA, type: 'select', proxies: directFirstProxies.slice() },
-    { name: BIZ.TOK, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.NFLX, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.DSNP, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.HBO, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.HULU, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.PRIME, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.YT, type: 'select', proxies: standardProxies.slice() },
-    { name: BIZ.MUSIC, type: 'select', proxies: standardProxies.slice() },
+    { name: BIZ.TOK, type: 'select', proxies: seaProxies.slice() },
+    { name: BIZ.NFLX, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.DSNP, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.HBO, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.HULU, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.PRIME, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.YT, type: 'select', proxies: streamUsProxies.slice() },
+    { name: BIZ.MUSIC, type: 'select', proxies: streamUsProxies.slice() },
     { name: BIZ.STREAM_HK, type: 'select', proxies: streamHkProxies.slice() },
     { name: BIZ.STREAM_TW, type: 'select', proxies: streamTwProxies.slice() },
     { name: BIZ.STREAM_JP, type: 'select', proxies: streamJpProxies.slice() },
     { name: BIZ.STREAM_EU, type: 'select', proxies: streamEuProxies.slice() },
     { name: BIZ.STREAM_OTHER, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.GAME_CN, type: 'select', proxies: directFirstProxies.slice() },
-    { name: BIZ.GAME_INTL, type: 'select', proxies: standardProxies.slice() },
+    { name: BIZ.GAME_INTL, type: 'select', proxies: intlGameProxies.slice() },
     { name: BIZ.GOOGLE, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.TOOLS, type: 'select', proxies: standardProxies.slice() },
     { name: BIZ.MS, type: 'select', proxies: standardProxies.slice() },
@@ -667,6 +650,10 @@ function injectBusinessGroups(config, activeSmartNames, privateAiNodeNames) {
   var _smartNameSet = new Set(Object.values(SMART))
   var firstSmartIdx = config['proxy-groups'].findIndex(function(g) { return g && _smartNameSet.has(g.name) })
   groups.forEach(function(group, i) {
+    if (activeSmartNames && activeSmartNames.has(SUBSCRIPTION_AI_GROUP_NAME)) {
+      if (group.name === BIZ.AI || group.name === BIZ.GEMINI) group.proxies.unshift(SUBSCRIPTION_AI_GROUP_NAME)
+      else group.proxies.push(SUBSCRIPTION_AI_GROUP_NAME)
+    }
     var existIdx = config['proxy-groups'].findIndex(function(g) { return g && g.name === group.name })
     if (existIdx !== -1) { config['proxy-groups'][existIdx] = group }
     else if (firstSmartIdx !== -1) { config['proxy-groups'].splice(firstSmartIdx + i, 0, group) }
@@ -1425,16 +1412,17 @@ function sanitizeFakeIpFilterEntries(list) {
 //  模块 J：清理订阅自带的旧组和旧规则
 // ================================================================
 
-function cleanupSubscription(config) {
+function cleanupSubscription(config, subscriptionAiGroup) {
   // v5.2.6-normal.1 FIX#26-P0: 与 Smart 版保持对齐 —— 清空订阅自带的所有 proxy-groups
   //   原 4 关键词黑名单无法清除机场模板提供的地区组 / 流媒体组，导致代理组 60+。
-  //   本脚本 46 组（18 url-test + 28 select）是唯一权威来源。
+  //   本脚本生成的区域、AI 与业务组是唯一权威来源。
   var removed = (config['proxy-groups'] || []).length
   if (Array.isArray(config['proxy-groups'])) {
     config['proxy-groups'].splice(0, config['proxy-groups'].length)
   } else {
     config['proxy-groups'] = []
   }
+  if (subscriptionAiGroup) config['proxy-groups'].push(subscriptionAiGroup)
   if (removed > 0) console.log(`[${VERSION}] Removed ${removed} subscription proxy-groups`)
   if (Array.isArray(config.rules)) config.rules.splice(0, config.rules.length)
   else config.rules = []
@@ -1485,7 +1473,7 @@ function injectSmartFingerprint(config) {
 function sortProxyGroups(config) {
   const bizGroups = [], smartGroups = [], otherGroups = []
   const bizNames = new Set(Object.values(BIZ))
-  const smartNames = new Set(Object.values(SMART).concat(Object.values(SMART_AI)).concat([SMART_PRIVATE_AI.NAME]))
+  const smartNames = new Set(Object.values(SMART).concat(Object.values(SMART_AI)).concat([SUBSCRIPTION_AI_GROUP_NAME]))
   config['proxy-groups'].forEach(g => {
     if (!g || !g.name) return
     if (bizNames.has(g.name)) { bizGroups.push(g) }
@@ -1494,7 +1482,7 @@ function sortProxyGroups(config) {
   })
   const bizOrder = Object.values(BIZ)
   bizGroups.sort((a, b) => bizOrder.indexOf(a.name) - bizOrder.indexOf(b.name))
-  const smartOrder = Object.values(SMART).concat(Object.values(SMART_AI)).concat([SMART_PRIVATE_AI.NAME])
+  const smartOrder = Object.values(SMART).concat(Object.values(SMART_AI)).concat([SUBSCRIPTION_AI_GROUP_NAME])
   smartGroups.sort((a, b) => { const ia = smartOrder.indexOf(a.name); const ib = smartOrder.indexOf(b.name); return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) })
   // AI/Gemini 业务组前置到全球节点之前，方便快速切换
   var aiGroups = []
@@ -1509,7 +1497,7 @@ function sortProxyGroups(config) {
   var aiExclusiveGroups = []
   var finalRestSmart = []
   for (var t = 0; t < restSmartGroups.length; t++) {
-    if (restSmartGroups[t].name === SMART_PRIVATE_AI.NAME) { aiExclusiveGroups.push(restSmartGroups[t]) }
+    if (restSmartGroups[t].name === SUBSCRIPTION_AI_GROUP_NAME) { aiExclusiveGroups.push(restSmartGroups[t]) }
     else { finalRestSmart.push(restSmartGroups[t]) }
   }
   // 顺序：AI/Gemini → 全球节点 → AI专属 → 其余业务组 → 其余区域组 → 其他
@@ -1525,7 +1513,7 @@ function main(config) {
   try {
     if (!config || typeof config !== 'object') return config
     SckiTrafficOptions.validate({ healthCheckProfile: SCKI_HEALTH_CHECK_PROFILE, quicPolicy: SCKI_QUIC_POLICY })
-    var nodePlan = SckiSubscriptionNodeFilter.preflight(config, Object.values(SMART).concat(Object.values(BIZ)), SCKI_MAX_NODE_MULTIPLIER)
+    var nodePlan = SckiSubscriptionNodeFilter.preflight(config, Object.values(SMART).concat(Object.values(SMART_AI), Object.values(BIZ), [SUBSCRIPTION_AI_GROUP_NAME]), SCKI_MAX_NODE_MULTIPLIER)
     if (!nodePlan.ok) {
       console.log(`[${VERSION}] Node preflight rejected: ${nodePlan.reason}${nodePlan.reason === 'provider-input' ? '; flatten in SubStore for provider subscriptions' : ''}`)
       return config
@@ -1551,15 +1539,15 @@ function main(config) {
     if (!Array.isArray(config['proxy-groups'])) config['proxy-groups'] = []
     if (!Array.isArray(config.rules)) config.rules = []
     logClashPartyDnsGuardBoundary(config)
-    var privateAiNodeNames = collectPrivateAiNodeNames(config)
-    var privateAiNameSet = new Set(privateAiNodeNames)
+    var subscriptionAiGroup = collectSubscriptionAiGroup(config)
+    var subscriptionAiNames = new Set(subscriptionAiGroup ? subscriptionAiGroup.proxies : [])
     var activeNodeServers = collectActiveSubscriptionNodeServers(config.proxies)
     var nodeDnsHints = SckiSubscriptionAdapter.captureNodeDns(config, activeNodeServers, SCKI_SUBSCRIPTION_ADAPTER_PROFILE)
     var nodeDnsReport = overwriteGeneral(config, nodeDnsHints)
     logSubscriptionAdapterReport(nodeDnsReport)
-    cleanupSubscription(config)
+    cleanupSubscription(config, subscriptionAiGroup)
     injectSmartFingerprint(config)
-    var c = classifyAllNodes(config.proxies.filter(function(p) { return p && !privateAiNameSet.has(p.name) }))
+    var c = classifyAllNodes(config.proxies.filter(function(p) { return p && !subscriptionAiNames.has(p.name) }))
     console.log(`[${VERSION}] Classification: ALL=${c.ALL.length} HOME_ALL=${c.HOME_ALL.length} HK=${c.HK.length}/${c.HOME_HK.length} TW=${c.TW.length}/${c.HOME_TW.length} CN=${c.CN.length}/${c.HOME_CN.length} JP=${c.JP.length}/${c.HOME_JP.length} KR=${c.KR.length}/${c.HOME_KR.length} SG=${c.SG.length}/${c.HOME_SG.length} US=${c.US.length}/${c.HOME_US.length} EU=${c.EU.length}/${c.HOME_EU.length} RU=${c.RU.length}/${c.HOME_RU.length} AM=${c.AM.length}/${c.HOME_AM.length} AF=${c.AF.length}/${c.HOME_AF.length} APAC_OTHER=${c.APAC_OTHER.length}/${c.HOME_APAC_OTHER.length} OTHER=${c.OTHER.length}/${c.HOME_OTHER.length}`)
     var jpkrNodes = c.JP.concat(c.KR)
     // v5.4.1 FIX: SG 同时存在于狮城组（独立）和亚太组（对标 US 在 美洲组）
@@ -1601,8 +1589,7 @@ function main(config) {
     if (aiGlobalNodes.length > 0) upsertUrlTestGroup(config, SMART_AI.GLOBAL, aiGlobalNodes)
     if (aiGlobalHomeNodes.length > 0) upsertUrlTestGroup(config, SMART_AI.GLOBAL_HOME, aiGlobalHomeNodes)
 
-    // 私有 AI 节点存在时才创建 AI专属组；没有私有 YAML 时保持公共订阅的原有组数量
-    if (privateAiNodeNames.length > 0) upsertUrlTestGroup(config, SMART_PRIVATE_AI.NAME, privateAiNodeNames)
+    if (subscriptionAiGroup) upsertUrlTestGroup(config, subscriptionAiGroup.name, subscriptionAiGroup.proxies)
 
     // 收集实际创建的区域组名（按 SMART 常量名匹配），过滤业务组的 proxy 引用
     var activeSmartNames = new Set(config['proxy-groups'].filter(function(g) { return g && g.type === 'url-test' }).map(function(g) { return g.name }))
@@ -1610,7 +1597,7 @@ function main(config) {
     activeSmartNames.add(SMART.GLOBAL)
     console.log(`[${VERSION}] Active url-test region groups: ${[...activeSmartNames].filter(function(n) { return n !== 'DIRECT' && n !== 'REJECT' }).join(', ')}`)
 
-    injectBusinessGroups(config, activeSmartNames, privateAiNodeNames)
+    injectBusinessGroups(config, activeSmartNames)
     applyMihomoFusedRuleSets(config)
     applyGeminiOverlay(config)
     SckiTrafficOptions.applyHealthCheckProfile(config, SCKI_HEALTH_CHECK_PROFILE, 'normal')

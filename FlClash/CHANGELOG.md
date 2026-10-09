@@ -3,6 +3,14 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.4 (2026-10-09)
+
+- SUBSTORE-AI：由 Cloudflare Sub-Store Collection 提供 JMS `AI专属` 代理组；移除 JS 对 YAML 标记组和固定 AI 节点池的依赖。
+- ISOLATION：仅保留组内真实代理引用并排除区域/家宽分类；共享组加入全部 34 个业务组，AI/Gemini 默认置首。
+- DEFAULTS：业务组默认首选按用途设置，包含国内业务 `DIRECT`、美国/日韩/东南亚与地区流媒体优先。
+- VERIFY：新增 Sub-Store AI 组和业务组默认回归，覆盖无效引用、重复/空组、重复覆写及 FlClash 数组引用身份。
+- DOCS：退役私有节点 YAML 示例，改为 Cloudflare Sub-Store 模板导入流程。
+
 ---
 
 ## v6.0.15-flclash-ai-gemini.2 (2026-10-08)

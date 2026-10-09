@@ -268,6 +268,43 @@ const GROUP_MEMBER_CASES = [
   { group: '🏡 其他家宽', include: ['Mystery Home IP x1'], exclude: ['HK 09 Standard x1', ...INFO_NODES] },
 ];
 
+const GROUP_DEFAULT_CASES = [
+  { group: '🤖 AI 服务', first: 'AI专属' },
+  { group: '✨ Gemini 服务', first: 'AI专属' },
+  { group: '💰 加密货币', first: '🇭🇰 香港节点' },
+  { group: '🏦 金融支付', first: 'DIRECT' },
+  { group: '💬 即时通讯', first: '🇭🇰 香港节点' },
+  { group: '📱 社交媒体', first: '🇯🇵 日韩节点' },
+  { group: '🧑‍💼 会议协作', first: '🇯🇵 日韩节点' },
+  { group: '📺 国内流媒体', first: 'DIRECT' },
+  { group: '🎵 TikTok', first: '🇸🇬 狮城节点' },
+  { group: '🎥 Netflix', first: '🇺🇸 美国节点' },
+  { group: '🎬 Disney+', first: '🇺🇸 美国节点' },
+  { group: '📡 HBO/Max', first: '🇺🇸 美国节点' },
+  { group: '📺 Hulu', first: '🇺🇸 美国节点' },
+  { group: '🎬 Prime Video', first: '🇺🇸 美国节点' },
+  { group: '📹 YouTube', first: '🇺🇸 美国节点' },
+  { group: '🎵 音乐流媒体', first: '🇺🇸 美国节点' },
+  { group: '🇭🇰 香港流媒体', first: '🇭🇰 香港节点' },
+  { group: '🇹🇼 台湾流媒体', first: '🇹🇼 台湾节点' },
+  { group: '🇯🇵 日韩流媒体', first: '🇯🇵 日韩节点' },
+  { group: '🇪🇺 欧洲流媒体', first: '🇪🇺 欧洲节点' },
+  { group: '🌐 其他国外流媒体', first: '🌍 全球节点' },
+  { group: '🕹️ 国内游戏', first: 'DIRECT' },
+  { group: '🎮 国外游戏', first: '🇯🇵 日韩节点' },
+  { group: '🔍 Google 服务', first: '🌍 全球节点' },
+  { group: '🔧 工具与服务', first: '🌍 全球节点' },
+  { group: 'Ⓜ️ 微软服务', first: '🌍 全球节点' },
+  { group: '🍎 苹果服务', first: 'DIRECT' },
+  { group: '📥 下载更新', first: '🌍 全球节点' },
+  { group: '🛰️ BT/PT Tracker', first: 'REJECT' },
+  { group: '🏠 国内网站', first: 'DIRECT' },
+  { group: '🚫 受限网站', first: '🌍 全球节点' },
+  { group: '🌐 国外网站', first: '🌍 全球节点' },
+  { group: '🐟 漏网之鱼', first: '🌍 全球节点' },
+  { group: '🛑 广告拦截', first: 'REJECT' },
+];
+
 function usage() {
   return [
     'Usage: node tools/validate-js-overwrites.js [--target smart|normal|flclash] [--json] [--verbose]',
@@ -359,14 +396,14 @@ function makeFixtureConfig() {
       makeProxy('FAQ'),
       // v5.4.20 #6 合法名守卫——"Signal" 含 "Sign" 但有词边界保护，必须保留并分类到 HK
       makeProxy('Signal 香港 IEPL x1'),
-      // 私有 AI 节点（匹配 __SCKI_PRIVATE_AI__ 标记组）
-      makeProxy('Private AI Node 01'),
-      makeProxy('Private AI Home 02'),
+      // JMS nodes are supplied by the Sub-Store AI-exclusive routing template.
+      makeProxy('JMS AI Node 01'),
+      makeProxy('JMS AI Home 02'),
     ],
     'proxy-groups': [
       { name: '机场自动选择', type: 'url-test', proxies: ['HKG 01 IEPL x1'] },
       { name: 'Netflix', type: 'select', proxies: ['机场自动选择'] },
-      { name: '__SCKI_PRIVATE_AI__', type: 'select', proxies: ['Private AI Node 01', 'Private AI Home 02'] },
+      { name: 'AI专属', type: 'url-test', proxies: ['JMS AI Node 01', 'JMS AI Home 02'] },
     ],
     rules: ['DOMAIN-SUFFIX,legacy.example,机场自动选择', 'MATCH,机场自动选择'],
     'rule-providers': {
@@ -654,6 +691,30 @@ function validateGroups(target, output, record) {
     }
     for (const name of scenario.exclude) {
       record.expect(!members.has(name), `${scenario.group} excludes ${name}`);
+    }
+  }
+
+  const hasSubscriptionAiGroup = groupsByName.has('AI专属');
+  for (const scenario of GROUP_DEFAULT_CASES) {
+    const group = groupsByName.get(scenario.group);
+    if (!group) continue;
+    const expectedFirst = scenario.first === 'AI专属' && !hasSubscriptionAiGroup
+      ? (group.proxies || []).find((member) => member !== 'AI专属')
+      : scenario.first;
+    record.expectEqual((group.proxies || [])[0], expectedFirst, `${scenario.group} keeps its business-appropriate default`);
+  }
+
+  if (hasSubscriptionAiGroup) {
+    for (const group of groups.filter((item) => BIZ_GROUPS.includes(item.name))) {
+      record.expect((group.proxies || []).includes('AI专属'), `${group.name} offers the shared AI-exclusive group`);
+    }
+    const aiGroup = groupsByName.get('AI专属');
+    record.expectEqual(aiGroup.type, target.regionType, `AI-exclusive group uses ${target.regionType}`);
+    record.expect((aiGroup.proxies || []).includes('JMS AI Node 01'), 'AI-exclusive group preserves the Sub-Store JMS node pool');
+    for (const name of ['JMS AI Node 01', 'JMS AI Home 02']) {
+      for (const group of groups.filter((item) => item.type === target.regionType && item.name !== 'AI专属')) {
+        record.expect(!(group.proxies || []).includes(name), `${name} does not leak into ${group.name}`);
+      }
     }
   }
 

@@ -1,0 +1,23 @@
+{
+  "id": "scki-jms-ai-mihomo",
+  "name": "SCKI JMS AI专属",
+  "target": "mihomo",
+  "config": {
+    "proxyGroups": [
+      {
+        "name": "🚀 节点选择",
+        "type": "select",
+        "proxies": ["AI专属", "DIRECT"]
+      },
+      {
+        "name": "AI专属",
+        "type": "url-test",
+        "filter": "(?i)(^|[^a-z0-9])JMS([^a-z0-9]|$)",
+        "url": "https://www.gstatic.com/generate_204",
+        "interval": 300,
+        "tolerance": 10
+      }
+    ],
+    "rules": ["MATCH,🚀 节点选择"]
+  }
+}

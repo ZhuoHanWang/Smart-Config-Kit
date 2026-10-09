@@ -4,19 +4,19 @@
 
 > 目录简介：这里是 Mihomo Smart/Normal 覆写脚本的事实基线，面向 Clash Party、Clash Verge Rev、Mihomo Party 等桌面客户端。
 >
-> 覆写脚本：**两份二选一**，规则 100% 等价，仅 22 区域组（11 全部 + 11 家宽）的内核选路算法不同
-> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.14**，2026-10-08）— Smart 内核 + LightGBM ML 评估
-> - `ClashParty(mihomo).js`（**v6.0.15-normal.15**，2026-10-08）— 普通内核 url-test 延迟选路
+> 覆写脚本：**两份二选一**，规则 100% 等价，仅 24 区域组（12 全部 + 12 家宽）的内核选路算法不同
+> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.20**，2026-10-09）— Smart 内核 + LightGBM ML 评估
+> - `ClashParty(mihomo).js`（**v6.0.15-normal.21**，2026-10-09）— 普通内核 url-test 延迟选路
 >
 > UI 补充配置：已整合到本文「四、粘贴 UI 补充配置」章节
-> 架构：**SUB-STORE 多机场融合** + 22 区域组（11 全部 + 11 家宽）+ 33 业务策略组 + **132 融合 rule-providers / 151 rules**（源 514 providers / 973 rules）
+> 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 34 业务策略组 + **134 rule-providers / 173 rules**（含 Gemini overlay）；`AI专属` 节点池由 Sub-Store 可选提供
 > 适用客户端：
 > - **Mihomo Party**（桌面端，推荐，原生支持 JS 覆写；内置 Smart 内核）
 > - **Clash Verge Rev**（桌面端，支持 JS/YAML 双覆写）
 > - **Clash Nyanpasu**（桌面端）
 > - 任何支持 Mihomo **JavaScript 覆写引擎**的客户端
 
-> 私有节点 DNS：覆写默认采用 `adaptive` 受限投影；可用 `off / policy / adaptive` 三档控制订阅 DNS 的投影深度，不会改变 55 组、规则或全局业务 DNS。若你另行粘贴 DNS UI 配置，请合并而不要覆盖这些字段。完整边界与静态端示例见 [私有节点 DNS 指南](../docs/private-node-dns.md)。
+> 节点 DNS：覆写默认采用 `adaptive` 受限投影；可用 `off / policy / adaptive` 三档控制订阅 DNS 的投影深度，不会改变策略组、规则或全局业务 DNS。若你另行粘贴 DNS UI 配置，请合并而不要覆盖这些字段。完整边界与静态端示例见 [私有节点 DNS 指南](../docs/private-node-dns.md)。
 
 > **Clash Party v2.0.3+ DNS 保护（Issue #183）**：客户端会在执行 JS 覆写前检查原始订阅是否包含 `proxy-server-nameserver`、`proxy-server-nameserver-policy` 或 `nameserver-policy`。如果客户端内置 DNS 控制处于开启状态，可能提示“检测到当前订阅包含自定义 DNS 配置，已自动关闭 DNS 覆写”。这只表示客户端的 `controlDns` 被保护逻辑关闭，不表示本脚本没有执行；本脚本随后仍会写入仓库 DNS 基线和受限节点 DNS。使用本仓库时请保持客户端内置 DNS 覆写关闭，不要把这条提示当作脚本加载失败。背景见 [Clash Party v2.0.3 发布说明](https://github.com/mihomo-party-org/clash-party/releases/tag/v2.0.3) 和 [DNS 覆写保护源码](https://github.com/mihomo-party-org/clash-party/blob/v2.0.3/src/main/core/dnsOverrideGuard.ts)。
 
@@ -26,7 +26,7 @@
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
-> 私有节点：Clash Party 请复制 [`private-nodes.clash-party.example.yaml`](private-nodes.clash-party.example.yaml) 为本地 `private-nodes.yaml`，用 `+proxies` / `+proxy-groups` 前置合并到订阅，再启用本 JS。普通 `proxies` / `proxy-groups` 会替换订阅数组，可能删掉脚本创建的节点和策略组，造成 `proxy not found`。私有节点只加入 `🤖 AI 服务`，不参与区域组；实际 YAML 已被 `.gitignore` 忽略，不要上传到公开 Fork、Issue 或 jsDelivr。
+> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源，并绑定仓库提供的 `SubStore/templates/scki-jms-ai-mihomo.json` 模板。组合输出会生成 `AI专属` 代理组；本 JS 接管该组、隔离其节点与区域/家宽分类，并将组加入所有业务组。AI/Gemini 默认优先 `AI专属`，国内业务默认 `DIRECT`。步骤见 [Sub-Store JMS 模板说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
 > 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 
@@ -36,7 +36,7 @@
 
 ## 📌 Smart 版 vs 普通版：怎么选？
 
-同目录下两个脚本**规则、策略组、rule-providers、DNS/嗅探完全一致**，唯一区别在 22 区域组（11 全部 + 11 家宽）内部如何从候选节点里挑一个具体出站：
+同目录下两个脚本**规则、策略组、rule-providers、DNS/嗅探完全一致**，唯一区别在 24 区域组（12 全部 + 12 家宽）内部如何从候选节点里挑一个具体出站：
 
 | 维度 | `ClashParty(mihomo-smart).js`（Smart 版） | `ClashParty(mihomo).js`（普通版） |
 |------|---------------------------------------|-------------------------------------|
@@ -88,7 +88,7 @@
 
 ### 跑起来之后怎么验证成功？
 - 浏览器打开 `https://www.google.com`，能打开说明代理通了。
-- 客户端左侧「代理」页面最多会看到 **55 个代理组**（22 区域 + 33 业务；空区域会自动不建组）。
+- 客户端左侧「代理」页面最多会看到 **61 个代理组**（24 区域 + 2 AI 排除 + 34 业务 + 可选 `AI专属`；空区域会自动不建组）。
 - 左侧「连接」页面可以看每条请求走了哪个组/哪个节点。
 - 额外检查：按根 README 的 [导入后 60 秒验证清单](../README.md#-导入后-60-秒验证清单) 确认规则下载、GEOSITE 命中与 anti-ad 误伤白名单。
 
@@ -166,7 +166,7 @@ Clash Party 系列（Mihomo Party / Clash Verge Rev / Clash Nyanpasu）底层都
 脚本会自动为所有节点：
 - 剔除信息类节点（导航/流量/到期/官网…）
 - 剔除高倍率节点（10x/20x/100x）
-- 按地区/城市/IATA 代码/ISO 代码**多维度分类**到 22 区域组（11 全部 + 11 家宽）
+- 按地区/城市/IATA 代码/ISO 代码**多维度分类**到 24 区域组（12 全部 + 12 家宽）
 
 ### 场景 C：在线订阅转换站（备选方案）
 
@@ -345,10 +345,10 @@ sniffer:
 连接成功后按以下步骤验证：
 
 1. **代理组（Proxies）页面**
-   - 应看到 **22 区域组**（🌍 全球 / 🏡 全球家宽 / 🇭🇰 香港 / 🏡 香港家宽 / 🇹🇼 台湾 / 🏡 台湾家宽 / 🇸🇬 狮城 / 🏡 狮城家宽 / 🇯🇵 日韩 / 🏡 日韩家宽 / 🌏 亚太 / 🏡 亚太家宽 / 🇺🇸 美国 / 🏡 美国家宽 / 🇪🇺 欧洲 / 🏡 欧洲家宽 / 🌎 美洲 / 🏡 美洲家宽 / 🌍 非洲 / 🏡 非洲家宽 / 🌏 其他 / 🏡 其他家宽），Smart 版显示为 `smart`，普通版显示为 `url-test`；
+   - **24 个区域组 + 最多 2 个 AI 排除组**，空区域自动跳过；Smart 版使用 `smart`，普通版使用 `url-test`；
    - 每个区域组下方有对应地区的所有节点；
-   - **33 个业务策略组**（AI 服务、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择；
-   - 导入私有节点 YAML 后，才会出现额外的 **`AI专属`** Smart 组；该组只供 🤖 AI 服务使用，不进全球/家宽组。没有私有 YAML 时不会创建此组。
+   - **34 个业务策略组**（AI 服务、Gemini、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择；
+   - 绑定 JMS Sub-Store 模板后会出现 **`AI专属`** Smart/url-test 组；其节点不进入区域/家宽组，并可在所有业务组中选择。
 
 2. **连接（Connections）页面**
    - 访问 `https://chat.openai.com`：Rule 应命中「🤖 AI 服务 → 🇺🇸 美国节点 → 某个 US 节点」；
@@ -371,18 +371,18 @@ sniffer:
 
 | 业务组 | 推荐上游 |
 |--------|----------|
-| 🤖 AI 服务 | 🇺🇸 美国节点 或 AI专属（来自本地私有 YAML；必须避开 HK / CN） |
-| 💰 加密货币 | 🇭🇰 香港节点（币安合规） |
+| 🤖 AI 服务 / ✨ Gemini 服务 | AI专属（已配置时），再按需切换全球 AI 区域组 |
+| 💰 加密货币 | 🇭🇰 香港节点 |
 | 🏦 金融支付 | DIRECT |
-| 💬 即时通讯 | 🇭🇰 香港 / 🇯🇵 日韩 |
-| 📱 社交媒体 | 🇯🇵 日韩节点 |
-| 🧑‍💼 会议协作 | 🇯🇵 日韩节点（延迟低） |
-| 📺 国内流媒体 | DIRECT（境内）/ 🇭🇰 香港（境外） |
-| 🇺🇸 美国流媒体 | 🇺🇸 美国节点 |
-| 🇭🇰 香港流媒体 | 🇭🇰 香港节点 |
-| 🇹🇼 台湾流媒体 | 🇹🇼 台湾节点 |
-| 🎮 游戏平台 | 🇯🇵 日韩节点（Steam/PSN） |
-| 🔍 Google 服务 | 🌍 全球节点 |
+| 💬 即时通讯 | 🇭🇰 香港节点 |
+| 📱 社交媒体 / 🧑‍💼 会议协作 | 🇯🇵 日韩节点 |
+| 📺 国内流媒体 / 🕹️ 国内游戏 / 🍎 苹果服务 / 🏠 国内网站 | DIRECT |
+| 🎥 美国流媒体、YouTube、音乐流媒体 | 🇺🇸 美国节点 |
+| 🇭🇰 / 🇹🇼 / 🇯🇵 / 🇪🇺 地区流媒体 | 对应地区节点 |
+| 🎵 TikTok | 🇸🇬 狮城节点 |
+| 🎮 国外游戏 | 🇯🇵 日韩节点 |
+| 🔍 Google 服务 / 工具与服务 / 微软服务 | 🌍 全球节点 |
+| 🛰️ BT/PT Tracker / 🛑 广告拦截 | REJECT |
 | 🔧 工具与服务 | 🌍 全球节点 |
 | 🚫 受限网站（GFW） | 中国选代理 / 海外选 DIRECT |
 

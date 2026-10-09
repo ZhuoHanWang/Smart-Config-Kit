@@ -6,6 +6,10 @@
 
 ---
 
+## v6.0.15-personal.2 — Sub-Store JMS AI 节点组 (2026-10-09)
+
+- 将 JMS `AI专属` 节点池迁移到 Cloudflare Sub-Store 模板，更新三个 JS 覆写的组隔离和业务默认顺序；详见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 与 [Sub-Store](./SubStore/CHANGELOG.md)。
+
 ## v6.0.15 — 默认测速组按需检查 (2026-10-07)
 
 - 根据实际使用选择，Mihomo 与 Stash 的默认档保持 300 秒并启用 `lazy: true`；900 秒仍是可选省电档。其他客户端沿用各自原生测速调度；海外 QUIC 默认档不变。详见[测速与 QUIC 策略选项](./docs/traffic-options.md)。

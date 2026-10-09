@@ -2,6 +2,12 @@
 
 > SubStore 是辅助脚本目录，不参与 14 类客户端正式分流产物的生成。
 
+## v6.0.2-substore.3 (2026-10-09)
+
+- 新增 Cloudflare Worker 可导入的 Mihomo 模板：从独立 `JMS` 名称标识动态展开 `AI专属` 自动测速代理组。
+- 文档补充 `/api/templates` admin-token 导入、Collection 绑定与 public download token 边界；没有匹配节点时模板会省略空组。
+- JMS 节点分类、隔离和业务组优先级由 Clash Party Smart/Normal 与 FlClash 覆写处理；模板不包含订阅 URL 或节点凭据。
+
 ## v6.0.2-substore.2 (2026-07-11)
 
 - 修复真实 CDN 镜像的计数漂移：同一账户的镜像可有几 KB 级 `upload` / `download` 缓存差异，不能以四项流量头逐字节相等作为自动去重前提。

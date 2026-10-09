@@ -5,6 +5,14 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.20 / v6.0.15-normal.21 (2026-10-09)
+
+- SUBSTORE-AI：迁移 JMS `AI专属` 节点池到 Sub-Store Collection 模板；Smart / Normal JS 消费展开后的组，不再读取 YAML 标记或硬编码节点。
+- ISOLATION：组内有效节点继续排除区域/家宽分类；`AI专属` 加入全部 34 个业务组，AI/Gemini 默认置首。
+- DEFAULTS：国内站点、国内媒体、国内游戏、Apple 与支付优先 `DIRECT`；美区媒体、日韩游戏、港/台/日/欧媒体与 TikTok 按业务地区设置默认首选。
+- VERIFY：增加 Sub-Store 组输入、重复执行、空/重名组、所有业务组候选及默认顺序合同测试；静态客户端没有该 JS 订阅输入入口，不适用。
+- DOCS：退役私有节点 YAML 模板，增加 Cloudflare `/api/templates` 导入和 Collection 绑定说明。
+
 ---
 
 ## v6.0.15-dns.18 / v6.0.15-normal.19 (2026-10-08)

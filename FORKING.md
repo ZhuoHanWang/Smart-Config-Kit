@@ -1,6 +1,6 @@
 # FORKING.md — 个人 Fork 维护指南
 
-> 面向需要 Fork 本仓库、发布个人 JS 到 jsDelivr、同时保护私有节点 YAML 不泄露的用户。
+> 面向需要 Fork 本仓库、发布个人 JS 到 jsDelivr，并在自己的 Sub-Store 中管理 JMS 节点与 AI 组的用户。
 > 如果你只是想使用源作者的配置，不需要 Fork——直接导入源仓库的 jsDelivr 地址即可。
 
 ---
@@ -11,8 +11,8 @@
 
 ```
 upstream (源作者仓库)    只读镜像，仅用于获取更新
-origin   (你的 GitHub Fork)   公开发布个人 JS
-本地私有节点 YAML              仅保存在本地，不提交到任何公开仓库
+origin   (你的 GitHub Fork)   公开发布个人 JS 与脱敏模板
+你的 Sub-Store                私有保存订阅凭据、节点与 JMS Collection
 ```
 
 FlClash 手机端加载你的 JS：
@@ -25,49 +25,35 @@ https://cdn.jsdelivr.net/gh/<你的用户名>/<你的仓库>@main/FlClash/FlClas
 
 ---
 
-## 2. 节点 YAML 设计
+## 2. Sub-Store JMS 组设计
 
-### 2.1 模板文件与真实文件
+### 2.1 模板与私有数据
 
-新增一个模板文件供参考：
-
-```
-Clash Party/private-nodes.clash-party.example.yaml
-FlClash/private-nodes.flclash.example.yaml
-```
-
-实际使用的文件：
+仓库模板只定义公开的策略组和名称过滤条件：
 
 ```
-Clash Party/private-nodes.yaml
+SubStore/templates/scki-jms-ai-mihomo.json
 ```
 
-**实际文件加入 `.gitignore`**，避免 UUID、密码、Reality 密钥等泄露到公开仓库。
-
-在 `.gitignore` 中添加：
-
-```gitignore
-# 私有节点 YAML（包含 UUID / Reality 密钥等敏感信息，禁止提交）
-Clash Party/private-nodes.yaml
-FlClash/private-nodes.yaml
-```
+在自己的 Cloudflare Sub-Store 中通过 `/api/templates` 导入，再绑定到包含 JMS Source 的 Collection。订阅 URL、admin token、节点参数与凭据只保存在自己的 Sub-Store，不应导出到公开仓库。
 
 ### 2.2 职责划分
 
-**YAML 负责：**
+**Sub-Store 负责：**
 
-- `proxies` — 节点服务器地址、端口、UUID、Reality 密钥等
-- 私有节点所属的内部标记组，例如 `__SCKI_PRIVATE_AI__`
+- 管理机场和 JMS Sources、订阅 URL 与凭据
+- 按独立 `JMS` 名称标识展开 `AI专属` 代理组
+- 输出一条供客户端使用的 Mihomo 组合订阅
 
 **JS 负责：**
 
-- 读取标记组中的节点名称
+- 从 `AI专属` 组读取 Sub-Store 已展开的节点名称
 - 清理机场原有策略组
-- 创建最终的 `AI专属` 或其他业务组
-- 将私有节点纳入对应策略组
-- 不再硬编码节点服务器、UUID、Reality 密钥
+- 让 JMS 节点不参与区域/家宽分类
+- 将 `AI专属` 加入全部业务组，AI/Gemini 默认优先
+- 根据业务给出合适的首选项（国内业务 `DIRECT`、对应地区业务优先其地区组）
 
-这样更新源作者 JS 时，节点 YAML 不受影响；修改节点时，也不需要修改 JS。
+更新公开 JS 不会影响私有订阅凭据；更换 JMS 节点也不需要修改或重新发布 JS。
 
 ---
 
@@ -115,8 +101,8 @@ git merge upstream/main
 |----------|----------|
 | 源作者修改其他客户端或生成规则集 | **优先接受 upstream** |
 | 源作者修改 Clash Party / FlClash 同一区域 | **人工合并**，保留你的本地行为 |
-| 私有节点 YAML | **始终保留本地文件**，不参与合并 |
-| `.gitignore` | 保留本地的私有文件排除规则 |
+| Sub-Store 私有配置 | 只在你自己的 Worker / 管理界面维护，不参与 Git 合并 |
+| `.gitignore` | 保留对本地遗留节点文件和实验文件的忽略规则 |
 
 合并完成后运行 JS 合同检查（见 §6）。
 
@@ -125,7 +111,7 @@ git merge upstream/main
 建议把个人定制拆成独立提交，便于以后区分 upstream 提交和个人修改：
 
 ```
-feat(private-nodes): load local node yaml
+feat(subscription): add Sub-Store JMS AI group
 fix(flclash): preserve local AI routing behavior
 docs: add personal jsdelivr import instructions
 ```
@@ -149,12 +135,12 @@ docs: add personal jsdelivr import instructions
 
 - Clash Party JS
 - FlClash JS
-- 示例 YAML（`Clash Party/private-nodes.clash-party.example.yaml` / `FlClash/private-nodes.flclash.example.yaml`）
+- 脱敏 Sub-Store 模板（`SubStore/templates/scki-jms-ai-mihomo.json`）
 - 使用说明
 
 **不发布（`.gitignore` + 本地保存）：**
 
-- 实际私有节点 YAML（`private-nodes.yaml`）
+- Sub-Store Source URL、Collection 数据和管理 Token
 - 节点订阅 URL
 - UUID、密码、Reality 密钥
 - `.bak` 和实验脚本
@@ -174,10 +160,10 @@ node tools/validate-js-overwrites.js --target flclash
 ### 6.2 安全检查确认清单
 
 - [ ] 公开 JS 中不存在 `uuid`、`reality-opts`、私有服务器地址
-- [ ] Clash Party 导入 JS 后，单独导入私有 YAML，能看到私有节点
-- [ ] FlClash 执行 JS 后，私有节点仍能进入目标策略组
-- [ ] 删除或停用私有 YAML 后，公共订阅仍能正常生成
-- [ ] `git fetch upstream && git merge upstream/main` 不会修改私有节点文件
+- [ ] Sub-Store Collection 输出 `AI专属` 组，且仅包含名称匹配的 JMS 节点
+- [ ] Clash Party Smart / Normal 与 FlClash 都能消费该组，并隔离 JMS 节点与区域组
+- [ ] 移除该组后，普通订阅仍能正常生成
+- [ ] `git fetch upstream && git merge upstream/main` 不会读取或覆盖 Sub-Store 私有数据
 - [ ] jsDelivr 地址返回的是纯 JavaScript，而不是 GitHub HTML 页面
 
 ### 6.3 节点泄露扫描（建议加入 CI）
@@ -195,7 +181,7 @@ rg -n "uuid:|reality-opts:|private-key:|short-id:" \
 
 ## 7. 默认假设
 
-- 实际节点 YAML 保存在本地或私有备份中，**不通过公开 GitHub / jsDelivr 发布**
+- 实际节点订阅与凭据保存在自己的 Sub-Store 中，**不通过公开 GitHub / jsDelivr 发布**
 - 个人 Fork 只负责公开 JS 和同步源作者代码
 - 定期从 upstream 拉取更新，保持规则集和客户端支持不落后
 
@@ -214,7 +200,7 @@ rg -n "uuid:|reality-opts:|private-key:|short-id:" \
 | `FORKING.md` | 个人文档 | ✅ 本文件 | 你正在读 |
 | `MERGE-PLAN.md` | 个人文档 | ✅ 保留 | 你的定制合并记录（已在 `.gitignore`） |
 | `docs/personal-fork-sync.md` | 个人文档 | ✅ 保留 | 与 FORKING.md 互补的实操笔记 |
-| `.gitignore` | 配置 | ✅ 保留 | 已配置私有节点排除规则 |
+| `.gitignore` | 配置 | ✅ 保留 | 保护本地遗留节点文件和实验文件 |
 | `tools/validate-js-overwrites.js` | 验证工具 | ✅ 需要 | 每次合并后跑 JS 合同检查 |
 | `tools/validate-process-name-direct.js` | 验证工具 | ✅ 需要 | PROCESS-NAME 白名单验证 |
 | `tools/setup-personal-fork.sh` | 辅助脚本 | ✅ 一次性 | 首次创建 Fork 时用 |
@@ -288,12 +274,9 @@ Smart-Config-Kit/
 ├── Clash Party/          ← 你的 JS 定制（核心）
 │   ├── ClashParty(mihomo-smart).js
 │   ├── ClashParty(mihomo).js
-│   ├── private-nodes.yaml         (.gitignore 保护)
-│   ├── private-nodes.clash-party.example.yaml （模板，可提交）
 ├── FlClash/              ← FlClash 手机端 JS
 │   ├── FlClash(mihomo).js
-│   ├── private-nodes.flclash.example.yaml （模板，可提交）
-│   └── private-nodes.yaml         (.gitignore 保护)
+├── SubStore/templates/   ← JMS `AI专属` 组合订阅模板
 ├── FORKING.md            ← 本指南
 ├── MERGE-PLAN.md         ← 你的定制合并记录
 ├── .gitignore            ← 私有文件排除规则
