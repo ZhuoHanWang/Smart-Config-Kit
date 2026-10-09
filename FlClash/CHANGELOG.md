@@ -3,6 +3,13 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.5 (2026-10-09)
+
+- FIX-JMS-AI：默认 Sub-Store 组合订阅包含 JMS 节点但没有专属组时，自动生成 `AI专属` url-test 组；AI/Gemini 首选、区域隔离与其他业务默认沿用现有逻辑。
+- INPUT：显式节点池优先；自动识别只匹配独立 `JMS` 标识，并复用节点预检结果排除信息和 direct/reject 出站。
+- VERIFY：覆盖四节点聚合、重复执行、名称边界、显式池优先和数组引用；同步 Smart/Normal，回归接入 JS CI。
+- REFERENCE/SCOPE：2026-10-09 复核官方 v0.8.99 与 Mihomo `proxy-groups` / `url-test` 字段；无新字段或最低版本变化。其余平台适用性见[逐端审计](../docs/research/2026-10-09-jms-ai-group.md)。
+
 ## v6.0.15-flclash-ai-gemini.4 (2026-10-09)
 
 - SUBSTORE-AI：由 Cloudflare Sub-Store Collection 提供 JMS `AI专属` 代理组；移除 JS 对 YAML 标记组和固定 AI 节点池的依赖。

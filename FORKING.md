@@ -35,19 +35,19 @@ https://cdn.jsdelivr.net/gh/<你的用户名>/<你的仓库>@main/FlClash/FlClas
 SubStore/templates/scki-jms-ai-mihomo.json
 ```
 
-在自己的 Cloudflare Sub-Store 中通过 `/api/templates` 导入，再绑定到包含 JMS Source 的 Collection。订阅 URL、admin token、节点参数与凭据只保存在自己的 Sub-Store，不应导出到公开仓库。
+将 JMS Source 加入 Collection 并保留独立 `JMS` 名称标识，JS 即可自动生成专属组。若需要在订阅中显式提供节点池，可通过 `/api/templates` 导入模板，再绑定 Collection。订阅 URL、admin token、节点参数与凭据只保存在自己的 Sub-Store，不应导出到公开仓库。
 
 ### 2.2 职责划分
 
 **Sub-Store 负责：**
 
 - 管理机场和 JMS Sources、订阅 URL 与凭据
-- 按独立 `JMS` 名称标识展开 `AI专属` 代理组
+- 可选：按独立 `JMS` 名称标识展开显式 `AI专属` 代理组
 - 输出一条供客户端使用的 Mihomo 组合订阅
 
 **JS 负责：**
 
-- 从 `AI专属` 组读取 Sub-Store 已展开的节点名称
+- 优先读取显式 `AI专属` 组；缺少该组时自动收集名称带独立 `JMS` 标识的节点
 - 清理机场原有策略组
 - 让 JMS 节点不参与区域/家宽分类
 - 将 `AI专属` 加入全部业务组，AI/Gemini 默认优先
@@ -160,9 +160,9 @@ node tools/validate-js-overwrites.js --target flclash
 ### 6.2 安全检查确认清单
 
 - [ ] 公开 JS 中不存在 `uuid`、`reality-opts`、私有服务器地址
-- [ ] Sub-Store Collection 输出 `AI专属` 组，且仅包含名称匹配的 JMS 节点
-- [ ] Clash Party Smart / Normal 与 FlClash 都能消费该组，并隔离 JMS 节点与区域组
-- [ ] 移除该组后，普通订阅仍能正常生成
+- [ ] Sub-Store Collection 包含带独立 `JMS` 标识的节点，或显式输出 `AI专属` 节点池
+- [ ] Clash Party Smart / Normal 与 FlClash 都能生成专属组，并隔离其节点与区域组
+- [ ] 没有显式节点池且没有 JMS 节点时，普通订阅仍能正常生成
 - [ ] `git fetch upstream && git merge upstream/main` 不会读取或覆盖 Sub-Store 私有数据
 - [ ] jsDelivr 地址返回的是纯 JavaScript，而不是 GitHub HTML 页面
 

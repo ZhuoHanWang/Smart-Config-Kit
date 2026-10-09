@@ -191,7 +191,9 @@ https://<你的-worker>/?token=<SUB_STORE_ADMIN_TOKEN>
 
 ## Cloudflare Sub-Store：JMS AI 专属组
 
-Cloudflare Worker 部署版可通过模板给组合订阅生成一个独立的 `AI专属` 代理组，不需要修改 Worker 代码，也不需要将 JMS 节点写进公开 YAML 或 JS。`POST /api/templates` 的 admin 鉴权见 [Cloudflare API route](https://github.com/realchendahuang/sub-store-cloudflare/blob/main/cloudflare/src/routes/api.ts#L220-L229)；`filter` 展开为精确节点名并省略空组的行为见 [订阅模板渲染器](https://github.com/realchendahuang/sub-store-cloudflare/blob/main/cloudflare/src/lib/subscription.ts#L1528-L1560)。输出字段使用 Mihomo 官方 [`proxy-groups`](https://wiki.metacubex.one/config/proxy-groups/) 的 `type`、`proxies`、`url`、`interval` 与 `tolerance`。
+使用本仓库的 Clash Party Smart/Normal 或 FlClash JS 时，把 JMS Source 加入 Collection 并保留独立的 `JMS` 名称标识即可。即使使用默认模板、输出只有普通的 `💬 AI 服务` 组，JS 也会在缺少 `AI专属` 时自动收集 JMS 节点生成该组。例如 `JMS LA c33s2`～`JMS LA c33s5` 会成为专属组的四个候选；无需修改 Worker 或额外绑定模板。
+
+下面的模板方式可选，用于让组合订阅显式提供 `AI专属` 节点池。已有显式组优先，其成员经过有效引用检查和去重；空组、重复组或无效组不触发自动识别。`POST /api/templates` 的 admin 鉴权见 [Cloudflare API route](https://github.com/realchendahuang/sub-store-cloudflare/blob/main/cloudflare/src/routes/api.ts#L220-L229)；`filter` 展开为精确节点名并省略空组的行为见 [订阅模板渲染器](https://github.com/realchendahuang/sub-store-cloudflare/blob/main/cloudflare/src/lib/subscription.ts#L1528-L1560)。输出字段使用 Mihomo 官方 [`proxy-groups`](https://wiki.metacubex.one/config/proxy-groups/) 的 `type`、`proxies`、`url`、`interval` 与 `tolerance`。
 
 1. 在 Sub-Store 中把 JMS 订阅建成一个 Source，并把它与普通机场 Sources 一起加入目标 Collection。
 2. 在可信终端将仓库模板 POST 到你自己的 Worker。此 `/api/templates` 管理接口要求 **admin token**；不要把 Token 写入仓库、截图或客户端订阅链接。
@@ -210,7 +212,7 @@ unset SUB_STORE_ADMIN_TOKEN
 3. 在 Sub-Store 管理界面编辑目标 Collection，将模板选为 **SCKI JMS AI专属**，输出目标选 **mihomo**。
 4. 刷新 Collection，确认输出中 `AI专属` 的 `proxies` 只包含预期 JMS 节点；客户端使用 Collection 的下载链接，且该链接只能使用 `SUB_STORE_PUBLIC_DOWNLOAD_TOKEN`。
 
-模板按节点名称匹配独立的 `JMS` 标识（大小写不敏感）：`JMS Tokyo 01`、`Tokyo-JMS-01` 可命中，`JMSProxy`、`ADJMS01` 不命中。若 JMS 服务的节点名称没有独立 `JMS` 标识，需要先在 Sub-Store 为该来源统一加上这个标识。
+模板与 JS 自动识别均按节点名称匹配独立的 `JMS` 标识（大小写不敏感）：`JMS Tokyo 01`、`Tokyo-JMS-01` 可命中，`JMSProxy`、`ADJMS01` 不命中。若 JMS 服务的节点名称没有独立 `JMS` 标识，需要先在 Sub-Store 为该来源统一加上这个标识。
 
 Clash Party Smart / Normal 与 FlClash JS 会读取 Sub-Store 展开的精确节点列表，重建目标客户端适配的 `AI专属` 自动测速组，并将它加入所有业务组。AI / Gemini 默认优先该组；国内组默认 `DIRECT`，其他组优先自身业务地区。没有有效 `AI专属` 组时，普通订阅保持正常行为。
 
@@ -265,7 +267,7 @@ https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/SubStore/s
 - 组合订阅只有一条客户端导入 URL，且输出格式为 `Clash.Meta(mihomo)`。
 - Airport-A / Airport-B 等前缀都能在代理列表中找到；没有“流量、到期、官网”等伪节点。
 - FlClash 日志中的处理节点数等于组合后的节点总数，而不是某一个机场的数量。
-- 区域组和业务组正常出现；FlClash 使用覆写脚本时应看到 24 个区域组、最多 2 个 AI 排除组和 34 个业务组；绑定 JMS 模板时另有 `AI专属` 组。
+- 区域组和业务组正常出现；FlClash 使用覆写脚本时应看到最多 24 个区域组、最多 2 个 AI 排除组和 34 个业务组；包含 JMS 节点或提供显式节点池时另有 `AI专属` 组。
 - 同名节点没有被静默覆盖；必要时检查 `dedupe-node-names.js` 的日志。
 - 流量统计仅在使用可选脚本后检查：独立机场应相加，镜像订阅应只计一次。
 

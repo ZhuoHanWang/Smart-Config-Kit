@@ -1,5 +1,7 @@
 # Mihomo (MetaCubeX) 官方配置文档参考
 
+> 复核于 2026-10-09：在线读取 [代理组通用字段](https://wiki.metacubex.one/config/proxy-groups/) 与 [url-test](https://wiki.metacubex.one/config/proxy-groups/url-test/)，页面 Last-Modified 为 2026-10-03，晚于字段初次核对日期。本次可选 JMS 池在 JS 中展开为精确 `proxies`，再复用现有 Smart/url-test 构造器；未新增内核字段或改变最低版本要求。
+
 > Clash Party YAML 覆写复核（2026-10-08）：官方 [YAML 覆写文档](https://clashparty.org/docs/guide/override/yaml) 说明默认对数组直接覆盖；`+key` 前置、`key+` 追加，普通 `proxies` / `proxy-groups` 会替换数组。私有节点必须使用 `+proxies` 与 `+proxy-groups`，否则订阅节点/由 JS 生成的策略组可能丢失，保留的规则就会引用不存在的策略组。
 
 > 同日补充复核：[`type: inline` / `payload`](https://wiki.metacubex.one/config/proxy-providers/) 为正式集合字段，HTTP/file 的 payload 只是失败备份，不代表远端节点已展开。[具名 direct](https://wiki.metacubex.one/config/proxies/direct/) 保留接口/拨号作用，分类时排除；[`PASS-RULE`](https://wiki.metacubex.one/config/proxies/built-in/) 是保留的内置策略。组 `exclude-type` 在 [v1.19.31 GroupBase](https://github.com/MetaCubeX/mihomo/blob/v1.19.31/adapter/outboundgroup/groupbase.go#L211-L225) 对已合并成员过滤，已用 v1.19.29 的 use-provider controller 验证；详见 [验收证据](../docs/research/2026-09-30-routing-runtime-followup.md)。

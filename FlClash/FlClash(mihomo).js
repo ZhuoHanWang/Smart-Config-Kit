@@ -1,8 +1,8 @@
 // FlClash 覆写脚本 — 标准 Mihomo 内核动态分流版
-// 版本：v6.0.15-flclash-ai-gemini.4 (2026-10-09)
-// 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属订阅组 + 134 providers；另含 Gemini overlay
+// 版本：v6.0.15-flclash-ai-gemini.5 (2026-10-09)
+// 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers；另含 Gemini overlay
 // 规则源：rulesets/source/routing-graph.js v6.0.15（基线规则等价；区域组为 url-test — FlClash 标准 Mihomo 不支持 smart + LightGBM）
-// 变体：保留个人 Gemini/AI 业务组；AI专属节点池由 Sub-Store 组合订阅提供
+// 变体：保留个人 Gemini/AI 业务组；AI专属池优先读取订阅组，缺少时按 JMS 名称生成
 // 适用：FlClash >= v0.8.85（覆盖脚本功能自该版本引入）；其他使用标准 Mihomo 内核的客户端
 // 变更历史：见 `FlClash/CHANGELOG.md`
 //
@@ -37,7 +37,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-flclash-ai-gemini.4'
+const VERSION = 'v6.0.15-flclash-ai-gemini.5'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -568,11 +568,16 @@ function applyAiGlobalPreference(proxies, activeSmartNames) {
 
 const SUBSCRIPTION_AI_GROUP_NAME = 'AI专属'
 
+// Prefer an explicit Sub-Store pool; otherwise collect delimited JMS names after node preflight.
 function collectSubscriptionAiGroup(config) {
   var proxies = Array.isArray(config.proxies) ? config.proxies : []
   var proxyNames = new Set(proxies.filter(function(p) { return SckiSubscriptionNodeFilter.isSelectableProxy(p) }).map(function(p) { return p.name }))
   var groups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : []
   var matches = groups.filter(function(g) { return g && g.name === SUBSCRIPTION_AI_GROUP_NAME })
+  if (matches.length === 0) {
+    var jmsNames = Array.from(proxyNames).filter(function(name) { return /(^|[^a-z0-9])JMS([^a-z0-9]|$)/i.test(name) })
+    return jmsNames.length ? { name: SUBSCRIPTION_AI_GROUP_NAME, type: 'url-test', proxies: jmsNames } : null
+  }
   if (matches.length !== 1) return null
   var source = matches[0]
   if (['select', 'smart', 'url-test', 'fallback'].indexOf(source.type) === -1 || !Array.isArray(source.proxies)) return null

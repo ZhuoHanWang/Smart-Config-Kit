@@ -7,7 +7,7 @@
 > 覆写脚本：`FlClash(mihomo).js`
 > 适用客户端：**FlClash**（Android / Windows / macOS / Linux）
 > 内核要求：FlClash >= **v0.8.85**
-> 当前版本：**v6.0.15-flclash-ai-gemini.4**（24 个区域组 + 最多 2 个 AI 排除组 + 34 业务组 + 134 providers / 173 rules；JMS `AI专属` 组由 Sub-Store 可选提供；变更历史见 `FlClash/CHANGELOG.md`）
+> 当前版本：**v6.0.15-flclash-ai-gemini.5**（24 个区域组 + 最多 2 个 AI 排除组 + 34 业务组 + 134 providers / 173 rules；`AI专属` 可由订阅提供或自动识别 JMS 节点生成；变更历史见 `FlClash/CHANGELOG.md`）
 >
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 等小写 ISO 两位码加编号会自动进入区域组；不对普通小写词做宽泛国家码匹配。
 
@@ -48,13 +48,14 @@
 
 ### 可选：JMS 节点与 AI专属组
 
-把 JMS 原生订阅添加为 Cloudflare Sub-Store 的 Source，并纳入正在使用的 Collection。随后将仓库模板
-[`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 导入 Worker 的 `/api/templates`，
-再把模板绑定到该 Collection。完整的 API 命令、Token 边界和 JMS 名称匹配条件见
-[Sub-Store JMS 模板说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
+把 JMS 原生订阅添加为 Cloudflare Sub-Store 的 Source，并纳入正在使用的 Collection。节点名含独立
+`JMS` 标识（例如 `JMS LA c33s2`）时，JS 会在订阅没有 `AI专属` 组的情况下自动创建该组。
+也可以绑定仓库的 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 模板，
+让订阅显式提供节点池；完整步骤见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
-生成的 `AI专属` 组由 JS 转换为 FlClash 的 `url-test` 组，并加入全部业务组；AI/Gemini 默认优先它，
-国内业务仍默认 `DIRECT`。若订阅没有该组或 JMS 节点，脚本继续按公共订阅生成，不需要单独的 YAML 覆写。
+`AI专属` 使用 FlClash 的 `url-test` 自动测速，并加入全部业务组候选；AI/Gemini 默认优先它，
+国内业务默认 `DIRECT`。已有显式组优先，其空组、重复组或无效组不触发自动识别。
+没有显式组且没有 JMS 节点时按公共订阅生成，不需要单独的 YAML 覆写。
 
 ### 第 2 步：关联到订阅
 

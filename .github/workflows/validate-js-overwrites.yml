@@ -16,6 +16,8 @@ on:
       - 'tools/sync-node-dns-hints-adapters.js'
       - 'tools/sync-subscription-node-filter.js'
       - 'tools/tests/subscription-node-filter.test.js'
+      - 'tools/tests/subscription-ai-group.test.js'
+      - 'SubStore/templates/scki-jms-ai-mihomo.json'
       - 'tools/validate-js-overwrites.js'
       - '.github/workflows/validate-js-overwrites.yml'
   push:
@@ -34,6 +36,8 @@ on:
       - 'tools/sync-node-dns-hints-adapters.js'
       - 'tools/sync-subscription-node-filter.js'
       - 'tools/tests/subscription-node-filter.test.js'
+      - 'tools/tests/subscription-ai-group.test.js'
+      - 'SubStore/templates/scki-jms-ai-mihomo.json'
       - 'tools/validate-js-overwrites.js'
       - '.github/workflows/validate-js-overwrites.yml'
   workflow_dispatch:
@@ -57,6 +61,9 @@ jobs:
 
       - name: Validate JS overwrite contracts
         run: node tools/validate-js-overwrites.js
+
+      - name: Validate subscription AI pools and automatic JMS groups
+        run: node --test tools/tests/subscription-ai-group.test.js
 
       - name: Check synchronized traffic options and JS presets
         run: |

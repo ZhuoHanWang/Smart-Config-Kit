@@ -109,13 +109,83 @@ for (const target of TARGETS) {
     }
   });
 
-  test(`${target.file}: missing, empty, or duplicate AI groups do not alter public subscription behavior`, () => {
+  test(`${target.file}: merged JMS nodes create an isolated AI group without a Sub-Store template`, () => {
+    const run = load(target.file);
+    const input = fixture();
+    const jmsNames = ['JMS LA c33s2', 'JMS LA c33s3', 'JMS LA c33s4', 'JMS LA c33s5'];
+    input.proxies = input.proxies.filter((item) => !item.name.startsWith('JMS'));
+    input.proxies.push(...jmsNames.map((name) => proxy(name, true)));
+    // These are the ordinary groups returned by a merged subscription, not an AI pool.
+    input['proxy-groups'].push(
+      { name: '🚀 节点选择', type: 'select', proxies: ['🚀 手动切换', 'DIRECT'] },
+      { name: '🚀 手动切换', type: 'select', proxies: input.proxies.map((item) => item.name) },
+      { name: '💬 AI 服务', type: 'select', proxies: ['🚀 节点选择', 'DIRECT'] },
+    );
+    const proxiesRef = input.proxies;
+    const rulesRef = input.rules;
+    const groupsRef = input['proxy-groups'];
+    for (let round = 0; round < 2; round++) {
+      const output = run(input);
+      assertValidGroups(output);
+      assert.equal(output.proxies, proxiesRef);
+      const aiGroups = output['proxy-groups'].filter((group) => group.name === 'AI专属');
+      assert.equal(aiGroups.length, 1);
+      assert.equal(aiGroups[0].type, target.regionType);
+      assert.deepEqual(Array.from(aiGroups[0].proxies), jmsNames);
+      assert.equal(output['proxy-groups'][3].name, 'AI专属', 'AI pool follows the global group');
+      for (const group of output['proxy-groups']) {
+        if (group.name !== 'AI专属') {
+          for (const name of jmsNames) assert.ok(!group.proxies.includes(name), `${group.name}: JMS node leaked`);
+        }
+      }
+      for (const [name, first] of BUSINESS_DEFAULTS) {
+        const group = output['proxy-groups'].find((item) => item.name === name);
+        assert.equal(group.proxies[0], first, `${name} default`);
+        assert.ok(group.proxies.includes('AI专属'), `${name}: AI candidate missing`);
+      }
+      if (target.file.startsWith('FlClash/')) {
+        assert.equal(output.rules, rulesRef);
+        assert.equal(output['proxy-groups'], groupsRef);
+      }
+    }
+  });
+
+  test(`${target.file}: automatic JMS matching uses name boundaries and ignores non-selectable nodes`, () => {
+    const run = load(target.file);
+    const input = fixture();
+    input.proxies = input.proxies.filter((item) => !item.name.startsWith('JMS'));
+    const names = ['jms LA 01', 'Tokyo-JMS-01', '🇺🇸JMS 02'];
+    input.proxies.push(...names.map((name) => proxy(name, true)),
+      proxy('ADJMS01'), proxy('JMSProxy Tokyo'), proxy('JMS1 US'), proxy('🇺🇸美国ai解锁'),
+      proxy('JMS 剩余流量'),
+      { name: 'JMS Direct', type: 'direct' }, { name: 'JMS Reject', type: 'reject' });
+    const output = run(input);
+    assertValidGroups(output);
+    const aiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属');
+    assert.deepEqual(Array.from(aiGroup.proxies), names);
+    assert.ok(!output.proxies.some((item) => item.name === 'JMS 剩余流量'));
+  });
+
+  test(`${target.file}: explicit AI pools keep their membership even when other JMS nodes exist`, () => {
+    const run = load(target.file);
+    const input = fixture(['US 01 Node', 'JMS US 01']);
+    for (let round = 0; round < 2; round++) {
+      const output = run(input);
+      assertValidGroups(output);
+      const aiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属');
+      assert.deepEqual(Array.from(aiGroup.proxies), ['US 01 Node', 'JMS US 01']);
+      assert.ok(output['proxy-groups'].find((group) => group.name === '🌍 全球节点').proxies.includes('JMS Home 02'));
+    }
+  });
+
+  test(`${target.file}: subscriptions without JMS and invalid explicit AI groups keep their existing behavior`, () => {
     const run = load(target.file);
     const cases = [
       fixture(),
       fixture(['missing node', 'DIRECT', null]),
       fixture(['JMS US 01']),
     ];
+    cases[0].proxies = cases[0].proxies.filter((item) => !item.name.startsWith('JMS'));
     cases[2]['proxy-groups'].push({ name: 'AI专属', type: 'url-test', proxies: ['JMS Home 02'] });
     for (const input of cases) {
       const output = run(input);

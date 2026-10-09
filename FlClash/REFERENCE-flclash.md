@@ -1,5 +1,7 @@
 # FlClash 参考文档
 
+> 复核于 2026-10-09：官方 latest release 仍为 [v0.8.99](https://github.com/chen08209/FlClash/releases/tag/v0.8.99)（2026-10-03），相对上次核对无新稳定版。JMS 自动识别只改变 `main(config)` 的组候选输入，复用 Mihomo 官方 [url-test](https://wiki.metacubex.one/config/proxy-groups/url-test/) 的 `proxies`、`url`、`interval`、`tolerance`，保留现有数组引用；最低 v0.8.85 要求不变。
+
 > 同日补充：在 FlClash JS 执行边界内展平仅含 type/payload 的 inline 代理集合，沿用 [Mihomo 集合字段](https://wiki.metacubex.one/config/proxy-providers/)。direct/reject 对象保留供依赖引用，只从测速分类剔除。数组引用、未知协议字段、共享 payload 与 JSON 序列化均以实际 main 回归读回；未代替设备上的 App patch 验收。
 
 > 更新于 2026-10-08：官方最新稳定版为 [v0.8.99](https://github.com/chen08209/FlClash/releases/tag/v0.8.99)。该版本 [getProfile](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/providers/actions/setup.dart#L335-L393) 对脚本类型调用 `handleEvaluate(scriptContent, rawConfig)`，再把结果交给 `makeRealProfileTask`；[配置生成器](https://github.com/chen08209/FlClash/blob/v0.8.99/lib/common/task.dart#L109-L160) 从脚本结果构建最终 Mihomo 配置。本次仍只使用 `main(config)`、`proxy-groups`、`rules`、`rule-providers` 和 `url-test`，未增加 FlClash 专属字段，v0.8.85 的最低版本要求不变。

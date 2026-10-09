@@ -6,6 +6,10 @@
 
 ---
 
+## v6.0.15-personal.3 — 聚合 JMS 自动生成 AI专属 (2026-10-09)
+
+- 三个 JS 覆写在订阅缺少 `AI专属` 组时自动识别 JMS 节点，沿用现有隔离和业务首选；详见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 与[逐端审计](./docs/research/2026-10-09-jms-ai-group.md)。
+
 ## v6.0.15-personal.2 — Sub-Store JMS AI 节点组 (2026-10-09)
 
 - 将 JMS `AI专属` 节点池迁移到 Cloudflare Sub-Store 模板，更新三个 JS 覆写的组隔离和业务默认顺序；详见 [Clash Party](./Clash%20Party/CHANGELOG.md)、[FlClash](./FlClash/CHANGELOG.md) 与 [Sub-Store](./SubStore/CHANGELOG.md)。

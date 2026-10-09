@@ -1,6 +1,6 @@
 // Clash 覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-normal.21 (2026-10-09)
-// 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属订阅组 + 134 providers
+// 版本：v6.0.15-normal.22 (2026-10-09)
+// 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers
 // 规则源：rulesets/source/routing-graph.js v6.0.15（与 Smart 版规则等价，仅区域组从 smart 改为 url-test）
 // 适用：Mihomo / Clash.Meta 稳定版内核、不支持 smart + LightGBM 的分支；也适用于想完全关闭 ML 评估的用户
 // 变更历史：见 `Clash Party/CHANGELOG.md`
@@ -9,7 +9,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-normal.21'
+const VERSION = 'v6.0.15-normal.22'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -556,12 +556,16 @@ function applyGeminiOverlay(config) {
   config.rules.splice.apply(config.rules, [0, 0].concat(rules))
 }
 
-// Sub-Store expands this group's filter to exact node names before JS runs.
+// Prefer an explicit Sub-Store pool; otherwise collect delimited JMS names after node preflight.
 function collectSubscriptionAiGroup(config) {
   var proxies = Array.isArray(config.proxies) ? config.proxies : []
   var proxyNames = new Set(proxies.filter(function(p) { return SckiSubscriptionNodeFilter.isSelectableProxy(p) }).map(function(p) { return p.name }))
   var groups = Array.isArray(config['proxy-groups']) ? config['proxy-groups'] : []
   var matches = groups.filter(function(g) { return g && g.name === SUBSCRIPTION_AI_GROUP_NAME })
+  if (matches.length === 0) {
+    var jmsNames = Array.from(proxyNames).filter(function(name) { return /(^|[^a-z0-9])JMS([^a-z0-9]|$)/i.test(name) })
+    return jmsNames.length ? { name: SUBSCRIPTION_AI_GROUP_NAME, type: 'url-test', proxies: jmsNames } : null
+  }
   if (matches.length !== 1) return null
   var source = matches[0]
   if (['select', 'smart', 'url-test', 'fallback'].indexOf(source.type) === -1 || !Array.isArray(source.proxies)) return null

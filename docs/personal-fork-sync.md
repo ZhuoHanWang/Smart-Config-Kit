@@ -68,4 +68,4 @@ https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28
 
 ## JMS AI 节点
 
-实际 JMS 订阅 URL、节点参数与凭据保存在你自己的 Sub-Store Source / Collection 中。把 JMS Source 加入组合 Collection，将 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 导入 Cloudflare Worker 的 `/api/templates` 并绑定 Collection。模板按独立 `JMS` 名称标识生成 `AI专属` 代理组；Clash Party Smart/Normal 与 FlClash JS 读取该组并统一完成隔离与业务组接入，不再依赖 YAML 扩展或硬编码节点。Admin token 只用于管理 API，客户端下载链接必须使用 public download token。
+实际 JMS 订阅 URL、节点参数与凭据保存在你自己的 Sub-Store Source / Collection 中。把 JMS Source 加入组合 Collection，并让该来源的节点名称带独立 `JMS` 标识；Clash Party Smart/Normal 与 FlClash JS 会在订阅缺少 `AI专属` 组时自动生成该组并完成隔离与业务组接入。可选的 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 模板可导入 Worker `/api/templates` 并绑定 Collection，用于显式提供节点池，JS 优先使用该组。Admin token 只用于管理 API，客户端下载链接使用 public download token。

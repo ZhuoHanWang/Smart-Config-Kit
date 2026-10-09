@@ -5,11 +5,11 @@
 > 目录简介：这里是 Mihomo Smart/Normal 覆写脚本的事实基线，面向 Clash Party、Clash Verge Rev、Mihomo Party 等桌面客户端。
 >
 > 覆写脚本：**两份二选一**，规则 100% 等价，仅 24 区域组（12 全部 + 12 家宽）的内核选路算法不同
-> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.20**，2026-10-09）— Smart 内核 + LightGBM ML 评估
-> - `ClashParty(mihomo).js`（**v6.0.15-normal.21**，2026-10-09）— 普通内核 url-test 延迟选路
+> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.21**，2026-10-09）— Smart 内核 + LightGBM ML 评估
+> - `ClashParty(mihomo).js`（**v6.0.15-normal.22**，2026-10-09）— 普通内核 url-test 延迟选路
 >
 > UI 补充配置：已整合到本文「四、粘贴 UI 补充配置」章节
-> 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 34 业务策略组 + **134 rule-providers / 173 rules**（含 Gemini overlay）；`AI专属` 节点池由 Sub-Store 可选提供
+> 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 34 业务策略组 + **134 rule-providers / 173 rules**（含 Gemini overlay）；`AI专属` 可由订阅提供或自动识别 JMS 节点生成
 > 适用客户端：
 > - **Mihomo Party**（桌面端，推荐，原生支持 JS 覆写；内置 Smart 内核）
 > - **Clash Verge Rev**（桌面端，支持 JS/YAML 双覆写）
@@ -26,7 +26,7 @@
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
-> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源，并绑定仓库提供的 `SubStore/templates/scki-jms-ai-mihomo.json` 模板。组合输出会生成 `AI专属` 代理组；本 JS 接管该组、隔离其节点与区域/家宽分类，并将组加入所有业务组。AI/Gemini 默认优先 `AI专属`，国内业务默认 `DIRECT`。步骤见 [Sub-Store JMS 模板说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
+> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，组加入所有业务候选；AI/Gemini 默认优先 `AI专属`，国内业务默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
 > 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 
