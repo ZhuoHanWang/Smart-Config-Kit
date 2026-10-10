@@ -1,5 +1,5 @@
 // FlClash 覆写脚本 — 标准 Mihomo 内核动态分流版
-// 版本：v6.0.15-flclash-ai-gemini.6 (2026-10-09)
+// 版本：v6.0.15-flclash-ai-gemini.7 (2026-10-10)
 // 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers；另含 Gemini overlay
 // 规则源：rulesets/source/routing-graph.js v6.0.15（基线规则等价；区域组为 url-test — FlClash 标准 Mihomo 不支持 smart + LightGBM）
 // 变体：保留个人 Gemini/AI 业务组；AI专属池优先读取订阅组，缺少时按 JMS 名称生成
@@ -36,7 +36,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-flclash-ai-gemini.6'
+const VERSION = 'v6.0.15-flclash-ai-gemini.7'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -1693,6 +1693,7 @@ function main(config) {
     ]
     // 自定义直连域名
     var customDirectRules = [
+      'DOMAIN,dl.xunlei.com,DIRECT',
       'DOMAIN-SUFFIX,muyuan.do,DIRECT',
       'DOMAIN-SUFFIX,anyrouter.top,DIRECT',
     ]

@@ -3,6 +3,11 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.7 (2026-10-10)
+
+- FIX-XUNLEI-DL：前置 `DOMAIN,dl.xunlei.com,DIRECT`，避免迅雷下载页被快照中的 `DOMAIN-KEYWORD,xunlei` 先命中到「📥 下载更新」后经代理 TLS 握手失败。
+- SCOPE：只覆盖下载页精确域名；融合规则快照、迅雷全域、下载客户端进程和其他下载规则不变。
+
 ## v6.0.15-flclash-ai-gemini.6 (2026-10-09)
 
 - PERSONAL-SNAPSHOT：FlClash 的 132 个融合 provider 和两份 Gemini provider 固定指向个人 Fork 的 `v6.0.15-fork.1` 文件快照。

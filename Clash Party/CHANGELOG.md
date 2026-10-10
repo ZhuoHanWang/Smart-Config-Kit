@@ -5,6 +5,11 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.23 / v6.0.15-normal.24 (2026-10-10)
+
+- FIX-XUNLEI-DL：前置 `DOMAIN,dl.xunlei.com,DIRECT`，避免迅雷下载页被快照中的 `DOMAIN-KEYWORD,xunlei` 先命中到「📥 下载更新」后经代理 TLS 握手失败。
+- SCOPE：只覆盖下载页精确域名，不修改已发布的 `v6.0.15-fork.1` 规则快照，也不改变迅雷全域、下载客户端进程和其他下载规则。
+
 ## v6.0.15-dns.22 / v6.0.15-normal.23 (2026-10-09)
 
 - PERSONAL-SNAPSHOT：Clash Party Smart / Normal 使用个人 Fork 的 `v6.0.15-fork.1` 快照，固定 132 个融合 provider 与两份 Gemini 规则；上游日后重排/删除融合文件不再影响当前配置。
