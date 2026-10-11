@@ -26,7 +26,7 @@
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
-> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，组加入所有业务候选；AI/Gemini 默认优先 `AI专属`，国内业务默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
+> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，组加入所有业务候选；AI/Gemini/Google 默认优先 `AI专属`，国内业务和会议协作默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
 > 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 
@@ -100,7 +100,7 @@
 - ❌ **LightGBM 模型没下载**（仅 Smart 版）：启动后若日志有 `Model.bin not found`，手动下 https://github.com/vernesong/mihomo/releases/download/LightGBM-Model/Model.bin 放到客户端的 mihomo 工作目录；或直接换成**普通版**脚本，不依赖 `Model.bin`。
 - ❌ **Smart 版提示内核不支持 `type: smart`**：你用的不是 mihomo Alpha。要么换内核（Clash Verge Rev → 设置 → Clash 内核 → Mihomo Alpha），要么直接改用**普通版**脚本。
 - ❌ **找不到业务组 / 区域组**：确认订阅返回的是 Mihomo / Clash.Meta 格式（不是 Surge / Quantumult）。
-- ❌ **RustDesk 仍然超时**：RustDesk 应命中 `🧑‍💼 会议协作`，不要让该组停在 `DIRECT`；DNS 段应采用本文第四章的 split-bootstrap / DoH 配置，并且 `fake-ip-filter` 应包含 `+.rustdesk.com` 真实 IP 回应。
+- ❌ **远控仍然超时**：ToDesk / RustDesk 等会话进程应命中 `🧑‍💼 会议协作`，该组默认 `DIRECT` 以优先真实 IP 和打洞；若某个公共中继或 API 必须代理，再手动把该组切到可用节点。DNS 段应采用本文第四章的 split-bootstrap / DoH 配置，并且 `fake-ip-filter` 应包含远控域名的真实 IP 回应。
 - ❌ **WebRTC / STUN 测出代理出口或失败**：v5.4.13 后标准 STUN/TURN 端口 `3478 / 3479 / 5349 / 19302 / 19305 / 19307` 应直连；若服务强制走 UDP/443 TURN，仍会受 QUIC 屏蔽策略影响。
 - ⚙️ **QUIC 精细化**：仅放行 YouTube/Google/微软/苹果 的 QUIC（UDP/443）走对应业务组，其余海外 QUIC 一律 `REJECT` 强制回退 HTTP/2（配合 `config.sniffer` 嗅探 SNI 做 GEOSITE 匹配）。**若某海外小众 App 必须用 QUIC 且无法回退 TCP 而断连**：在 `injectRules` 中删除/注释那 5 条 `AND,((DST-PORT,443),(NETWORK,UDP),...)` 规则即可恢复全量 QUIC 透传；只想恢复一部分则保留白名单豁免行、删掉末条 `...,(NOT,((GEOSITE,cn)))),REJECT` 即可。
 
@@ -373,19 +373,19 @@ sniffer:
 
 | 业务组 | 推荐上游 |
 |--------|----------|
-| 🤖 AI 服务 / ✨ Gemini 服务 | AI专属（已配置时），再按需切换全球 AI 区域组 |
+| 🤖 AI 服务 / ✨ Gemini 服务 / 🔍 Google 服务 | AI专属（已配置时），再按需切换全球 AI 区域组 |
 | 💰 加密货币 | 🇭🇰 香港节点 |
 | 🏦 金融支付 | DIRECT |
 | 💬 即时通讯 | 🇭🇰 香港节点 |
-| 📱 社交媒体 / 🧑‍💼 会议协作 | 🇯🇵 日韩节点 |
+| 📱 社交媒体 | 🇯🇵 日韩节点 |
+| 🧑‍💼 会议协作 | DIRECT |
 | 📺 国内流媒体 / 🕹️ 国内游戏 / 🍎 苹果服务 / 🏠 国内网站 | DIRECT |
 | 🎥 美国流媒体、YouTube、音乐流媒体 | 🇺🇸 美国节点 |
 | 🇭🇰 / 🇹🇼 / 🇯🇵 / 🇪🇺 地区流媒体 | 对应地区节点 |
 | 🎵 TikTok | 🇸🇬 狮城节点 |
 | 🎮 国外游戏 | 🇯🇵 日韩节点 |
-| 🔍 Google 服务 / 工具与服务 / 微软服务 | 🌍 全球节点 |
+| 🔧 工具与服务 / Ⓜ️ 微软服务 | 🌍 全球节点 |
 | 🛰️ BT/PT Tracker / 🛑 广告拦截 | REJECT |
-| 🔧 工具与服务 | 🌍 全球节点 |
 | 🚫 受限网站（GFW） | 中国选代理 / 海外选 DIRECT |
 
 ---

@@ -16,7 +16,7 @@ const BUSINESS_DEFAULTS = [
   ['🤖 AI 服务', 'AI专属'], ['✨ Gemini 服务', 'AI专属'],
   ['💰 加密货币', '🇭🇰 香港节点'], ['🏦 金融支付', 'DIRECT'],
   ['💬 即时通讯', '🇭🇰 香港节点'], ['📱 社交媒体', '🇯🇵 日韩节点'],
-  ['🧑‍💼 会议协作', '🇯🇵 日韩节点'], ['📺 国内流媒体', 'DIRECT'],
+  ['🧑‍💼 会议协作', 'DIRECT'], ['📺 国内流媒体', 'DIRECT'],
   ['🎵 TikTok', '🇸🇬 狮城节点'], ['🎥 Netflix', '🇺🇸 美国节点'],
   ['🎬 Disney+', '🇺🇸 美国节点'], ['📡 HBO/Max', '🇺🇸 美国节点'],
   ['📺 Hulu', '🇺🇸 美国节点'], ['🎬 Prime Video', '🇺🇸 美国节点'],
@@ -24,7 +24,7 @@ const BUSINESS_DEFAULTS = [
   ['🇭🇰 香港流媒体', '🇭🇰 香港节点'], ['🇹🇼 台湾流媒体', '🇹🇼 台湾节点'],
   ['🇯🇵 日韩流媒体', '🇯🇵 日韩节点'], ['🇪🇺 欧洲流媒体', '🇪🇺 欧洲节点'],
   ['🌐 其他国外流媒体', '🌍 全球节点'], ['🕹️ 国内游戏', 'DIRECT'],
-  ['🎮 国外游戏', '🇯🇵 日韩节点'], ['🔍 Google 服务', '🌍 全球节点'],
+  ['🎮 国外游戏', '🇯🇵 日韩节点'], ['🔍 Google 服务', 'AI专属'],
   ['🔧 工具与服务', '🌍 全球节点'], ['Ⓜ️ 微软服务', '🌍 全球节点'],
   ['🍎 苹果服务', 'DIRECT'], ['📥 下载更新', '🌍 全球节点'],
   ['🛰️ BT/PT Tracker', 'REJECT'], ['🏠 国内网站', 'DIRECT'],
@@ -132,7 +132,23 @@ for (const target of TARGETS) {
       assert.equal(aiGroups.length, 1);
       assert.equal(aiGroups[0].type, target.regionType);
       assert.deepEqual(Array.from(aiGroups[0].proxies), jmsNames);
-      assert.equal(output['proxy-groups'][3].name, 'AI专属', 'AI pool follows the global group');
+      const expectedAiDisplayOrder = [
+        '🤖 AI 服务',
+        '✨ Gemini 服务',
+        '🔍 Google 服务',
+        '🌍 全球节点',
+        '🌍 全球节点（AI排除港台澳俄）',
+        '🏡 全球家宽（AI排除港台澳俄）',
+        'AI专属',
+      ].filter((name) => output['proxy-groups'].some((group) => group.name === name));
+      assert.equal(
+        output['proxy-groups']
+          .filter((group) => expectedAiDisplayOrder.includes(group.name))
+          .map((group) => group.name)
+          .join('\u0000'),
+        expectedAiDisplayOrder.join('\u0000'),
+        'AI-related groups stay together in the convenient display order',
+      );
       for (const group of output['proxy-groups']) {
         if (group.name !== 'AI专属') {
           for (const name of jmsNames) assert.ok(!group.proxies.includes(name), `${group.name}: JMS node leaked`);
@@ -192,6 +208,8 @@ for (const target of TARGETS) {
       assertValidGroups(output);
       assert.ok(!output['proxy-groups'].some((group) => group.name === 'AI专属'));
       assert.ok(output['proxy-groups'].some((group) => group.name === '🌍 全球节点'));
+      assert.equal(output['proxy-groups'].find((group) => group.name === '🧑‍💼 会议协作').proxies[0], 'DIRECT');
+      assert.equal(output['proxy-groups'].find((group) => group.name === '🔍 Google 服务').proxies[0], '🌍 全球节点');
     }
   });
 }

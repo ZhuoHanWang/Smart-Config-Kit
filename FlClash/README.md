@@ -54,8 +54,8 @@
 也可以绑定仓库的 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 模板，
 让订阅显式提供节点池；完整步骤见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
-`AI专属` 使用 FlClash 的 `url-test` 自动测速，并加入全部业务组候选；AI/Gemini 默认优先它，
-国内业务默认 `DIRECT`。已有显式组优先，其空组、重复组或无效组不触发自动识别。
+`AI专属` 使用 FlClash 的 `url-test` 自动测速，并加入全部业务组候选；AI/Gemini/Google 默认优先它，
+国内业务和会议协作默认 `DIRECT`。已有显式组优先，其空组、重复组或无效组不触发自动识别。
 没有显式组且没有 JMS 节点时按公共订阅生成，不需要单独的 YAML 覆写。
 
 ### 第 2 步：关联到订阅

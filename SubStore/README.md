@@ -214,7 +214,7 @@ unset SUB_STORE_ADMIN_TOKEN
 
 模板与 JS 自动识别均按节点名称匹配独立的 `JMS` 标识（大小写不敏感）：`JMS Tokyo 01`、`Tokyo-JMS-01` 可命中，`JMSProxy`、`ADJMS01` 不命中。若 JMS 服务的节点名称没有独立 `JMS` 标识，需要先在 Sub-Store 为该来源统一加上这个标识。
 
-Clash Party Smart / Normal 与 FlClash JS 会读取 Sub-Store 展开的精确节点列表，重建目标客户端适配的 `AI专属` 自动测速组，并将它加入所有业务组。AI / Gemini 默认优先该组；国内组默认 `DIRECT`，其他组优先自身业务地区。没有有效 `AI专属` 组时，普通订阅保持正常行为。
+Clash Party Smart / Normal 与 FlClash JS 会读取 Sub-Store 展开的精确节点列表，重建目标客户端适配的 `AI专属` 自动测速组，并将它加入所有业务组。AI / Gemini / Google 默认优先该组；国内组和会议协作默认 `DIRECT`，其他组优先自身业务地区。没有有效 `AI专属` 组时，普通订阅保持正常行为。
 
 继续使用下方的 Raw 脚本链前，请确认你的部署是方式一、方式二，或已实测支持相同脚本宿主能力的 Worker 适配；Cloudflare-native 兼容版应使用其内置节点操作。
 

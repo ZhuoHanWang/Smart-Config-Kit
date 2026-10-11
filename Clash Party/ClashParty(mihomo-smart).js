@@ -1,5 +1,5 @@
 // Clash Smart 内核覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-dns.23 (2026-10-10)
+// 版本：v6.0.15-dns.25 (2026-10-11)
 // 架构：SUB-STORE 多机场融合 + 24 Smart 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers
 // 规则源：rulesets/source/routing-graph.js v6.0.15（同策略规范化与语义去重）
 // 变更历史：见 `Clash Party/CHANGELOG.md`
@@ -8,7 +8,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-dns.23'
+const VERSION = 'v6.0.15-dns.25'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -594,7 +594,7 @@ function injectBusinessGroups(config, activeSmartNames) {
   var paymentProxies = filterActive(buildDirectFirstProxies())
   var imProxies = filterActive(buildRegionPreferredProxies('HK'))
   var socialProxies = filterActive(buildRegionPreferredProxies('JPKR'))
-  var workProxies = filterActive(buildRegionPreferredProxies('JPKR'))
+  var workProxies = filterActive(buildDirectFirstProxies())
   var standardProxies = filterActive(buildStandardProxies())
   var streamUsProxies = filterActive(buildRegionPreferredProxies('US'))
   var streamHkProxies = filterActive(buildRegionPreferredProxies('HK'))
@@ -644,7 +644,7 @@ function injectBusinessGroups(config, activeSmartNames) {
   var firstSmartIdx = config['proxy-groups'].findIndex(function(g) { return g && g.type === 'smart' })
   groups.forEach(function(group, i) {
     if (activeSmartNames && activeSmartNames.has(SUBSCRIPTION_AI_GROUP_NAME)) {
-      if (group.name === BIZ.AI || group.name === BIZ.GEMINI) group.proxies.unshift(SUBSCRIPTION_AI_GROUP_NAME)
+      if (group.name === BIZ.AI || group.name === BIZ.GEMINI || group.name === BIZ.GOOGLE) group.proxies.unshift(SUBSCRIPTION_AI_GROUP_NAME)
       else group.proxies.push(SUBSCRIPTION_AI_GROUP_NAME)
     }
     var existIdx = config['proxy-groups'].findIndex(function(g) { return g && g.name === group.name })
@@ -1564,24 +1564,27 @@ function sortProxyGroups(config) {
   bizGroups.sort((a, b) => bizOrder.indexOf(a.name) - bizOrder.indexOf(b.name))
   const smartOrder = Object.values(SMART).concat(Object.values(SMART_AI)).concat([SUBSCRIPTION_AI_GROUP_NAME])
   smartGroups.sort((a, b) => { const ia = smartOrder.indexOf(a.name); const ib = smartOrder.indexOf(b.name); return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) })
-  // AI/Gemini 业务组前置到全球节点之前，方便快速切换
+  // AI/Gemini/Google 业务组前置到全球节点之前，方便快速切换
   var aiGroups = []
   var restBizGroups = []
   bizGroups.forEach(function(g) {
-    if (g.name === BIZ.AI || g.name === BIZ.GEMINI) { aiGroups.push(g) }
+    if (g.name === BIZ.AI || g.name === BIZ.GEMINI || g.name === BIZ.GOOGLE) { aiGroups.push(g) }
     else { restBizGroups.push(g) }
   })
   var globalGroup = smartGroups.find(function(g) { return g.name === SMART.GLOBAL })
   var restSmartGroups = smartGroups.filter(function(g) { return g.name !== SMART.GLOBAL })
-  // AI专属组紧跟全球节点
+  // AI 排除组紧跟全球节点，AI专属组随后显示
+  var aiExcludedGroups = []
   var aiExclusiveGroups = []
   var finalRestSmart = []
   for (var t = 0; t < restSmartGroups.length; t++) {
-    if (restSmartGroups[t].name === SUBSCRIPTION_AI_GROUP_NAME) { aiExclusiveGroups.push(restSmartGroups[t]) }
+    if (restSmartGroups[t].name === SMART_AI.GLOBAL || restSmartGroups[t].name === SMART_AI.GLOBAL_HOME) {
+      aiExcludedGroups.push(restSmartGroups[t])
+    } else if (restSmartGroups[t].name === SUBSCRIPTION_AI_GROUP_NAME) { aiExclusiveGroups.push(restSmartGroups[t]) }
     else { finalRestSmart.push(restSmartGroups[t]) }
   }
-  // 顺序：AI/Gemini → 全球节点 → AI专属 → 其余业务组 → 其余区域组 → 其他
-  config['proxy-groups'] = aiGroups.concat([globalGroup], aiExclusiveGroups, restBizGroups, finalRestSmart, otherGroups)
+  // 顺序：AI/Gemini/Google → 全球节点 → AI 排除组 → AI专属 → 其余业务组 → 其余区域组 → 其他
+  config['proxy-groups'] = aiGroups.concat([globalGroup], aiExcludedGroups, aiExclusiveGroups, restBizGroups, finalRestSmart, otherGroups)
     .filter(function(g) { return g })  // 过滤可能的 undefined（如无全球节点时）
 }
 

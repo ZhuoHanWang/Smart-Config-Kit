@@ -1,5 +1,5 @@
 // FlClash 覆写脚本 — 标准 Mihomo 内核动态分流版
-// 版本：v6.0.15-flclash-ai-gemini.7 (2026-10-10)
+// 版本：v6.0.15-flclash-ai-gemini.9 (2026-10-11)
 // 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers；另含 Gemini overlay
 // 规则源：rulesets/source/routing-graph.js v6.0.15（基线规则等价；区域组为 url-test — FlClash 标准 Mihomo 不支持 smart + LightGBM）
 // 变体：保留个人 Gemini/AI 业务组；AI专属池优先读取订阅组，缺少时按 JMS 名称生成
@@ -36,7 +36,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-flclash-ai-gemini.7'
+const VERSION = 'v6.0.15-flclash-ai-gemini.9'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -615,7 +615,7 @@ function injectBusinessGroups(config, activeSmartNames) {
   var paymentProxies = filterActive(buildDirectFirstProxies())
   var imProxies = filterActive(buildRegionPreferredProxies('HK'))
   var socialProxies = filterActive(buildRegionPreferredProxies('JPKR'))
-  var workProxies = filterActive(buildRegionPreferredProxies('JPKR'))
+  var workProxies = filterActive(buildDirectFirstProxies())
   var standardProxies = filterActive(buildStandardProxies())
   var streamUsProxies = filterActive(buildRegionPreferredProxies('US'))
   var streamHkProxies = filterActive(buildRegionPreferredProxies('HK'))
@@ -666,7 +666,7 @@ function injectBusinessGroups(config, activeSmartNames) {
   var firstSmartIdx = config['proxy-groups'].findIndex(function(g) { return g && _smartNameSet.has(g.name) })
   groups.forEach(function(group, i) {
     if (activeSmartNames && activeSmartNames.has(SUBSCRIPTION_AI_GROUP_NAME)) {
-      if (group.name === BIZ.AI || group.name === BIZ.GEMINI) group.proxies.unshift(SUBSCRIPTION_AI_GROUP_NAME)
+      if (group.name === BIZ.AI || group.name === BIZ.GEMINI || group.name === BIZ.GOOGLE) group.proxies.unshift(SUBSCRIPTION_AI_GROUP_NAME)
       else group.proxies.push(SUBSCRIPTION_AI_GROUP_NAME)
     }
     var existIdx = config['proxy-groups'].findIndex(function(g) { return g && g.name === group.name })
@@ -1529,11 +1529,11 @@ function sortProxyGroups(config) {
   bizGroups.sort((a, b) => bizOrder.indexOf(a.name) - bizOrder.indexOf(b.name))
   var smartOrder = Object.values(SMART).concat(Object.values(SMART_AI)).concat([SUBSCRIPTION_AI_GROUP_NAME])
   smartGroups.sort((a, b) => { const ia = smartOrder.indexOf(a.name); const ib = smartOrder.indexOf(b.name); return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) })
-  // AI/Gemini 业务组前置到全球节点之前，方便快速切换
+  // AI/Gemini/Google 业务组前置到全球节点之前，方便快速切换
   var aiGroups = []
   var restBizGroups = []
   bizGroups.forEach(function(g) {
-    if (g.name === BIZ.AI || g.name === BIZ.GEMINI) {
+    if (g.name === BIZ.AI || g.name === BIZ.GEMINI || g.name === BIZ.GOOGLE) {
       aiGroups.push(g)
     } else {
       restBizGroups.push(g)
@@ -1545,20 +1545,24 @@ function sortProxyGroups(config) {
     if (smartGroups[s].name === SMART.GLOBAL) { globalGroup = smartGroups[s] }
     else { restSmartGroups.push(smartGroups[s]) }
   }
-  // AI专属组紧跟全球节点
+  // AI 排除组紧跟全球节点，AI专属组随后显示
+  var aiExcludedGroups = []
   var aiExclusiveGroups = []
   var finalRestSmart = []
   for (var t = 0; t < restSmartGroups.length; t++) {
-    if (restSmartGroups[t].name === SUBSCRIPTION_AI_GROUP_NAME) {
+    if (restSmartGroups[t].name === SMART_AI.GLOBAL || restSmartGroups[t].name === SMART_AI.GLOBAL_HOME) {
+      aiExcludedGroups.push(restSmartGroups[t])
+    } else if (restSmartGroups[t].name === SUBSCRIPTION_AI_GROUP_NAME) {
       aiExclusiveGroups.push(restSmartGroups[t])
     } else {
       finalRestSmart.push(restSmartGroups[t])
     }
   }
   config['proxy-groups'].splice(0, config['proxy-groups'].length)
-  // 顺序：AI/Gemini → 全球节点 → AI专属 → 其余业务组 → 其余区域组 → 其他
+  // 顺序：AI/Gemini/Google → 全球节点 → AI 排除组 → AI专属 → 其余业务组 → 其余区域组 → 其他
   for (var a = 0; a < aiGroups.length; a++) { config['proxy-groups'].push(aiGroups[a]) }
   if (globalGroup) { config['proxy-groups'].push(globalGroup) }
+  for (var f = 0; f < aiExcludedGroups.length; f++) { config['proxy-groups'].push(aiExcludedGroups[f]) }
   for (var b = 0; b < aiExclusiveGroups.length; b++) { config['proxy-groups'].push(aiExclusiveGroups[b]) }
   for (var c = 0; c < restBizGroups.length; c++) { config['proxy-groups'].push(restBizGroups[c]) }
   for (var d = 0; d < finalRestSmart.length; d++) { config['proxy-groups'].push(finalRestSmart[d]) }

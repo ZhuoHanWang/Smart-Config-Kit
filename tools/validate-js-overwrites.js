@@ -118,13 +118,19 @@ const BIZ_GROUPS = [
 ];
 
 const EXPECTED_GROUP_ORDER = [SMART_GROUPS[0], ...BIZ_GROUPS, ...SMART_GROUPS.slice(1)];
+const AI_PRIORITY_GROUPS = new Set(['🤖 AI 服务', '✨ Gemini 服务', '🔍 Google 服务']);
+const OPTIONAL_DISPLAY_GROUPS = new Set([
+  '🌍 全球节点（AI排除港台澳俄）',
+  '🏡 全球家宽（AI排除港台澳俄）',
+]);
 const SMART_AI_GEMINI_GROUP_ORDER = [
-  BIZ_GROUPS[0],
-  '✨ Gemini 服务',
+  ...BIZ_GROUPS.filter((name) => AI_PRIORITY_GROUPS.has(name)),
   SMART_GROUPS[0],
+  '🌍 全球节点（AI排除港台澳俄）',
+  '🏡 全球家宽（AI排除港台澳俄）',
   'AI专属',
-  ...BIZ_GROUPS.slice(2),  // 跳过 Gemini（已在前面显示），从 💰 加密货币 开始
-  ...SMART_GROUPS.slice(1), // 区域组（含 RU），不含全球节点
+  ...BIZ_GROUPS.filter((name) => !AI_PRIORITY_GROUPS.has(name)),
+  ...SMART_GROUPS.slice(1).filter((name) => !OPTIONAL_DISPLAY_GROUPS.has(name)),
 ];
 const flclashTarget = TARGETS.find((target) => target.id === 'flclash');
 Object.assign(flclashTarget, {
@@ -145,11 +151,11 @@ Object.assign(flclashTarget, {
   },
 });
 
-// Smart 和 Normal 版包含 AI/Gemini overlay 但不做 front-placement（保持全球节点置顶）
+// Smart 和 Normal 版包含 AI/Gemini overlay，统一按 AI/Gemini/Google → 全球节点 → AI 排除组排序
 const smartTarget = TARGETS.find((target) => target.id === 'smart');
 const normalTarget = TARGETS.find((target) => target.id === 'normal');
 [smartTarget, normalTarget].forEach((t) => Object.assign(t, {
-  expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,  // AI/Gemini 前置 + AI专属
+  expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,  // AI/Gemini/Google 前置 + 全球 AI 排除组 + AI专属
   expectedFusedRules: EXPECTED_FUSED_RULES + 23,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
@@ -277,7 +283,7 @@ const GROUP_DEFAULT_CASES = [
   { group: '🏦 金融支付', first: 'DIRECT' },
   { group: '💬 即时通讯', first: '🇭🇰 香港节点' },
   { group: '📱 社交媒体', first: '🇯🇵 日韩节点' },
-  { group: '🧑‍💼 会议协作', first: '🇯🇵 日韩节点' },
+  { group: '🧑‍💼 会议协作', first: 'DIRECT' },
   { group: '📺 国内流媒体', first: 'DIRECT' },
   { group: '🎵 TikTok', first: '🇸🇬 狮城节点' },
   { group: '🎥 Netflix', first: '🇺🇸 美国节点' },
@@ -294,7 +300,7 @@ const GROUP_DEFAULT_CASES = [
   { group: '🌐 其他国外流媒体', first: '🌍 全球节点' },
   { group: '🕹️ 国内游戏', first: 'DIRECT' },
   { group: '🎮 国外游戏', first: '🇯🇵 日韩节点' },
-  { group: '🔍 Google 服务', first: '🌍 全球节点' },
+  { group: '🔍 Google 服务', first: 'AI专属' },
   { group: '🔧 工具与服务', first: '🌍 全球节点' },
   { group: 'Ⓜ️ 微软服务', first: '🌍 全球节点' },
   { group: '🍎 苹果服务', first: 'DIRECT' },
@@ -660,10 +666,11 @@ function validateGroups(target, output, record) {
   const groupsByName = groupByName(output);
   const proxyNames = new Set(output.proxies.map((proxy) => proxy.name));
 
-  const expectedGroupOrder = target.expectedGroupOrder || EXPECTED_GROUP_ORDER;
+  const expectedGroupOrder = (target.expectedGroupOrder || EXPECTED_GROUP_ORDER)
+    .filter((name) => !OPTIONAL_DISPLAY_GROUPS.has(name) || groupNames.includes(name));
   record.expectEqual(groups.length, expectedGroupOrder.length, 'emits exactly the expected JS overwrite group count');
   record.expectEqual(uniqueValues(groupNames).length, groupNames.length, 'does not emit duplicate proxy-group names');
-  record.expectArrayEqual(groupNames, expectedGroupOrder, 'keeps global, business, then region group order stable');
+  record.expectArrayEqual(groupNames, expectedGroupOrder, 'keeps the configured AI, global, business, and region display order');
 
   for (const name of BIZ_GROUPS) {
     const group = groupsByName.get(name);

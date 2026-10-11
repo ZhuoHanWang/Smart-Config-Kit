@@ -5,6 +5,16 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.25 / v6.0.15-normal.26 (2026-10-11)
+
+- UI-ORDER：代理组列表将 `🔍 Google 服务` 放到 `✨ Gemini 服务` 下方，并将 `🌍 全球节点（AI排除港台澳俄）`、`🏡 全球家宽（AI排除港台澳俄）` 紧跟在 `🌍 全球节点` 后方；规则判断顺序和业务默认策略不变。
+
+## v6.0.15-dns.24 / v6.0.15-normal.25 (2026-10-10)
+
+- DEFAULTS：`🧑‍💼 会议协作` 改为 `DIRECT` 优先，避免 ToDesk / RustDesk 等远控会话进程默认落到日韩节点；其他区域候选仍保留在后。
+- GOOGLE-AI：检测到有效 `AI专属` 时，`🔍 Google 服务` 与 AI / Gemini 一样默认优先该组；没有专属组时继续默认 `🌍 全球节点`。
+- VERIFY：同步 Smart / Normal / FlClash 默认值合同测试，不修改已发布的 `v6.0.15-fork.1` 规则快照。
+
 ## v6.0.15-dns.23 / v6.0.15-normal.24 (2026-10-10)
 
 - FIX-XUNLEI-DL：前置 `DOMAIN,dl.xunlei.com,DIRECT`，避免迅雷下载页被快照中的 `DOMAIN-KEYWORD,xunlei` 先命中到「📥 下载更新」后经代理 TLS 握手失败。
