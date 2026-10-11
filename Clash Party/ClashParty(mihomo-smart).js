@@ -1,5 +1,5 @@
 // Clash Smart 内核覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-dns.25 (2026-10-11)
+// 版本：v6.0.15-dns.26 (2026-10-11)
 // 架构：SUB-STORE 多机场融合 + 24 Smart 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers
 // 规则源：rulesets/source/routing-graph.js v6.0.15（同策略规范化与语义去重）
 // 变更历史：见 `Clash Party/CHANGELOG.md`
@@ -8,7 +8,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-dns.25'
+const VERSION = 'v6.0.15-dns.26'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -539,7 +539,6 @@ function applyGeminiOverlay(config) {
     `DOMAIN-SUFFIX,lh3.googleusercontent.com,${BIZ.GEMINI}`,
     `DOMAIN-SUFFIX,lh5.googleusercontent.com,${BIZ.GEMINI}`,
     `DOMAIN-SUFFIX,notebooklm.google,${BIZ.GEMINI}`,
-    'DOMAIN,dl.xunlei.com,DIRECT',
     'DOMAIN-SUFFIX,muyuan.do,DIRECT',
     'DOMAIN-SUFFIX,anyrouter.top,DIRECT',
   ]

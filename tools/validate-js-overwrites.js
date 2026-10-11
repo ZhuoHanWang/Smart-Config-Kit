@@ -135,7 +135,7 @@ const SMART_AI_GEMINI_GROUP_ORDER = [
 const flclashTarget = TARGETS.find((target) => target.id === 'flclash');
 Object.assign(flclashTarget, {
   expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,
-  expectedFusedRules: EXPECTED_FUSED_RULES + 23,
+  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
     'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
@@ -145,7 +145,6 @@ Object.assign(flclashTarget, {
   allowInlineRule(rule) {
     const text = String(rule);
     return text.endsWith(',✨ Gemini 服务')
-      || text === 'DOMAIN,dl.xunlei.com,DIRECT'
       || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
       || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
   },
@@ -156,7 +155,7 @@ const smartTarget = TARGETS.find((target) => target.id === 'smart');
 const normalTarget = TARGETS.find((target) => target.id === 'normal');
 [smartTarget, normalTarget].forEach((t) => Object.assign(t, {
   expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,  // AI/Gemini/Google 前置 + 全球 AI 排除组 + AI专属
-  expectedFusedRules: EXPECTED_FUSED_RULES + 23,
+  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
     'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
@@ -166,7 +165,6 @@ const normalTarget = TARGETS.find((target) => target.id === 'normal');
   allowInlineRule(rule) {
     const text = String(rule);
     return text.endsWith(',✨ Gemini 服务')
-      || text === 'DOMAIN,dl.xunlei.com,DIRECT'
       || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
       || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
   },
@@ -759,11 +757,6 @@ function validateRulesAndProviders(output, record, target) {
   record.expect(!rules.slice(0, -1).some((rule) => String(rule).startsWith('MATCH,')), 'does not place MATCH before the final rule');
   record.expect(!rules.some((rule) => String(rule).includes('机场自动选择')), 'subscription-native rules are removed');
   record.expect(!providerNames.has('legacy_provider'), 'subscription-native rule-providers are removed');
-  const xunleiDirectIndex = rules.indexOf('DOMAIN,dl.xunlei.com,DIRECT');
-  const xunleiDownloadIndex = rules.indexOf('RULE-SET,scki-fused-057-download-residual,📥 下载更新');
-  record.expect(xunleiDirectIndex !== -1, 'Thunder download page direct exception is present');
-  record.expect(xunleiDownloadIndex !== -1 && xunleiDirectIndex < xunleiDownloadIndex, 'Thunder download page direct exception precedes generic download keyword routing');
-
   const fusedIntlPreAd = firstFusedRuleIndex(rules, 'intl-site-domain', '🌐 国外网站');
   const fusedCnMediaPreTikTok = firstFusedRuleIndex(rules, 'cnmedia-domain', '📺 国内流媒体');
   const fusedAd = firstFusedRuleIndex(rules, 'ad-domain', '🛑 广告拦截');

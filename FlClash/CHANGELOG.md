@@ -3,6 +3,11 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.10 (2026-10-11)
+
+- REVERT-XUNLEI-DL：移除 `DOMAIN,dl.xunlei.com,DIRECT` 直连例外；此前问题由「🌐 全球节点」固定到不可用节点导致 Smart 选路未生效，恢复由现有下载规则和健康节点选择处理迅雷流量。
+- VERIFY：移除迅雷专属合同校验；个人规则快照、通用 `xunlei` 规则、下载客户端进程规则和其他业务路由不变。
+
 ## v6.0.15-flclash-ai-gemini.9 (2026-10-11)
 
 - UI-ORDER：代理组列表将 `🔍 Google 服务` 放到 `✨ Gemini 服务` 下方，并将 `🌍 全球节点（AI排除港台澳俄）`、`🏡 全球家宽（AI排除港台澳俄）` 紧跟在 `🌍 全球节点` 后方；规则判断顺序和业务默认策略不变。

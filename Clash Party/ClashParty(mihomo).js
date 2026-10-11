@@ -1,5 +1,5 @@
 // Clash 覆写脚本 - SUB-STORE 多机场精细分流版
-// 版本：v6.0.15-normal.26 (2026-10-11)
+// 版本：v6.0.15-normal.27 (2026-10-11)
 // 架构：24 url-test 区域组 + 34 业务策略组 + 可选 AI专属组（自动识别 JMS）+ 134 providers
 // 规则源：rulesets/source/routing-graph.js v6.0.15（与 Smart 版规则等价，仅区域组从 smart 改为 url-test）
 // 适用：Mihomo / Clash.Meta 稳定版内核、不支持 smart + LightGBM 的分支；也适用于想完全关闭 ML 评估的用户
@@ -9,7 +9,7 @@
 //  版本常量
 // ================================================================
 
-const VERSION = 'v6.0.15-normal.26'
+const VERSION = 'v6.0.15-normal.27'
 
 // 受信任的本地订阅适配模式：off | policy | adaptive。
 // 不从机场订阅读取；三档均不会改变策略组、规则或仓库 DNS 基线。
@@ -550,7 +550,6 @@ function applyGeminiOverlay(config) {
     `DOMAIN-SUFFIX,lh3.googleusercontent.com,${BIZ.GEMINI}`,
     `DOMAIN-SUFFIX,lh5.googleusercontent.com,${BIZ.GEMINI}`,
     `DOMAIN-SUFFIX,notebooklm.google,${BIZ.GEMINI}`,
-    'DOMAIN,dl.xunlei.com,DIRECT',
     'DOMAIN-SUFFIX,muyuan.do,DIRECT',
     'DOMAIN-SUFFIX,anyrouter.top,DIRECT',
   ]
