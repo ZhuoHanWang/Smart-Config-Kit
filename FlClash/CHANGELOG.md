@@ -3,6 +3,12 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.11 (2026-10-17)
+
+- FIX-TODESK：前置 `todesk.com` 后缀直连例外，避免 ToDesk 被广告规则或海外 UDP/443 拒绝规则提前处理。
+- PERSONAL-SNAPSHOT：同步个人 `v6.0.15-fork.2` 快照；DNS、`fake-ip-filter`、进程规则和业务广告组保持不变。
+- VERIFY：与 Clash Party Smart / Normal 共享 ToDesk 首命中回归。
+
 ## v6.0.15-flclash-ai-gemini.10 (2026-10-11)
 
 - REVERT-XUNLEI-DL：移除 `DOMAIN,dl.xunlei.com,DIRECT` 直连例外；此前问题由「🌐 全球节点」固定到不可用节点导致 Smart 选路未生效，恢复由现有下载规则和健康节点选择处理迅雷流量。

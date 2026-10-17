@@ -31,6 +31,10 @@ const WECHAT_HTTPDNS_DIRECT_HOSTS = [
   'dns.weixin.qq.com',
   'dns.weixin.qq.com.cn',
 ];
+const TODESK_DIRECT_HOSTS = [
+  'authds.todesk.com',
+  'st.todesk.com',
+];
 
 function readText(relativePath) {
   return fs.readFileSync(path.join(REPO_ROOT, relativePath), 'utf8');
@@ -228,6 +232,65 @@ test('WeChat HTTPDNS endpoints bypass generic BlockHttpDNS rejection through the
   for (const host of WECHAT_HTTPDNS_DIRECT_HOSTS) {
     assert.match(directGuard, new RegExp(`^DOMAIN,${host}$`, 'm'));
     assert.deepEqual(firstDomainRoute(host), {
+      provider: 'scki-fused-001-direct-domain',
+      policy: DIRECT,
+    });
+  }
+});
+
+test('ToDesk endpoints bypass generic ad, QUIC rejection and later process-direct rules', () => {
+  const graph = getRawRoutingGraph();
+  const directGuardIndex = graph.rules.indexOf('RULE-SET,scki-adfp-direct,DIRECT');
+  const adIndex = graph.rules.indexOf('RULE-SET,acc-prerepaireasyprivacy,🛑 广告拦截');
+  const quicRejectIndex = graph.rules.indexOf('AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT');
+  const processDirectIndex = graph.rules.indexOf('RULE-SET,scki-local-process-direct,DIRECT');
+  const directGuard = readText('rulesets/supplemental/clash/adfp-direct.list');
+  const privacyResidual = readText('rulesets/generated/mihomo-mrs/acc-prerepaireasyprivacy-classical.yaml');
+  const fusedRules = parseFusedRules();
+  const activeSnapshot = JSON.parse(readText('Clash Party/rulesets/active.json'));
+  const snapshotManifest = JSON.parse(readText(`Clash Party/rulesets/${activeSnapshot.snapshot}/manifest.json`));
+  const directSnapshotProvider = snapshotManifest.providers['scki-fused-001-direct-domain'];
+  const smartSource = readText('Clash Party/ClashParty(mihomo-smart).js');
+  const providerMatch = smartSource.match(/^const MIHOMO_FUSED_RULE_PROVIDERS = (.+)$/m);
+  assert.ok(providerMatch, 'Clash Party Smart must contain its personal fused providers');
+  const smartProviders = JSON.parse(providerMatch[1]);
+  const directGuardEntries = directGuard.split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+  const earlyFusedDirect = 'RULE-SET,scki-fused-001-direct-domain,DIRECT';
+  const ordinaryFusedDirect = 'RULE-SET,scki-fused-008-direct-domain,DIRECT';
+  const earlyFusedDirectIndex = fusedRules.indexOf(earlyFusedDirect);
+  const adFusedRuleIndex = fusedRules.indexOf('RULE-SET,scki-fused-006-ad-residual,🛑 广告拦截');
+  const quicFusedRuleIndex = fusedRules.indexOf('AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT');
+  const ordinaryFusedDirectIndex = fusedRules.indexOf(ordinaryFusedDirect);
+
+  assert.ok(directGuardIndex >= 0, 'the early direct guard must exist');
+  assert.ok(adIndex >= 0, 'the generic privacy provider must exist');
+  assert.ok(quicRejectIndex >= 0, 'the foreign QUIC rejection rule must exist');
+  assert.ok(processDirectIndex >= 0, 'the later process-direct provider must exist');
+  assert.ok(directGuardIndex < adIndex, 'the direct guard must precede generic privacy rules');
+  assert.ok(directGuardIndex < quicRejectIndex, 'the direct guard must precede foreign QUIC rejection');
+  assert.ok(directGuardIndex < processDirectIndex, 'the direct guard must precede process-direct rules');
+  assert.match(directGuard, /^DOMAIN-SUFFIX,todesk\.com$/m);
+  assert.match(privacyResidual, /DOMAIN-KEYWORD,\s*todesk\.com/);
+  assert.ok(earlyFusedDirectIndex >= 0, 'the ToDesk direct provider must exist in the personal fused rules');
+  assert.ok(adFusedRuleIndex >= 0, 'the fused ad residual must exist');
+  assert.ok(quicFusedRuleIndex >= 0, 'the fused foreign QUIC rejection must exist');
+  assert.ok(ordinaryFusedDirectIndex >= 0, 'the later ordinary direct segment must exist');
+  assert.ok(earlyFusedDirectIndex < adFusedRuleIndex, 'fused direct segment must precede the ad segment');
+  assert.ok(earlyFusedDirectIndex < quicFusedRuleIndex, 'fused direct segment must precede the foreign QUIC rejection');
+  assert.ok(earlyFusedDirectIndex < ordinaryFusedDirectIndex, 'ToDesk direct segment must precede the ordinary direct segment');
+  assert.equal(fusedRules[0], earlyFusedDirect, 'the ToDesk direct provider must be the first fused rule');
+  assert.equal(directSnapshotProvider.file, 'scki-fused-001-direct-domain.mrs');
+  assert.ok(smartProviders['scki-fused-001-direct-domain'].url.includes(`/${activeSnapshot.snapshot}/`), 'the first direct rule must use the active personal snapshot');
+
+  for (const host of TODESK_DIRECT_HOSTS) {
+    const matchingDirectRule = directGuardEntries.find((rule) => matchesDomainRule(rule, host));
+    assert.equal(matchingDirectRule, 'DOMAIN-SUFFIX,todesk.com', `${host} must match the early ToDesk suffix rule`);
+    assert.deepEqual({
+      provider: fusedRules[0].split(',')[1],
+      policy: fusedRules[0].split(',')[2],
+    }, {
       provider: 'scki-fused-001-direct-domain',
       policy: DIRECT,
     });

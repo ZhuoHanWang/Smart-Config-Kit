@@ -5,6 +5,12 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.27 / v6.0.15-normal.28 (2026-10-17)
+
+- FIX-TODESK：在最前置直连例外加入 `DOMAIN-SUFFIX,todesk.com`，让 ToDesk 认证、调度和打洞域名先命中 `DIRECT`，避免被广告规则或海外 UDP/443 拒绝规则处理。
+- PERSONAL-SNAPSHOT：创建并同步个人 `v6.0.15-fork.2` 规则快照；保留 DNS、`fake-ip-filter`、进程直连规则和广告组不变。
+- VERIFY：新增 ToDesk 首命中回归，覆盖 `authds.todesk.com`、`st.todesk.com` 及规则顺序。
+
 ## v6.0.15-dns.26 / v6.0.15-normal.27 (2026-10-11)
 
 - REVERT-XUNLEI-DL：移除 `DOMAIN,dl.xunlei.com,DIRECT` 直连例外；此前问题由「🌐 全球节点」固定到不可用节点导致 Smart 选路未生效，恢复由现有下载规则和健康节点选择处理迅雷流量。
