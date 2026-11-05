@@ -13,7 +13,7 @@ const TARGETS = [
   { file: 'FlClash/FlClash(mihomo).js', regionType: 'url-test' },
 ];
 const BUSINESS_DEFAULTS = [
-  ['🤖 AI 服务', 'AI专属'], ['✨ Gemini 服务', 'AI专属'],
+  ['🤖 AI 服务', 'AI专属'], ['🧠 Anthropic 服务', 'AI专属（手动）'], ['✨ Gemini 服务', 'AI专属'],
   ['💰 加密货币', '🇭🇰 香港节点'], ['🏦 金融支付', 'DIRECT'],
   ['💬 即时通讯', '🇭🇰 香港节点'], ['📱 社交媒体', '🇯🇵 日韩节点'],
   ['🧑‍💼 会议协作', 'DIRECT'], ['📺 国内流媒体', 'DIRECT'],
@@ -30,6 +30,22 @@ const BUSINESS_DEFAULTS = [
   ['🛰️ BT/PT Tracker', 'REJECT'], ['🏠 国内网站', 'DIRECT'],
   ['🚫 受限网站', '🌍 全球节点'], ['🌐 国外网站', '🌍 全球节点'],
   ['🐟 漏网之鱼', '🌍 全球节点'], ['🛑 广告拦截', 'REJECT'],
+];
+const ANTHROPIC_RULES = [
+  'DOMAIN-SUFFIX,anthropic.com,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.ai,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.com,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claudeusercontent.com,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.app,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.new,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.site,🧠 Anthropic 服务',
+  'DOMAIN-SUFFIX,claude.dev,🧠 Anthropic 服务',
+  'PROCESS-NAME,Claude,🧠 Anthropic 服务',
+  'PROCESS-NAME,Claude Helper,🧠 Anthropic 服务',
+  'PROCESS-NAME,Claude Helper (Renderer),🧠 Anthropic 服务',
+  'PROCESS-NAME,Claude.exe,🧠 Anthropic 服务',
+  'PROCESS-NAME,claude,🧠 Anthropic 服务',
+  'PROCESS-NAME,claude.exe,🧠 Anthropic 服务',
 ];
 
 function load(file) {
@@ -95,13 +111,25 @@ for (const target of TARGETS) {
           assert.ok(!group.proxies.includes('JMS US 01'), `${group.name}: JMS node leaked into a region group`);
           assert.ok(!group.proxies.includes('JMS Home 02'), `${group.name}: JMS node leaked into a region group`);
         }
-        if (group.type === 'select') assert.ok(group.proxies.includes('AI专属'), `${group.name}: AI group missing`);
+        if (group.type === 'select' && group.name !== 'AI专属（手动）') assert.ok(group.proxies.includes('AI专属'), `${group.name}: AI group missing`);
       }
       for (const [name, first] of BUSINESS_DEFAULTS) {
         const group = output['proxy-groups'].find((item) => item.name === name);
         assert.ok(group, `missing business group ${name}`);
         assert.equal(group.proxies[0], first, `${name} default`);
       }
+      const manualAiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属（手动）');
+      assert.ok(manualAiGroup);
+      assert.equal(manualAiGroup.type, 'select');
+      assert.deepEqual(Array.from(manualAiGroup.proxies), ['JMS US 01', 'JMS Home 02']);
+      for (const group of output['proxy-groups'].filter((item) => BUSINESS_DEFAULTS.some(([name]) => name === item.name))) {
+        assert.ok(group.proxies.includes('AI专属'), `${group.name}: Smart AI candidate missing`);
+        assert.ok(group.proxies.includes('AI专属（手动）'), `${group.name}: manual AI candidate missing`);
+      }
+      assert.deepEqual(output.rules.filter((rule) => rule.endsWith(',🧠 Anthropic 服务')), ANTHROPIC_RULES);
+      const firstAnthropicRule = output.rules.indexOf(ANTHROPIC_RULES[0]);
+      const firstFusedRule = output.rules.findIndex((rule) => String(rule).startsWith('RULE-SET,scki-fused-'));
+      assert.ok(firstAnthropicRule !== -1 && firstAnthropicRule < firstFusedRule, 'Anthropic rules precede fused rule sets');
       if (target.file.startsWith('FlClash/')) {
         assert.equal(output.rules, rulesRef, 'FlClash must preserve rule array identity');
         assert.equal(output['proxy-groups'], groupsRef, 'FlClash must preserve group array identity');
@@ -136,10 +164,12 @@ for (const target of TARGETS) {
         '🤖 AI 服务',
         '✨ Gemini 服务',
         '🔍 Google 服务',
+        '🧠 Anthropic 服务',
         '🌍 全球节点',
         '🌍 全球节点（AI排除港台澳俄）',
         '🏡 全球家宽（AI排除港台澳俄）',
         'AI专属',
+        'AI专属（手动）',
       ].filter((name) => output['proxy-groups'].some((group) => group.name === name));
       assert.equal(
         output['proxy-groups']
@@ -150,7 +180,7 @@ for (const target of TARGETS) {
         'AI-related groups stay together in the convenient display order',
       );
       for (const group of output['proxy-groups']) {
-        if (group.name !== 'AI专属') {
+        if (group.name !== 'AI专属' && group.name !== 'AI专属（手动）') {
           for (const name of jmsNames) assert.ok(!group.proxies.includes(name), `${group.name}: JMS node leaked`);
         }
       }
@@ -158,7 +188,11 @@ for (const target of TARGETS) {
         const group = output['proxy-groups'].find((item) => item.name === name);
         assert.equal(group.proxies[0], first, `${name} default`);
         assert.ok(group.proxies.includes('AI专属'), `${name}: AI candidate missing`);
+        assert.ok(group.proxies.includes('AI专属（手动）'), `${name}: manual AI candidate missing`);
       }
+      const manualAiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属（手动）');
+      assert.equal(manualAiGroup.type, 'select');
+      assert.deepEqual(Array.from(manualAiGroup.proxies), jmsNames);
       if (target.file.startsWith('FlClash/')) {
         assert.equal(output.rules, rulesRef);
         assert.equal(output['proxy-groups'], groupsRef);
@@ -207,6 +241,12 @@ for (const target of TARGETS) {
       const output = run(input);
       assertValidGroups(output);
       assert.ok(!output['proxy-groups'].some((group) => group.name === 'AI专属'));
+      assert.ok(!output['proxy-groups'].some((group) => group.name === 'AI专属（手动）'));
+      const anthropic = output['proxy-groups'].find((group) => group.name === '🧠 Anthropic 服务');
+      assert.ok(anthropic);
+      assert.notEqual(anthropic.proxies[0], 'AI专属');
+      assert.notEqual(anthropic.proxies[0], 'AI专属（手动）');
+      assert.deepEqual(output.rules.filter((rule) => rule.endsWith(',🧠 Anthropic 服务')), ANTHROPIC_RULES);
       assert.ok(output['proxy-groups'].some((group) => group.name === '🌍 全球节点'));
       assert.equal(output['proxy-groups'].find((group) => group.name === '🧑‍💼 会议协作').proxies[0], 'DIRECT');
       assert.equal(output['proxy-groups'].find((group) => group.name === '🔍 Google 服务').proxies[0], '🌍 全球节点');

@@ -105,6 +105,7 @@ const BIZ_GROUPS = [
   '🕹️ 国内游戏',
   '🎮 国外游戏',
   '🔍 Google 服务',
+  '🧠 Anthropic 服务',
   '🔧 工具与服务',
   'Ⓜ️ 微软服务',
   '🍎 苹果服务',
@@ -118,7 +119,7 @@ const BIZ_GROUPS = [
 ];
 
 const EXPECTED_GROUP_ORDER = [SMART_GROUPS[0], ...BIZ_GROUPS, ...SMART_GROUPS.slice(1)];
-const AI_PRIORITY_GROUPS = new Set(['🤖 AI 服务', '✨ Gemini 服务', '🔍 Google 服务']);
+const AI_PRIORITY_GROUPS = new Set(['🤖 AI 服务', '🧠 Anthropic 服务', '✨ Gemini 服务', '🔍 Google 服务']);
 const OPTIONAL_DISPLAY_GROUPS = new Set([
   '🌍 全球节点（AI排除港台澳俄）',
   '🏡 全球家宽（AI排除港台澳俄）',
@@ -129,13 +130,14 @@ const SMART_AI_GEMINI_GROUP_ORDER = [
   '🌍 全球节点（AI排除港台澳俄）',
   '🏡 全球家宽（AI排除港台澳俄）',
   'AI专属',
+  'AI专属（手动）',
   ...BIZ_GROUPS.filter((name) => !AI_PRIORITY_GROUPS.has(name)),
   ...SMART_GROUPS.slice(1).filter((name) => !OPTIONAL_DISPLAY_GROUPS.has(name)),
 ];
 const flclashTarget = TARGETS.find((target) => target.id === 'flclash');
 Object.assign(flclashTarget, {
   expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,
-  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
+  expectedFusedRules: EXPECTED_FUSED_RULES + 36,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
     'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
@@ -145,17 +147,18 @@ Object.assign(flclashTarget, {
   allowInlineRule(rule) {
     const text = String(rule);
     return text.endsWith(',✨ Gemini 服务')
+      || text.endsWith(',🧠 Anthropic 服务')
       || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
       || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
   },
 });
 
-// Smart 和 Normal 版包含 AI/Gemini overlay，统一按 AI/Gemini/Google → 全球节点 → AI 排除组排序
+// Smart 和 Normal 版包含 AI/Gemini/Anthropic overlay，统一按 AI/Gemini/Google/Anthropic → 全球节点 → AI 排除组排序
 const smartTarget = TARGETS.find((target) => target.id === 'smart');
 const normalTarget = TARGETS.find((target) => target.id === 'normal');
 [smartTarget, normalTarget].forEach((t) => Object.assign(t, {
   expectedGroupOrder: SMART_AI_GEMINI_GROUP_ORDER,  // AI/Gemini/Google 前置 + 全球 AI 排除组 + AI专属
-  expectedFusedRules: EXPECTED_FUSED_RULES + 22,
+  expectedFusedRules: EXPECTED_FUSED_RULES + 36,
   expectedFusedProviders: EXPECTED_FUSED_PROVIDERS + 2,
   additionalQuicRules: [
     'AND,((DST-PORT,443),(NETWORK,UDP),(RULE-SET,gemini)),✨ Gemini 服务',
@@ -165,6 +168,7 @@ const normalTarget = TARGETS.find((target) => target.id === 'normal');
   allowInlineRule(rule) {
     const text = String(rule);
     return text.endsWith(',✨ Gemini 服务')
+      || text.endsWith(',🧠 Anthropic 服务')
       || text === 'DOMAIN-SUFFIX,muyuan.do,DIRECT'
       || text === 'DOMAIN-SUFFIX,anyrouter.top,DIRECT';
   },
@@ -276,6 +280,7 @@ const GROUP_MEMBER_CASES = [
 
 const GROUP_DEFAULT_CASES = [
   { group: '🤖 AI 服务', first: 'AI专属' },
+  { group: '🧠 Anthropic 服务', first: 'AI专属（手动）' },
   { group: '✨ Gemini 服务', first: 'AI专属' },
   { group: '💰 加密货币', first: '🇭🇰 香港节点' },
   { group: '🏦 金融支付', first: 'DIRECT' },
@@ -705,8 +710,13 @@ function validateGroups(target, output, record) {
   for (const scenario of GROUP_DEFAULT_CASES) {
     const group = groupsByName.get(scenario.group);
     if (!group) continue;
-    const expectedFirst = scenario.first === 'AI专属' && !hasSubscriptionAiGroup
-      ? (group.proxies || []).find((member) => member !== 'AI专属')
+    const hasManualAiGroup = groupsByName.has('AI专属（手动）');
+    const aiExclusiveNames = new Set(['AI专属', 'AI专属（手动）']);
+    const expectedFirst = (
+      (scenario.first === 'AI专属' && !hasSubscriptionAiGroup)
+      || (scenario.first === 'AI专属（手动）' && !hasManualAiGroup)
+    )
+      ? (group.proxies || []).find((member) => !aiExclusiveNames.has(member))
       : scenario.first;
     record.expectEqual((group.proxies || [])[0], expectedFirst, `${scenario.group} keeps its business-appropriate default`);
   }
@@ -714,15 +724,25 @@ function validateGroups(target, output, record) {
   if (hasSubscriptionAiGroup) {
     for (const group of groups.filter((item) => BIZ_GROUPS.includes(item.name))) {
       record.expect((group.proxies || []).includes('AI专属'), `${group.name} offers the shared AI-exclusive group`);
+      record.expect((group.proxies || []).includes('AI专属（手动）'), `${group.name} offers the manual AI-exclusive group`);
     }
     const aiGroup = groupsByName.get('AI专属');
     record.expectEqual(aiGroup.type, target.regionType, `AI-exclusive group uses ${target.regionType}`);
     record.expect((aiGroup.proxies || []).includes('JMS AI Node 01'), 'AI-exclusive group preserves the Sub-Store JMS node pool');
+    const manualAiGroup = groupsByName.get('AI专属（手动）');
+    record.expectEqual(manualAiGroup.type, 'select', 'manual AI-exclusive group is a select group');
+    record.expectArrayEqual(manualAiGroup.proxies || [], aiGroup.proxies || [], 'manual AI-exclusive group preserves the exact AI node pool');
     for (const name of ['JMS AI Node 01', 'JMS AI Home 02']) {
       for (const group of groups.filter((item) => item.type === target.regionType && item.name !== 'AI专属')) {
         record.expect(!(group.proxies || []).includes(name), `${name} does not leak into ${group.name}`);
       }
     }
+  }
+
+  const anthropic = groupsByName.get('🧠 Anthropic 服务');
+  if (anthropic) {
+    record.expectEqual((anthropic.proxies || [])[0], hasSubscriptionAiGroup ? 'AI专属（手动）' : (anthropic.proxies || [])[0], 'Anthropic defaults to the manual AI-exclusive group when available');
+    record.expectEqual((anthropic.proxies || [])[1], hasSubscriptionAiGroup ? 'AI专属' : (anthropic.proxies || [])[1], 'Anthropic keeps the Smart/url-test AI group as its second AI candidate when available');
   }
 
   for (const sample of LOWERCASE_NUMBERED_ISO_CASES) {
@@ -801,7 +821,7 @@ function validateRulesAndProviders(output, record, target) {
   record.expect(!rules.some((rule) => /^RULE-SET,(scholar|tiktok|amap|proxy|scki-(?!fused)[^,]+|remotedesktop|acc-rustdesk|acc-parsec),/.test(String(rule))), 'legacy individual rule-set names are not emitted in the main rule list');
   record.expect(!rules.some((rule) => /^DOMAIN(-SUFFIX|-KEYWORD)?[,]/.test(String(rule)) && !(target.allowInlineRule && target.allowInlineRule(rule))), 'foldable domain rules are not emitted inline');
   record.expect(!rules.some((rule) => /^IP-CIDR6?[,]/.test(String(rule))), 'foldable IP-CIDR rules are not emitted inline');
-  record.expect(!rules.some((rule) => /^PROCESS-NAME[,]/.test(String(rule))), 'process rules are not emitted inline');
+  record.expect(!rules.some((rule) => /^PROCESS-NAME[,]/.test(String(rule)) && !(target.allowInlineRule && target.allowInlineRule(rule))), 'process rules are not emitted inline');
 
   for (const [providerName, provider] of Object.entries(providers)) {
     if (provider && provider.type === 'http') {

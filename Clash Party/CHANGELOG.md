@@ -5,6 +5,13 @@
 >
 > 主版本变更必须同步传递到所有受影响产物的子版本号。
 
+## v6.0.15-dns.28 / v6.0.15-normal.29 (2026-11-05)
+
+- ANTHROPIC：新增 `🧠 Anthropic 服务` 业务组，前置 Claude/Anthropic 域名与桌面端进程规则，避免被通用 AI 或广告规则抢先处理。
+- FIXED-EGRESS：有效 `AI专属` 节点池现在同时生成 `AI专属（手动）` `select` 组；Anthropic 默认优先手动组，便于 Claude 固定出口 IP，`AI专属` Smart/url-test 组继续服务需要自动择路的 AI/Gemini/Google 流量。
+- ALL-BUSINESS：`AI专属` 与 `AI专属（手动）` 同时加入全部 35 个业务组；专属节点仍隔离于普通区域和家宽分类，无有效池时不创建悬空组。
+- VERIFY：同步更新组顺序、规则计数和 Sub-Store AI 回归，Smart/Normal 输出 63 个策略组、187 条规则和 134 个 provider。
+
 ## v6.0.15-dns.27 / v6.0.15-normal.28 (2026-10-17)
 
 - FIX-TODESK：在最前置直连例外加入 `DOMAIN-SUFFIX,todesk.com`，让 ToDesk 认证、调度和打洞域名先命中 `DIRECT`，避免被广告规则或海外 UDP/443 拒绝规则处理。

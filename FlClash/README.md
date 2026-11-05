@@ -7,11 +7,11 @@
 > 覆写脚本：`FlClash(mihomo).js`
 > 适用客户端：**FlClash**（Android / Windows / macOS / Linux）
 > 内核要求：FlClash >= **v0.8.85**
-> 当前版本：**v6.0.15-flclash-ai-gemini.6**（24 个区域组 + 最多 2 个 AI 排除组 + 34 业务组 + 134 providers / 173 rules；融合规则及 Gemini 规则固定在个人 Fork 快照；变更历史见 `FlClash/CHANGELOG.md`）
+> 当前版本：**v6.0.15-flclash-ai-gemini.12**（24 个区域组 + 最多 2 个 AI 排除组 + 35 业务组 + 134 providers / 187 rules；融合规则与 Gemini 规则固定在个人 Fork 快照，Anthropic overlay 由脚本内联；变更历史见 `FlClash/CHANGELOG.md`）
 >
 > 节点命名兼容：yun hk01 / yun us01 / yun jp01 / yun sg01 / yun tw01 等小写 ISO 两位码加编号会自动进入区域组；不对普通小写词做宽泛国家码匹配。
 
-> 规则文件：134 个 provider 共用个人 Fork 的 [`v6.0.15-fork.1` 快照](../Clash%20Party/rulesets/v6.0.15-fork.1/manifest.json)，包含 132 个融合文件及两份 Gemini YAML。客户端定时刷新取得的是自己的副本；发布时与 JS 一起推送。恢复/升级流程见 [Fork 指南](../FORKING.md#日常同步)。
+> 规则文件：134 个 provider 共用个人 Fork 的 [`v6.0.15-fork.2` 快照](../Clash%20Party/rulesets/v6.0.15-fork.2/manifest.json)，包含 132 个融合文件及两份 Gemini YAML。客户端定时刷新取得的是自己的副本；发布时与 JS 一起推送。恢复/升级流程见 [Fork 指南](../FORKING.md#日常同步)。
 
 > 节点筛选：本地脚本 `SCKI_MAX_NODE_MULTIPLIER = null` 默认关闭倍率筛选；设为正数才启用。仅含 type/payload 的 inline 集合可直接展平；具名直连/拒绝出站保留拨号依赖但不参加测速。预检保持数组引用，遇到重名歧义、异常字段或不支持的集合时保留原订阅并输出脱敏原因。详见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
@@ -40,8 +40,8 @@
 1. FlClash → 底部「配置」→ 顶部 **「覆写脚本」**
 2. 点右上角 **+**
 3. 输入名称（如 `Smart分流`），选择加载方式：
-   - **个人 Fork URL**：填入 `https://raw.githubusercontent.com/ZhuoHanWang/Smart-Config-Kit/main/FlClash/FlClash%28mihomo%29.js`
-   - **个人 Fork jsdelivr**（备用，速度与可达性取决于网络）：`https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js`
+   - **个人 Fork URL**：填入 `https://raw.githubusercontent.com/ZhuoHanWang/Smart-Config-Kit/v6.0.15-flclash-ai-gemini.12/FlClash/FlClash%28mihomo%29.js`
+   - **个人 Fork jsdelivr**（备用，速度与可达性取决于网络）：`https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@v6.0.15-flclash-ai-gemini.12/FlClash/FlClash%28mihomo%29.js`
    - **粘贴**：浏览器打开 Raw 链接，全选复制粘贴；第一行必须是 `// FlClash 覆写脚本`
 4. 保存
 
@@ -54,7 +54,7 @@
 也可以绑定仓库的 [`scki-jms-ai-mihomo.json`](../SubStore/templates/scki-jms-ai-mihomo.json) 模板，
 让订阅显式提供节点池；完整步骤见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
-`AI专属` 使用 FlClash 的 `url-test` 自动测速，并加入全部业务组候选；AI/Gemini/Google 默认优先它，
+`AI专属` 使用 FlClash 的 `url-test` 自动测速，`AI专属（手动）` 使用 `select` 固定单节点；两个组都会加入全部业务组候选，AI/Gemini/Google 默认优先自动组，Anthropic 默认优先手动组。
 国内业务和会议协作默认 `DIRECT`。已有显式组优先，其空组、重复组或无效组不触发自动识别。
 没有显式组且没有 JMS 节点时按公共订阅生成，不需要单独的 YAML 覆写。
 
@@ -71,7 +71,7 @@
 
 点「代理」标签，应看到：
 - **24 个区域组 + 最多 2 个 AI 排除组**，空区域自动跳过：🌍 全球节点、🇭🇰 香港节点、🇸🇬 狮城节点、🌏 其他节点……
-- **34 业务组**：🤖 AI 服务、✨ Gemini、🎵 TikTok、🎥 Netflix、📱 社交媒体……
+- **35 业务组**：🤖 AI 服务、🧠 Anthropic、✨ Gemini、🎵 TikTok、🎥 Netflix、📱 社交媒体……
 - 额外检查：按根 README 的 [导入后 60 秒验证清单](../README.md#-导入后-60-秒验证清单) 确认规则下载、GEOSITE 命中与 anti-ad 误伤白名单。
 
 ---

@@ -8,7 +8,7 @@
 >
 > - 🧭 同一 source graph 经 `MRS -> fused -> 原生产物` 生成各端配置，统一规则顺序与分流目标。
 > - 🎯 国内策略优先，关键域名、API 和本地工具按明确策略分流；各内核使用适合自身能力的规则格式。
-> - 🧩 24 个区域组 + 最多 2 个 AI 排除组 + 34 个业务组，提供 Smart / Normal 两种内核；JMS AI 节点由 Sub-Store 独立维护，JS 可自动生成 `AI专属` 组。
+> - 🧩 Clash Party / FlClash JS 提供 24 个区域组 + 最多 2 个 AI 排除组 + 35 个业务组；JMS AI 节点由 Sub-Store 独立维护，JS 可自动生成 `AI专属` Smart/url-test 组和 `AI专属（手动）` select 组，Anthropic 业务默认使用手动组固定出口。
 > - 🧹 订阅覆写入口提供节点预检、inline payload 展平和可选倍率上限；具名直连依赖保留并排除测速，详见 [节点筛选指南](./docs/subscription-node-filter.md)。
 > - ⚙️ Mihomo/Stash 默认测速组 300 秒并启用 `lazy`，可选 900 秒；海外 UDP/443 的 QUIC 策略也可切换。命令、平台差异与验证方法见[测速与 QUIC 策略选项](./docs/traffic-options.md)。
 > - 🔎 设计依据见 [GitHub 分流脚本横向研究](./docs/research/2026-09-30-github-routing-script-comparison.md)，包含按 star 排序的搜索快照、源码对比和采用边界。
@@ -257,7 +257,7 @@ flowchart TB
 
 导入任一端产物后，先看这 7 件事，能快速判断是配置问题、规则下载问题，还是节点质量问题。
 
-1. **节点与策略组存在**：Mihomo / Stash / Apple 系客户端应看到 22 区域组 + 33 业务组；sing-box Full 应看到 54 个出站；v2rayN Xray / Passwall 系没有业务策略组是正常限制。
+1. **节点与策略组存在**：Clash Party / FlClash JS 应看到最多 24 个区域组 + 35 业务组，带有效 JMS 池时再有 `AI专属` 与 `AI专属（手动）`；Stash / Apple 系客户端沿用各自静态产物的组数量；sing-box Full 应看到 54 个出站；v2rayN Xray / Passwall 系没有业务策略组是正常限制。
 2. **规则源下载完成**：Clash / OpenClash / CMFA / FlClash / Stash 里 `rule-providers` 不应有大面积 403 / 404；Surge / Loon / QX / Egern 看远程规则列表是否下载成功；sing-box 和 Passwall 系看 fused `.srs` 是否全部可用。
 3. **广告误伤安全阀生效**：访问或规则测试 `paddle.com` 应命中 `🏦 金融支付`，`cloudflarestorage.com` 应命中 `🌐 国外网站`，都不是 `🛑 广告拦截`；小米账号/云服务域名应走 `DIRECT`。
 4. **GEOSITE 基础命中正常**：`geosite:private` / 局域网应直连，`geosite:gfw` 应进入 `🚫 受限网站`，`geosite:category-ads-all` 应进入广告拦截。
@@ -291,7 +291,7 @@ Sub-Store 是客户端导入前的订阅聚合层，**不是第 15 个正式客�
 
 ### 个人 Fork、jsDelivr 与 JMS AI 节点
 
-需要保留个人 JS 修改并持续获取源作者更新时，使用个人 Fork 作为 `origin`，将源作者仓库配置为 `upstream`；FlClash 的发布地址使用个人 Fork 的 jsDelivr URL。JMS 节点由自己的 Sub-Store Source / Collection 管理；组合订阅中的节点名带独立 `JMS` 标识时，三个 JS 覆写会在缺少 `AI专属` 组时自动生成它。也可绑定仓库模板显式提供节点池，JS 优先采用该组。完整步骤见 [Sub-Store JMS 说明](SubStore/README.md#cloudflare-sub-store-jms-ai-专属组) 与 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)。
+需要保留个人 JS 修改并持续获取源作者更新时，使用个人 Fork 作为 `origin`，将源作者仓库配置为 `upstream`；FlClash 的发布地址使用个人 Fork 的 jsDelivr URL。JMS 节点由自己的 Sub-Store Source / Collection 管理；组合订阅中的节点名带独立 `JMS` 标识时，三个 JS 覆写会在缺少 `AI专属` 组时自动生成它，并同步生成用于固定出口的 `AI专属（手动）`。也可绑定仓库模板显式提供节点池，JS 优先采用该组。完整步骤见 [Sub-Store JMS 说明](SubStore/README.md#cloudflare-sub-store-jms-ai-专属组) 与 [`docs/personal-fork-sync.md`](docs/personal-fork-sync.md)。
 
 - 想“一套配置跑多端”的用户；
 - 不想手工维护大量策略组但又追求精细分流的用户；

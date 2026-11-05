@@ -93,7 +93,7 @@ node --test tools/tests/subscription-ai-group.test.js
 当前个人 Fork 的 FlClash 地址：
 
 ```text
-https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js
+https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@v6.0.15-flclash-ai-gemini.12/FlClash/FlClash%28mihomo%29.js
 ```
 
 其他 Fork 替换用户名和仓库名；Clash Party 使用同一前缀下的 `Clash%20Party/ClashParty%28mihomo-smart%29.js` 或 `Clash%20Party/ClashParty%28mihomo%29.js`。确认地址返回纯 JavaScript，刷新客户端后检查最终策略组及默认选项。

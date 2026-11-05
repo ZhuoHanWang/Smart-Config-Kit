@@ -5,11 +5,11 @@
 > 目录简介：这里是 Mihomo Smart/Normal 覆写脚本的事实基线，面向 Clash Party、Clash Verge Rev、Mihomo Party 等桌面客户端。
 >
 > 覆写脚本：**两份二选一**，规则 100% 等价，仅 24 区域组（12 全部 + 12 家宽）的内核选路算法不同
-> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.22**，2026-10-09）— Smart 内核 + LightGBM ML 评估
-> - `ClashParty(mihomo).js`（**v6.0.15-normal.23**，2026-10-09）— 普通内核 url-test 延迟选路
+> - `ClashParty(mihomo-smart).js`（**v6.0.15-dns.28**，2026-11-05）— Smart 内核 + LightGBM ML 评估
+> - `ClashParty(mihomo).js`（**v6.0.15-normal.29**，2026-11-05）— 普通内核 url-test 延迟选路
 >
 > UI 补充配置：已整合到本文「四、粘贴 UI 补充配置」章节
-> 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 34 业务策略组 + **134 rule-providers / 173 rules**（含 Gemini overlay）；`AI专属` 可由订阅提供或自动识别 JMS 节点生成
+> 架构：**SUB-STORE 多机场融合** + 24 区域组 + 2 AI 排除组 + 35 业务策略组 + **134 rule-providers / 187 rules**（含 Gemini 与 Anthropic overlay）；`AI专属` 可由订阅提供或自动识别 JMS 节点生成，并同步提供固定节点用的 `AI专属（手动）`
 > 适用客户端：
 > - **Mihomo Party**（桌面端，推荐，原生支持 JS 覆写；内置 Smart 内核）
 > - **Clash Verge Rev**（桌面端，支持 JS/YAML 双覆写）
@@ -26,11 +26,11 @@
 
 > 节点筛选：`SCKI_MAX_NODE_MULTIPLIER = null` 默认保留全部倍率。仅含 `type: inline` 与 `payload` 的集合可直接展平；远程或带额外字段的集合需先通过 Sub-Store 展平。具名直连/拒绝出站保留依赖但不参加测速；预检拒绝时保留原始订阅，日志仅报告原因和计数。参数与引用边界见 [节点筛选指南](../docs/subscription-node-filter.md)。
 
-> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，组加入所有业务候选；AI/Gemini/Google 默认优先 `AI专属`，国内业务和会议协作默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
+> JMS 节点：将 JMS 订阅作为 Sub-Store Collection 的一个来源即可。订阅没有 `AI专属` 组时，JS 自动收集名称含独立 `JMS` 标识的节点（例如 `JMS LA c33s2`）生成专属组，无需绑定模板。若订阅已有该组，则优先使用组内有效节点；空组、重复组或无效组不触发自动识别。专属节点隔离于区域/家宽分类，`AI专属` 使用 Smart/url-test 自动择路，`AI专属（手动）` 使用 `select` 固定出口；两个组都会加入全部业务候选，AI/Gemini/Google 默认优先自动组，Anthropic 默认优先手动组，适合 Claude 保持出口 IP 稳定。国内业务和会议协作默认 `DIRECT`。可选模板及命名条件见 [Sub-Store JMS 说明](../SubStore/README.md#cloudflare-sub-store-jms-ai-专属组)。
 
-> 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@main/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
+> 个人发布：FlClash/手机端使用 [你的 Fork jsDelivr 脚本](https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@v6.0.15-flclash-ai-gemini.12/FlClash/FlClash%28mihomo%29.js)；Fork 创建和 `upstream` 同步流程见 [`docs/personal-fork-sync.md`](../docs/personal-fork-sync.md)。
 
-> 规则文件：Smart/Normal 与 FlClash 的 134 个 provider 共用个人 Fork 的 [`v6.0.15-fork.1` 快照](./rulesets/v6.0.15-fork.1/manifest.json)，包含已编译的融合 `.mrs` / YAML 与两份 Gemini YAML。规则每 24 小时尝试下载，但副本保持不变时内容不会跟随源作者变化。发布时 JS 与快照目录必须一起推送；上游合并后恢复当前快照或有意升级，见 [Fork 指南](../FORKING.md#日常同步)。本地旧 `ai-gemini.js` 需重新粘贴修复后的本地全文，不在公开仓库发布。
+> 规则文件：Smart/Normal 与 FlClash 的 134 个 provider 共用个人 Fork 的 [`v6.0.15-fork.2` 快照](./rulesets/v6.0.15-fork.2/manifest.json)，包含已编译的融合 `.mrs` / YAML 与两份 Gemini YAML。规则每 24 小时尝试下载，但副本保持不变时内容不会跟随源作者变化。发布时 JS 与快照目录必须一起推送；上游合并后恢复当前快照或有意升级，见 [Fork 指南](../FORKING.md#日常同步)。本地旧 `ai-gemini.js` 需重新粘贴修复后的本地全文，不在公开仓库发布。
 
 <sub>💖 [支持本项目](../docs/donate.md) · ⭐ [Star](https://github.com/ivansolis1989/Smart-Config-Kit) · 🐛 [Issue](https://github.com/ivansolis1989/Smart-Config-Kit/issues)</sub>
 
@@ -90,7 +90,7 @@
 
 ### 跑起来之后怎么验证成功？
 - 浏览器打开 `https://www.google.com`，能打开说明代理通了。
-- 客户端左侧「代理」页面最多会看到 **61 个代理组**（24 区域 + 2 AI 排除 + 34 业务 + 可选 `AI专属`；空区域会自动不建组）。
+- 客户端左侧「代理」页面最多会看到 **63 个代理组**（24 区域 + 2 AI 排除 + 35 业务 + 可选 `AI专属` 与 `AI专属（手动）`；空区域会自动不建组）。
 - 左侧「连接」页面可以看每条请求走了哪个组/哪个节点。
 - 额外检查：按根 README 的 [导入后 60 秒验证清单](../README.md#-导入后-60-秒验证清单) 确认规则下载、GEOSITE 命中与 anti-ad 误伤白名单。
 
@@ -349,8 +349,8 @@ sniffer:
 1. **代理组（Proxies）页面**
    - **24 个区域组 + 最多 2 个 AI 排除组**，空区域自动跳过；Smart 版使用 `smart`，普通版使用 `url-test`；
    - 每个区域组下方有对应地区的所有节点；
-   - **34 个业务策略组**（AI 服务、Gemini、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择；
-   - 绑定 JMS Sub-Store 模板后会出现 **`AI专属`** Smart/url-test 组；其节点不进入区域/家宽组，并可在所有业务组中选择。
+   - **35 个业务策略组**（AI 服务、Anthropic、Gemini、加密货币、TikTok、Netflix、Disney+、YouTube、Telegram 等）可正常选择；
+   - 绑定 JMS Sub-Store 模板后会出现 **`AI专属`** Smart/url-test 组和 **`AI专属（手动）`** select 组；其节点不进入区域/家宽组，并可在所有业务组中选择。
 
 2. **连接（Connections）页面**
    - 访问 `https://chat.openai.com`：Rule 应命中「🤖 AI 服务 → 🇺🇸 美国节点 → 某个 US 节点」；
@@ -374,6 +374,7 @@ sniffer:
 | 业务组 | 推荐上游 |
 |--------|----------|
 | 🤖 AI 服务 / ✨ Gemini 服务 / 🔍 Google 服务 | AI专属（已配置时），再按需切换全球 AI 区域组 |
+| 🧠 Anthropic 服务 | AI专属（手动）优先，固定一个 Claude 出口节点；需要时再切换 AI专属或区域组 |
 | 💰 加密货币 | 🇭🇰 香港节点 |
 | 🏦 金融支付 | DIRECT |
 | 💬 即时通讯 | 🇭🇰 香港节点 |

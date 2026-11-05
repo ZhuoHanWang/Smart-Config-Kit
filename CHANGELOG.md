@@ -4,6 +4,12 @@
 > 主版本号由 `rulesets/source/routing-graph.js` 的 `SOURCE_GRAPH_VERSION` 与客户端产物版本共同维护；规则权威源是 `rulesets/source/routing-graph.js`。
 > 覆盖 14 个客户端形态的等价实现：Clash Party JS / CMFA / Stash / OpenClash(Normal+Smart) / Shadowrocket / Surge / Loon / Quantumult X / SingBox / Egern / v2rayN / Passwall / Passwall2 / FlClash。
 
+## v6.0.15-personal.5 — Anthropic 固定出口业务组 (2026-11-05)
+
+- 三份个人 JS 新增 `🧠 Anthropic 服务` 业务组及 Claude/Anthropic 前置规则。
+- 有效 `AI专属` 节点池同时生成 Smart/url-test `AI专属` 与手动 `select` `AI专属（手动）`；两个组加入全部 35 个业务组，Anthropic 默认选择手动组以保持出口 IP 稳定。
+- 更新 Clash Party、FlClash、Sub-Store 文档和 JS 覆写回归；无有效 AI 节点池时不创建空组或悬空候选。
+
 ## v6.0.15-personal.4 — Clash Party / FlClash 个人规则快照 (2026-10-09)
 
 - 将三个正式 JS 的 132 个融合规则文件与 Gemini 上游文件复制到个人 Fork 的不可变版本目录，避免规则重排和 CDN 上游变更影响当前路由。

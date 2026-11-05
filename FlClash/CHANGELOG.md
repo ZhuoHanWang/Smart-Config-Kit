@@ -3,6 +3,13 @@
 > FlClash 覆写脚本 `FlClash(mihomo).js`，使用标准 Mihomo 内核的 url-test 区域组。
 > 规则权威源：`rulesets/source/routing-graph.js`；FlClash 消费最终融合规则集，区域组与 Clash Party 对齐。
 
+## v6.0.15-flclash-ai-gemini.12 (2026-11-05)
+
+- ANTHROPIC：新增 `🧠 Anthropic 服务` 业务组和 Claude/Anthropic 前置规则，覆盖 Web 与桌面端进程。
+- FIXED-EGRESS：有效 `AI专属` 节点池同时生成 `AI专属（手动）` `select` 组；Anthropic 默认使用手动组保持出口 IP，AI/Gemini/Google 继续优先 `AI专属` url-test 组。
+- ALL-BUSINESS：两个 AI 专属组加入全部 35 个业务组，专属节点不参与区域/家宽分类；无有效池时保持普通订阅行为。
+- VERIFY：更新 FlClash 数组引用、组顺序、规则计数和 Sub-Store 回归；输出 63 个策略组、187 条规则和 134 个 provider。
+
 ## v6.0.15-flclash-ai-gemini.11 (2026-10-17)
 
 - FIX-TODESK：前置 `todesk.com` 后缀直连例外，避免 ToDesk 被广告规则或海外 UDP/443 拒绝规则提前处理。

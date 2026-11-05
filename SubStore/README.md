@@ -9,7 +9,7 @@
   → Sub-Store：单订阅标识、组合清洗、去重、可选流量头合并
   → 一条 Clash.Meta(mihomo) 订阅 URL
   → FlClash / Clash Party 单一 Profile + Smart-Config-Kit 覆写
-  → 24 区域组 + 2 AI 排除组 + 34 业务组 + 可选 AI专属组
+  → 24 区域组 + 2 AI 排除组 + 35 业务组 + 可选 AI专属 Smart/url-test 与 AI专属（手动）select 组
 ```
 
 ## 先判断是否需要聚合
@@ -214,7 +214,7 @@ unset SUB_STORE_ADMIN_TOKEN
 
 模板与 JS 自动识别均按节点名称匹配独立的 `JMS` 标识（大小写不敏感）：`JMS Tokyo 01`、`Tokyo-JMS-01` 可命中，`JMSProxy`、`ADJMS01` 不命中。若 JMS 服务的节点名称没有独立 `JMS` 标识，需要先在 Sub-Store 为该来源统一加上这个标识。
 
-Clash Party Smart / Normal 与 FlClash JS 会读取 Sub-Store 展开的精确节点列表，重建目标客户端适配的 `AI专属` 自动测速组，并将它加入所有业务组。AI / Gemini / Google 默认优先该组；国内组和会议协作默认 `DIRECT`，其他组优先自身业务地区。没有有效 `AI专属` 组时，普通订阅保持正常行为。
+Clash Party Smart / Normal 与 FlClash JS 会读取 Sub-Store 展开的精确节点列表，重建目标客户端适配的 `AI专属` 自动测速组和 `AI专属（手动）` 固定节点组，并将两个组加入所有业务组。AI / Gemini / Google 默认优先 `AI专属`，Anthropic 默认优先 `AI专属（手动）`；国内组和会议协作默认 `DIRECT`，其他组优先自身业务地区。没有有效 `AI专属` 组时，普通订阅保持正常行为。
 
 继续使用下方的 Raw 脚本链前，请确认你的部署是方式一、方式二，或已实测支持相同脚本宿主能力的 Worker 适配；Cloudflare-native 兼容版应使用其内置节点操作。
 
@@ -267,7 +267,7 @@ https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/SubStore/s
 - 组合订阅只有一条客户端导入 URL，且输出格式为 `Clash.Meta(mihomo)`。
 - Airport-A / Airport-B 等前缀都能在代理列表中找到；没有“流量、到期、官网”等伪节点。
 - FlClash 日志中的处理节点数等于组合后的节点总数，而不是某一个机场的数量。
-- 区域组和业务组正常出现；FlClash 使用覆写脚本时应看到最多 24 个区域组、最多 2 个 AI 排除组和 34 个业务组；包含 JMS 节点或提供显式节点池时另有 `AI专属` 组。
+- 区域组和业务组正常出现；FlClash 使用覆写脚本时应看到最多 24 个区域组、最多 2 个 AI 排除组和 35 个业务组；包含 JMS 节点或提供显式节点池时另有 `AI专属` 与 `AI专属（手动）` 组。
 - 同名节点没有被静默覆盖；必要时检查 `dedupe-node-names.js` 的日志。
 - 流量统计仅在使用可选脚本后检查：独立机场应相加，镜像订阅应只计一次。
 
