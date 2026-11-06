@@ -26,7 +26,10 @@ function buildBusinessProfileScriptTemplate(source, artifact) {
 function buildBusinessProfileRuntimePlan(plan, catalog = getBusinessProfileCatalog()) {
   if (typeof plan.finalRule !== 'string' || !plan.finalRule.startsWith('MATCH,')) throw new Error('Source final routing rule missing');
   return { disabledGroups: plan.disabledGroups, fallbacks: plan.fallbacks, safetyByProvider: plan.safetyByProvider,
-    businessGroups: [...catalog.protectedGroups, ...catalog.services.map(service => service.group)], finalRule: plan.finalRule };
+    businessGroups: [...catalog.protectedGroups, ...catalog.services.map(service => service.group)], finalRule: plan.finalRule,
+    // The personal Mihomo overlays add these two rule providers after the fused block.
+    // They remain eligible only when the maintained rules reference them.
+    allowedProviderNames: ['gemini', 'acc-gemini'] };
 }
 
 // Self contained and intentionally small: the browser calls this same function

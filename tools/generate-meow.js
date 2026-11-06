@@ -8,9 +8,10 @@ const path = require('node:path');
 const vm = require('node:vm');
 const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
-const { SOURCE_GRAPH_VERSION } = require('../rulesets/source/routing-graph');
+const { SOURCE_GRAPH_VERSION, BIZ: SOURCE_BIZ } = require('../rulesets/source/routing-graph');
 const { trafficSourceFingerprint } = require('./build-fused-rule-sets');
 const { writeRepositoryArtifact } = require('./lib/write-repository-artifact');
+const { repositoryAssetUrl, mihomoAssetCachePath } = require('./lib/generated-asset-url');
 const { buildNativeProfile } = require('./lib/meow-native-profile');
 const { projectAeroveRouting } = require('./lib/aerove-rule-projection');
 const ROOT = path.resolve(__dirname, '..');
@@ -22,8 +23,8 @@ const SCRIPT_PATH = `${SCRIPT_CLIENT_DIR}/AeroveLite(meow).js`;
 const NATIVE_PATH = `${CLIENT_DIR}/Meow(meow).yaml`;
 const CMFA_PATH = 'Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml';
 const MANIFEST_PATH = `${FAMILY_DIR}/adapter-manifest.json`;
-const VERSION = `${SOURCE_GRAPH_VERSION}-meow.8`;
-const BUILD = '2026-10-31';
+const VERSION = `${SOURCE_GRAPH_VERSION}-meow.9`;
+const BUILD = '2026-11-06';
 // The native client has no Lite per-resource cap; preserve its published bytes.
 const NATIVE_VERSION = `${SOURCE_GRAPH_VERSION}-meow.4`;
 const NATIVE_BUILD = '2026-10-28';
@@ -82,7 +83,7 @@ function renderScript(input, splits) {
   source = replaceOnce(source, '    SckiTrafficOptions.applyBrowserUdpPolicy(config.rules, SCKI_BROWSER_UDP_POLICY)\n', '');
   // Delete the complete Node-DNS/global-settings module. Do not copy unsupported
   // Mihomo fields and then silently strip them from the user's configuration.
-  source = removeBetween(source, '// >>> SCKI NODE DNS HINTS: BEGIN', 'function cleanupSubscription(config)');
+  source = removeBetween(source, 'var SCKI_SUBSCRIPTION_ADAPTER_PROFILE_DEFAULT = "adaptive"', 'function cleanupSubscription(config');
   source = removeBetween(source, 'function _simpleHash(str)', 'function sortProxyGroups(config)');
   source = replaceOnce(source, 'function main(config)', 'function sckiRoutingMain(config)');
   source = replaceOnce(source, "const SCKI_SUBSCRIPTION_ADAPTER_PROFILE = 'adaptive'", "const SCKI_SUBSCRIPTION_ADAPTER_PROFILE = 'off'");
@@ -126,7 +127,7 @@ function renderScript(input, splits) {
   return [
     '// AEROVE Lite / meow-rs 分流覆写候选（共享 Meow 分流实现）',
     `// 版本：${VERSION} | Build：${BUILD}`,
-    '// 架构：最多 22 个 url-test 区域组 + 33 业务组；融合 MRS / residual YAML',
+    '// 架构：保留 FlClash 的区域组和业务组；融合 MRS / residual YAML',
     `// 规则源：rulesets/source/routing-graph.js ${SOURCE_GRAPH_VERSION}`,
     `// 生成：node tools/generate-meow.js；运行时输入：${SOURCE_PATH}`,
     `// 变更历史：${SCRIPT_CLIENT_DIR}/CHANGELOG.md；状态：docs/support-queue.md#aerove-lite-meow`,
@@ -154,7 +155,18 @@ function readSharedRouting(input = read(SOURCE_PATH)) {
     'fused/source graph fingerprint mismatch; regenerate the shared routing chain first');
   insist(routing.rules.length === fused.fused_rule_count && Object.keys(routing.providers).length === fused.fused_provider_count,
     'routing consumer/fused manifest drift; regenerate the shared routing chain first');
-  insist(routing.business.length === 33, 'unexpected business group topology');
+  const sourceBusiness = Object.values(SOURCE_BIZ);
+  insist(sourceBusiness.every(name => routing.business.includes(name)), 'FlClash source is missing a routing-graph business group');
+  routing.business = sourceBusiness;
+  const assetRevision = fused.asset_revision || fused.baseline_version;
+  for (const [name, provider] of Object.entries(routing.providers)) {
+    insist(provider && (provider.format === 'mrs' || provider.format === 'yaml'), `unsupported fused provider format: ${name}`);
+    const file = `${name}.${provider.format}`;
+    const relative = `rulesets/generated/fused/mihomo/${file}`;
+    insist(fs.existsSync(path.join(ROOT, relative)), `missing compiled upstream rule asset: ${relative}`);
+    provider.url = repositoryAssetUrl(relative, assetRevision);
+    provider.path = mihomoAssetCachePath(file, assetRevision);
+  }
   insist(routing.rules.at(-1) === 'MATCH,🐟 漏网之鱼', 'missing final routing rule');
   return JSON.parse(JSON.stringify(routing));
 }
@@ -164,12 +176,29 @@ function readAeroveAssets(providers) {
   return readAssetManifest({ repoRoot: ROOT, providers, fusedManifest: JSON.parse(read('rulesets/generated/fused/manifest.json')) });
 }
 
+function readRuntimeProjection(script, splits) {
+  const context = vm.createContext({ console: { log() {} } });
+  new vm.Script(script).runInContext(context, { timeout: 3000 });
+  context.__SCKI_MEOW_PROBE = {
+    proxies: [{ name: '美国 USA synthetic', type: 'ss', server: '192.0.2.1', port: 443,
+      cipher: 'aes-128-gcm', password: 'synthetic-only' }],
+    'proxy-groups': [], 'rule-providers': {}, rules: [],
+  };
+  const runtime = vm.runInContext('sckiRoutingMain(__SCKI_MEOW_PROBE)', context, { timeout: 3000 });
+  return projectAeroveRouting({ 'rule-providers': runtime['rule-providers'], rules: runtime.rules }, splits);
+}
+
 function buildOutputs() {
   const input = read(SOURCE_PATH);
   const routing = readSharedRouting(input);
   const assetManifest = readAeroveAssets(routing.providers);
   const script = renderScript(input, assetManifest.splits);
   const aerove = projectAeroveRouting({ 'rule-providers': routing.providers, rules: routing.rules }, assetManifest.splits);
+  const runtime = readRuntimeProjection(script, assetManifest.splits);
+  const runtimeOverlayProviderNames = Object.keys(runtime['rule-providers']).filter(name => !Object.hasOwn(aerove['rule-providers'], name));
+  insist(runtimeOverlayProviderNames.every(name => name === 'gemini' || name === 'acc-gemini'),
+    `unexpected AEROVE runtime provider overlay: ${runtimeOverlayProviderNames.join(', ')}`);
+  insist(runtime.rules.length >= aerove.rules.length, 'AEROVE runtime rule projection is shorter than its public routing projection');
   const ruleResourceBytes = assetManifest.sources.filter(source => !assetManifest.splits[source.provider])
     .reduce((sum, source) => sum + source.bytes, 0) + assetManifest.assets.reduce((sum, asset) => sum + asset.bytes, 0);
   insist(Object.keys(aerove['rule-providers']).length <= 256 && ruleResourceBytes <= 256 * 1024 * 1024,
@@ -190,6 +219,9 @@ function buildOutputs() {
     aerove_rule_assets: { manifest: 'Meow内核系/Aerove Lite/rule-assets/manifest.json',
       assets: assetManifest.assets.map(asset => ({ path: asset.path, sha256: asset.sha256, bytes: asset.bytes })) },
     aerove_routing: { rule_count: aerove.rules.length, provider_count: Object.keys(aerove['rule-providers']).length,
+      runtime_rule_count: runtime.rules.length, runtime_provider_count: Object.keys(runtime['rule-providers']).length,
+      runtime_overlay_rule_count: runtime.rules.length - aerove.rules.length,
+      runtime_overlay_provider_names: runtimeOverlayProviderNames,
       split_provider_count: Object.keys(assetManifest.splits).length, rule_resource_bytes: ruleResourceBytes,
       app_owned_and_derived_resources: 'not included; final App prepared bundle validation required' },
     client_entries: {

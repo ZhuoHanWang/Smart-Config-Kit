@@ -89,6 +89,15 @@ for (const plan of plans) {
     });
   }
 
+  const flclashArtifact = scripts.find(item => item.runtimeContract === 'in-place' && item.path.includes('/FlClash/'));
+  test(`${plan.profile} FlClash rejects Gemini providers without retained rule references`, () => {
+    const source = fs.readFileSync(path.join(root, flclashArtifact.path), 'utf8');
+    const generated = projectScript(source, plan, flclashArtifact).replace(/RULE-SET,(?:acc-)?gemini/g, 'DOMAIN-SUFFIX,fixture.invalid');
+    const input = scenarios().find(item => item.id === 'normal-subscription').config;
+    assert.deepEqual(executeNode(generated, input, flclashArtifact.path).output, input);
+    assert.deepEqual(executeQuickJS(engine, generated, input, flclashArtifact.path).output, input);
+  });
+
   const artifact = scripts.find(item => item.runtimeContract === 'clone');
   test(`${plan.profile} AEROVE: QuickJS returns a projected candidate and preserves guest input and independent DNS`, () => {
     const source = fs.readFileSync(path.join(root, artifact.path), 'utf8');

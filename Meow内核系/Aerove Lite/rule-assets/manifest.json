@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "v6.0.21-meow.5",
+  "version": "v6.0.21-meow.6",
   "policy": {
     "app": "AEROVE Lite",
     "app_commit": "457fab8455ac8713fc9828e129d2050b11bf1beb",
@@ -31,10 +31,10 @@
   },
   "inputs": {
     "providers_sha256": "20e3e6aa4f0aedd47387a28523e925ec0e87914204a83166eb94e0493922dc39",
-    "fused_manifest_sha256": "52d28d6e005d2e538261de9c2d46b49e56c0b5bf43f2c0a795dff9c0b8fbf253",
+    "fused_manifest_sha256": "8ad8043425273f1a9f4b05a414e47d58873ce1b74740356fa654f560a0248056",
     "files": {
       "rulesets/source/routing-graph.js": "58d4288900b607d3c30c3ec792b17cf669052fa41b1eb5ca94e03b9f06113b6e",
-      "tools/lib/aerove-rule-assets.js": "70f2cc0aff9d2aca74cc6e64c28c4220e73cdaf9436f453d1f8fada7bc7610e6",
+      "tools/lib/aerove-rule-assets.js": "713acc8c68325a3829de7c7deca3ec3762c26315bc60f6b18056b0f1846cbc32",
       "tools/generate-aerove-rule-assets.js": "1aa8e7baeca8ba4924d4fccf89db6dc3b46721d5f9cb813fa7851663e08d3c14"
     }
   },
@@ -45,30 +45,30 @@
       "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.mrs?scki=v6.0.21",
       "behavior": "domain",
       "format": "mrs",
-      "sha256": "940a8bda33182199c0f7f608e3af90f4a9e82779fe091f7ae160e9ff237fa00b",
-      "bytes": 364,
+      "sha256": "983c298313dea9c54c3712bdf8dc453701e5f256358f98a80dc014d7abd7a974",
+      "bytes": 374,
       "metrics": {
-        "entries": 29,
-        "labels": 109,
-        "text_bytes": 560,
+        "entries": 30,
+        "labels": 112,
+        "text_bytes": 573,
         "max_entry_bytes": 45,
         "max_entry_labels": 5,
-        "header_entries": 29,
-        "decompressed_bytes": 463,
-        "encoded_leaves": 37,
-        "encoded_label_bytes": 297
+        "header_entries": 30,
+        "decompressed_bytes": 471,
+        "encoded_leaves": 39,
+        "encoded_label_bytes": 305
       },
       "native_metrics": {
-        "entries": 37,
-        "labels": 128,
-        "text_bytes": 667,
+        "entries": 39,
+        "labels": 133,
+        "text_bytes": 691,
         "max_entry_bytes": 45,
         "max_entry_labels": 5
       },
       "source_yaml": {
         "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
-        "sha256": "0f49043b78a083cec86793cb498e370e12071931d78291254cfdc9cb7cde3702",
-        "bytes": 743,
+        "sha256": "69ccd2cfc46d2e48eededdd52cb67c6e1275faea76f3f18c351f67f16e6fb6af",
+        "bytes": 762,
         "normalization": "canonical LF"
       }
     },
@@ -4118,30 +4118,30 @@
       "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/rulesets/generated/fused/mihomo/scki-fused-075-cn-site-domain.mrs?scki=v6.0.21",
       "behavior": "domain",
       "format": "mrs",
-      "sha256": "cf85b069fd75f2e319e42786443aa19d4e91f942b0c915e0c76ad78db466277a",
-      "bytes": 554710,
+      "sha256": "94a867426153bf4243afe05adaafa1c4b341711c1147363efda82b1a40a03bb6",
+      "bytes": 554842,
       "metrics": {
-        "entries": 115894,
-        "labels": 348063,
-        "text_bytes": 1695481,
+        "entries": 115893,
+        "labels": 348060,
+        "text_bytes": 1695468,
         "max_entry_bytes": 69,
         "max_entry_labels": 7,
-        "header_entries": 115894,
-        "decompressed_bytes": 938021,
-        "encoded_leaves": 231701,
-        "encoded_label_bytes": 682159
+        "header_entries": 115893,
+        "decompressed_bytes": 938018,
+        "encoded_leaves": 231699,
+        "encoded_label_bytes": 682156
       },
       "native_metrics": {
-        "entries": 231701,
-        "labels": 580034,
-        "text_bytes": 3157413,
+        "entries": 231699,
+        "labels": 580029,
+        "text_bytes": 3157389,
         "max_entry_bytes": 69,
         "max_entry_labels": 7
       },
       "source_yaml": {
         "path": "rulesets/generated/fused/mihomo/scki-fused-075-cn-site-domain.yaml",
-        "sha256": "f2db3c7cfb91fe8cb048d0d0bc759139f3261e57a7b903b17e77516ee15de21e",
-        "bytes": 2390854,
+        "sha256": "957976585c31f653e5f0d2aea0340f188eddd087c5d25dde85da5f3879d222f1",
+        "bytes": 2390835,
         "normalization": "canonical LF"
       },
       "exact_union_verified": true
@@ -4572,8 +4572,8 @@
     },
     {
       "path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-001.mrs",
-      "sha256": "a6d448a0dbecb38c30dd650570b3a0fa04ad459e8393c92be6a7b3062e34c011",
-      "bytes": 487641,
+      "sha256": "31c64266ee2a2c3667f7c447ad8b3008c66ff2dcd4659479b3d10298ad99b59e",
+      "bytes": 487805,
       "metrics": {
         "entries": 99852,
         "labels": 299925,
@@ -4581,9 +4581,9 @@
         "max_entry_bytes": 50,
         "max_entry_labels": 7,
         "header_entries": 99852,
-        "decompressed_bytes": 817953,
+        "decompressed_bytes": 817956,
         "encoded_leaves": 199704,
-        "encoded_label_bytes": 594835
+        "encoded_label_bytes": 594838
       },
       "native_metrics": {
         "entries": 199704,
@@ -4595,23 +4595,23 @@
     },
     {
       "path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-002.mrs",
-      "sha256": "cf5a5b6aa16c102fe11e3e9a0077cf846cf4558c9bacea90e628b612ebafb4e5",
-      "bytes": 95273,
+      "sha256": "374f7195c8a9a84b20799c1abfca4ce41f449cdbab6be03dffbd7188980ed555",
+      "bytes": 95751,
       "metrics": {
-        "entries": 16042,
-        "labels": 48138,
-        "text_bytes": 235673,
+        "entries": 16041,
+        "labels": 48135,
+        "text_bytes": 235660,
         "max_entry_bytes": 69,
         "max_entry_labels": 7,
-        "header_entries": 16042,
-        "decompressed_bytes": 147294,
-        "encoded_leaves": 31997,
-        "encoded_label_bytes": 107080
+        "header_entries": 16041,
+        "decompressed_bytes": 147288,
+        "encoded_leaves": 31995,
+        "encoded_label_bytes": 107074
       },
       "native_metrics": {
-        "entries": 31997,
-        "labels": 80036,
-        "text_bytes": 437501,
+        "entries": 31995,
+        "labels": 80031,
+        "text_bytes": 437477,
         "max_entry_bytes": 69,
         "max_entry_labels": 7
       }
@@ -4622,8 +4622,8 @@
       {
         "id": "scki-fused-010-ad-domain-aerove-part-001",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-001.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-001.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-010-ad-domain-aerove-part-001.mrs",
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-001.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-010-ad-domain-aerove-part-001.mrs",
         "sha256": "6a6010e3d65e579e5200d7bd355501a663f8e743fbea3bc941e0cd9f5ca2661a",
         "bytes": 852079,
         "metrics": {
@@ -4648,8 +4648,8 @@
       {
         "id": "scki-fused-010-ad-domain-aerove-part-002",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-002.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-002.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-010-ad-domain-aerove-part-002.mrs",
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-002.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-010-ad-domain-aerove-part-002.mrs",
         "sha256": "35a9f1e5b7f80c12fc08c95ac8e3219261ef0953a8e784d1f866492ee84f40d9",
         "bytes": 802758,
         "metrics": {
@@ -4674,8 +4674,8 @@
       {
         "id": "scki-fused-010-ad-domain-aerove-part-003",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-003.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-003.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-010-ad-domain-aerove-part-003.mrs",
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-003.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-010-ad-domain-aerove-part-003.mrs",
         "sha256": "7221c740c9bcc0b81cdcd689021514ee45269ea6e4e78211c4a51a6895c88b64",
         "bytes": 973407,
         "metrics": {
@@ -4700,8 +4700,8 @@
       {
         "id": "scki-fused-010-ad-domain-aerove-part-004",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-004.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-004.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-010-ad-domain-aerove-part-004.mrs",
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-010-ad-domain-aerove-part-004.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-010-ad-domain-aerove-part-004.mrs",
         "sha256": "6d90a0f30e2eea72164a056e0ff377a55f441bfbeca2057f36f9dfc9d0f1f07d",
         "bytes": 914795,
         "metrics": {
@@ -4728,10 +4728,10 @@
       {
         "id": "scki-fused-075-cn-site-domain-aerove-part-001",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-001.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-001.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-075-cn-site-domain-aerove-part-001.mrs",
-        "sha256": "a6d448a0dbecb38c30dd650570b3a0fa04ad459e8393c92be6a7b3062e34c011",
-        "bytes": 487641,
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-001.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-075-cn-site-domain-aerove-part-001.mrs",
+        "sha256": "31c64266ee2a2c3667f7c447ad8b3008c66ff2dcd4659479b3d10298ad99b59e",
+        "bytes": 487805,
         "metrics": {
           "entries": 99852,
           "labels": 299925,
@@ -4739,9 +4739,9 @@
           "max_entry_bytes": 50,
           "max_entry_labels": 7,
           "header_entries": 99852,
-          "decompressed_bytes": 817953,
+          "decompressed_bytes": 817956,
           "encoded_leaves": 199704,
-          "encoded_label_bytes": 594835
+          "encoded_label_bytes": 594838
         },
         "native_metrics": {
           "entries": 199704,
@@ -4754,25 +4754,25 @@
       {
         "id": "scki-fused-075-cn-site-domain-aerove-part-002",
         "asset_path": "Meow内核系/Aerove Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-002.mrs",
-        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-002.mrs?scki=v6.0.21-meow.5",
-        "cache_path": "./ruleset/v6.0.21-meow.5/scki-fused-075-cn-site-domain-aerove-part-002.mrs",
-        "sha256": "cf5a5b6aa16c102fe11e3e9a0077cf846cf4558c9bacea90e628b612ebafb4e5",
-        "bytes": 95273,
+        "url": "https://raw.githubusercontent.com/IvanSolis1989/Smart-Config-Kit/main/Meow%E5%86%85%E6%A0%B8%E7%B3%BB/Aerove%20Lite/rule-assets/scki-fused-075-cn-site-domain-aerove-part-002.mrs?scki=v6.0.21-meow.6",
+        "cache_path": "./ruleset/v6.0.21-meow.6/scki-fused-075-cn-site-domain-aerove-part-002.mrs",
+        "sha256": "374f7195c8a9a84b20799c1abfca4ce41f449cdbab6be03dffbd7188980ed555",
+        "bytes": 95751,
         "metrics": {
-          "entries": 16042,
-          "labels": 48138,
-          "text_bytes": 235673,
+          "entries": 16041,
+          "labels": 48135,
+          "text_bytes": 235660,
           "max_entry_bytes": 69,
           "max_entry_labels": 7,
-          "header_entries": 16042,
-          "decompressed_bytes": 147294,
-          "encoded_leaves": 31997,
-          "encoded_label_bytes": 107080
+          "header_entries": 16041,
+          "decompressed_bytes": 147288,
+          "encoded_leaves": 31995,
+          "encoded_label_bytes": 107074
         },
         "native_metrics": {
-          "entries": 31997,
-          "labels": 80036,
-          "text_bytes": 437501,
+          "entries": 31995,
+          "labels": 80031,
+          "text_bytes": 437477,
           "max_entry_bytes": 69,
           "max_entry_labels": 7
         }

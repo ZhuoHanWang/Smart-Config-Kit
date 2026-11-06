@@ -39,8 +39,10 @@ test('Meow adapter preserves the shared ordered routing and region/business topo
   const expected = projectAeroveRouting(run(source(), input), splitManifest().splits);
   const actual = run(api().renderScript(source()), input);
   for (const key of ['proxy-groups', 'rule-providers', 'rules']) assert.deepEqual(actual[key], expected[key], key);
-  assert.equal(actual['proxy-groups'].length, 55);
-  assert.equal(actual['proxy-groups'].filter(group => group.type === 'select').length, 33);
+  assert.equal(actual['proxy-groups'].length, 59);
+  assert.equal(actual['proxy-groups'].filter(group => group.type === 'select').length, 35);
+  assert.ok(actual['proxy-groups'].some(group => group.name === '✨ Gemini 服务'));
+  assert.ok(actual['proxy-groups'].some(group => group.name === '🧠 Anthropic 服务'));
   assert.equal(actual.rules.at(-1), 'MATCH,🐟 漏网之鱼');
 });
 
@@ -111,8 +113,15 @@ test('generated script and provenance manifest are current; support remains pend
   assert.ok(manifest.routing.rule_count > 100);
   assert.equal(manifest.routing.business_group_count, 33);
   const actual = run(fs.readFileSync(path.join(root, api().SCRIPT_PATH), 'utf8'), fixture());
-  assert.equal(manifest.aerove_routing.provider_count, Object.keys(actual['rule-providers']).length);
-  assert.equal(manifest.aerove_routing.rule_count, actual.rules.length);
+  assert.equal(Object.keys(actual['rule-providers']).length, manifest.aerove_routing.runtime_provider_count);
+  assert.ok(actual['rule-providers'].gemini);
+  assert.ok(actual['rule-providers']['acc-gemini']);
+  assert.ok(actual['proxy-groups'].some(group => group.name === '✨ Gemini 服务'));
+  assert.ok(actual['proxy-groups'].some(group => group.name === '🧠 Anthropic 服务'));
+  assert.equal(actual.rules.length, manifest.aerove_routing.runtime_rule_count);
+  assert.deepEqual(manifest.aerove_routing.runtime_overlay_provider_names, ['gemini', 'acc-gemini']);
+  assert.equal(manifest.aerove_routing.runtime_overlay_rule_count, 37);
+  assert.equal(actual.rules.at(-1), 'MATCH,🐟 漏网之鱼');
   assert.equal(manifest.aerove_rule_assets.assets.length, splitManifest().assets.length);
 });
 

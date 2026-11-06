@@ -7,12 +7,21 @@ const { projectMihomoConfig } = require('./business-profiles');
 function runBusinessProfile(config, plan, contract, originalMain, completedConfig, resetCompleted) {
   function complete(output) {
     var completed = completedConfig();
+    function referencedProvider(name) {
+      var marker = 'RULE-SET,' + name;
+      return output.rules.some(function (rule) {
+        return typeof rule === 'string' && (rule.indexOf(marker + ',') !== -1 || rule.indexOf(marker + ')') !== -1);
+      });
+    }
     return completed && output && typeof output === 'object' && output.proxies === completed.proxies &&
       Array.isArray(output.rules) && output.rules[output.rules.length - 1] === plan.finalRule &&
       Array.isArray(output['proxy-groups']) && plan.businessGroups.every(function (name) {
         return output['proxy-groups'].some(function (group) { return group && group.name === name; });
       }) && output['rule-providers'] && typeof output['rule-providers'] === 'object' &&
-      Object.keys(output['rule-providers']).length > 0 && Object.keys(output['rule-providers']).every(function (name) { return name.indexOf('scki-fused-') === 0; });
+      Object.keys(output['rule-providers']).length > 0 && Object.keys(output['rule-providers']).every(function (name) {
+        return name.indexOf('scki-fused-') === 0 || (Array.isArray(plan.allowedProviderNames) &&
+          plan.allowedProviderNames.indexOf(name) !== -1 && referencedProvider(name));
+      });
   }
   function mutableDataObject(value) {
     if (!value || typeof value !== 'object' || !Object.isExtensible(value)) return false;

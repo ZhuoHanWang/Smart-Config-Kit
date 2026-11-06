@@ -25,7 +25,7 @@ official MRS header declares 411634 entries, over 250000
 | 共享 fused 资产统一拆分 | 会改变所有消费客户端的资源引用与生成合同，扩大本次 Lite 容量适配的影响范围。未采用。 |
 | Lite 专版派生 | 从同一规则权威源及共享资产生成，保持策略顺序、目标组和完整匹配集合，仅投影 Lite 的 provider 与规则引用。采用。 |
 
-本轮不修改 App 安全门槛，不删除规则，不改共享 fused 资产。官方 meow YAML 保持 `v6.0.20-meow.3` 原字节；本地 Lite JS 候选为 `v6.0.20-meow.5`。后续上游刷新必须重新生成并检查全部资源，不能将本次分片数量视为永久常量。跨平台源文本指纹使用 canonical LF，MRS 本身使用原始二进制 SHA；LF/CRLF 回归与资产损坏拒绝均有测试。
+本轮不修改 App 安全门槛，不删除规则，不改共享 fused 资产。官方 Meow YAML 继续保持 `v6.0.21-meow.4` 原字节；本地 Lite JS 候选为 `v6.0.21-meow.9`，其专版资源批次为 `v6.0.21-meow.6`。后续上游刷新必须重新生成并检查全部资源，不能将本次分片数量视为永久常量。跨平台源文本指纹使用 canonical LF，MRS 本身使用原始二进制 SHA；LF/CRLF 回归与资产损坏拒绝均有测试。
 
 ## 固定 App 预算与计数语义
 
@@ -47,7 +47,7 @@ official MRS header declares 411634 entries, over 250000
 
 原广告资源的 canonical 集合包含 411,634 个唯一 predicate、1,260,199 个点分标签。Mihomo `DumpMrs` 将 `+.domain` 和裸域两个编码 leaf 折叠，固定 Rust reader 会枚举两条，因此 canonical 计数不能代替原生预算计数。旧广告 `part-001` 为 canonical 146,916 条 / 499,998 标签，Rust 实际展开 293,832 条 / 853,080 标签；`part-002` 为 169,023 / 499,997，Rust 展开 263,286 / 722,695，均被拒绝；`part-003` 通过。共享 `075-cn-site-domain` 的原生展开为 231,701 条 / 580,034 标签，同样超限。
 
-当前候选将广告拆为四片、国内站点拆为两片，其他 147 个规则源复用；投影为 **153 个 provider、172 条规则、55 个 fixture 策略组，规则资源 4,496,629 字节**。两组 canonical 与实际 Rust leaf 集合均已独立核对，`missing=0 / added=0`；广告保留 411,634 个唯一 predicate / 1,260,199 个 canonical 标签，对应原生 652,813 个唯一 leaf / 1,835,979 个标签。每片 canonical 与 native 指标、SHA 和字节数见 [资源清单](rule-assets/manifest.json)，脚本身份见[适配清单](../adapter-manifest.json)。
+当前候选将广告拆为四片、国内站点拆为两片，其他 147 个规则源复用；原生投影为 **153 个 provider、172 条规则、55 个 fixture 策略组，规则资源 4,497,163 字节**。AEROVE JS 运行时还会保留个人 Gemini/Anthropic provider 与业务规则覆盖，实际为 **155 个 provider、209 条规则、59 个策略组**；这两个运行时叠加项不改变资源分片预算。两组 canonical 与实际 Rust leaf 集合均已独立核对，`missing=0 / added=0`；广告保留 411,634 个唯一 predicate / 1,260,199 个 canonical 标签，对应原生 652,813 个唯一 leaf / 1,835,979 个标签。每片 canonical 与 native 指标、SHA 和字节数见 [资源清单](rule-assets/manifest.json)，脚本身份见[适配清单](../adapter-manifest.json)。
 
 ## 验证范围与接取条件
 

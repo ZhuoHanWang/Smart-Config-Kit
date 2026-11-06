@@ -14,7 +14,7 @@
 
 核对日期：2026-10-24。两个客户端目录并列：[官方 Meow](../Meow内核系/Meow/README.md)使用 [Meow(meow).yaml](../Meow内核系/Meow/Meow%28meow%29.yaml)，[AEROVE Lite](../Meow内核系/Aerove%20Lite/README.md)使用 [AeroveLite(meow).js](../Meow内核系/Aerove%20Lite/AeroveLite%28meow%29.js)；各自提供 README、参考文档和日志，共享生成器与规则基线。
 
-已完成同源融合规则、33 业务组、22 个原生地区/家宽组、通用 JS、原生 YAML、输入/输出哈希、失败原子性、空池拒绝，以及自动刷新/CI。官方 v0.26.1 核心真实 -t 已加载 149 个本地规则资产、168 条规则、55 个组及实际 Geo 数据，没有 WARN/ERROR。节点为合成样例，未启动代理流量。依据见 [REFERENCE](../Meow内核系/Meow/REFERENCE-meow-rs.md)。
+已完成同源融合规则、33 个原生业务组、22 个原生地区/家宽组、通用 JS、原生 YAML、输入/输出哈希、失败原子性、空池拒绝，以及自动刷新/CI。官方 v0.26.1 核心真实 -t 已加载 149 个本地规则资产、168 条规则、55 个组及实际 Geo 数据，没有 WARN/ERROR。AEROVE 运行时在此基础上叠加个人 Gemini/Anthropic provider 与业务规则，当前为 155 个 provider、209 条规则、59 个策略组；该运行时数字不代表官方原生 YAML。节点为合成样例，未启动代理流量。依据见 [REFERENCE](../Meow内核系/Meow/REFERENCE-meow-rs.md)。
 
 共同待验：
 
@@ -41,7 +41,7 @@ meow-android 稳定 v1.0.8 固定核心 v0.20.2；meow-ios 稳定 v2.0.0 固定�
 已完成的本地候选检查：
 
 - 保留原单资源安全预算，将广告资源拆为四片、国内站点拆为两片，其他 147 个规则源复用；原位置、目标与 provider 元数据保持。
-- 投影为 153 个规则资源、172 条主规则、55 个 fixture 组，规则资源共 4,496,629 字节；全部 111 个投影 MRS 通过固定 Rust reader 和 App 原样头部/条目预算。两个来源的 canonical 与实际原生 leaf 并集均已确认 `missing=0 / added=0`。
+- 原生投影为 153 个规则资源、172 条主规则、55 个 fixture 组，规则资源共 4,497,163 字节；AEROVE JS 运行时叠加 2 个个人 provider 和 37 条个人规则，实际为 155 个 provider、209 条规则、59 个策略组。全部 111 个投影 MRS 通过固定 Rust reader 和 App 原样头部/条目预算。两个来源的 canonical 与实际原生 leaf 并集均已确认 `missing=0 / added=0`。
 - 共享 fused、规则权威源和官方 Meow YAML 字节不变，23 项组件测试通过且无跳过；完整 App checked matcher、native preflight、JNI、APK、HTTP 和 VPN 均未由该检查覆盖。详细身份及许可边界见[分片依据](../Meow内核系/Aerove%20Lite/RESOURCE-SPLITTING.md)。
 
 剩余生产与设备验收：
