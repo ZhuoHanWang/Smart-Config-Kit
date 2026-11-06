@@ -57,14 +57,18 @@ function assertGraphUnchanged(baseline, current) {
     }
   }
 }
-function evaluateGraph(source, trafficOptions, label) {
+function graphDependencies(read) {
+  const files = ['traffic-options.json', 'business-dns-policy.json', 'business-profiles.json'];
+  return Object.fromEntries(files.map(file => [`./${file}`, JSON.parse(lf(read(`rulesets/source/${file}`)))]));
+}
+function evaluateGraph(source, dependencies, label) {
   const module = { exports: {} };
   const fixedMath = Object.create(Math);
   fixedMath.random = () => 0;
   vm.runInNewContext(source, { module, exports: module.exports, Math: fixedMath,
     process: { env: {} }, console: { log() {} }, require: id => {
-      if (id !== './traffic-options.json') throw new Error(`Unexpected graph dependency: ${id}`);
-      return trafficOptions;
+      if (!Object.prototype.hasOwnProperty.call(dependencies, id)) throw new Error(`Unexpected graph dependency: ${id}`);
+      return dependencies[id];
     } }, { filename: label, timeout: 15000 });
   const build = module.exports.buildMihomoRoutingGraph;
   return { raw: build({ applyMihomoMrsOverrides: false, quicPolicy: 'block-foreign' }),
@@ -145,6 +149,10 @@ function assertLocalDelta(before, after, adds, removes) {
   const unchangedAfter = after.filter(entry => !adds.includes(entry));
   if (JSON.stringify(unchangedBefore) !== JSON.stringify(unchangedAfter)) throw new Error('Existing supplemental rule order changed');
 }
+function sameEntrySet(left, right) {
+  if (left.length !== right.length || new Set(left).size !== left.length || new Set(right).size !== right.length) return false;
+  return JSON.stringify([...left].sort()) === JSON.stringify([...right].sort());
+}
 function patchSegmentDomains(segments, targetId, adds, removes) {
   const before = new Map(segments.map(s => [s.id, [...s.domain]]));
   const otherBuckets = new Map(segments.map(s => [s.id, JSON.stringify([s.ipcidr, s.ipcidrNoResolve, s.residual])]));
@@ -189,9 +197,9 @@ function loadPlan({ root, baselineRef, provider, localSource, adds, removes = []
   assertFrozenSnapshot(root, baselineRef);
   const sourcePath = assertSupplementalPath(root, localSource);
   const baselineGraph = evaluateGraph(lf(frozenRead(root, baselineRef, SOURCE)),
-    JSON.parse(lf(frozenRead(root, baselineRef, 'rulesets/source/traffic-options.json'))), `${SOURCE}@${baselineRef}`);
+    graphDependencies(relative => frozenRead(root, baselineRef, relative)), `${SOURCE}@${baselineRef}`);
   const currentGraph = evaluateGraph(lf(fs.readFileSync(path.join(root, SOURCE))),
-    JSON.parse(lf(fs.readFileSync(path.join(root, 'rulesets/source/traffic-options.json')))), SOURCE);
+    graphDependencies(relative => fs.readFileSync(path.join(root, relative))), SOURCE);
   assertGraphUnchanged(baselineGraph, currentGraph);
   const definition = currentGraph.raw['rule-providers'][provider];
   if (!definition) throw new Error('Unknown explicit provider');
@@ -224,7 +232,7 @@ function loadPlan({ root, baselineRef, provider, localSource, adds, removes = []
       if (segment[bucket].length !== row.counts[manifestBucket]) throw new Error(`Snapshot bucket count mismatch: ${segment.id}/${bucket}`);
     }
   }
-  if (JSON.stringify(targets[0].domain) !== JSON.stringify(before.map(canonicalizeEntry))) {
+  if (!sameEntrySet(targets[0].domain, before.map(canonicalizeEntry))) {
     throw new Error('Local supplemental baseline is not bound to the isolated segment payload');
   }
   const changes = patchSegmentDomains(topology.segments, targets[0].id, adds, removes);
@@ -410,7 +418,7 @@ function writePlan(plan, { mihomoBin, singBoxBin }) {
     // destination write. A concurrent writer cannot silently be overwritten.
     assertFrozenSnapshot(plan.root, plan.baselineRef);
     const graphNow = evaluateGraph(lf(fs.readFileSync(path.join(plan.root, SOURCE))),
-      JSON.parse(lf(fs.readFileSync(path.join(plan.root, 'rulesets/source/traffic-options.json')))), SOURCE);
+      graphDependencies(relative => fs.readFileSync(path.join(plan.root, relative))), SOURCE);
     assertGraphUnchanged(plan.currentGraph, graphNow);
     if (sha256(Buffer.from(lf(fs.readFileSync(path.join(plan.root, plan.localSource))))) !== plan.sourceReceipt.content.sha256) throw new Error('Local source changed after planning');
     for (const [file, bytes] of outputs) {
@@ -425,5 +433,5 @@ function writePlan(plan, { mihomoBin, singBoxBin }) {
   } finally { fs.rmSync(stage, { recursive: true, force: true }); }
 }
 
-module.exports = { RECEIPT, graphDefinition, assertGraphUnchanged, assertTypedDomains, assertLocalDelta,
+module.exports = { RECEIPT, graphDefinition, assertGraphUnchanged, assertTypedDomains, assertLocalDelta, sameEntrySet,
   assertSupplementalPath, assertFrozenSnapshot, patchSegmentDomains, patchNativeAssets, loadPlan, renderPlan, writePlan };

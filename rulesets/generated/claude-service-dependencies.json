@@ -7225,10 +7225,10 @@
     "No real account sign-in, API call, upload, application update or message was exercised."
   ],
   "policy_gaps": [],
-  "report_identity": "0a9cbd4f77078205a17f896ef2d80f86f562525b7c68e283ff9b107ac3cb000e",
+  "report_identity": "6b07e9a3b0ccdfdd2cc792ffd9ea0e155d1dccda9fb6e459ac938c463052a7fe",
   "schema_version": 1,
   "scope": "Claude登录、API、Files API上传、Desktop/Code更新与CDN、可选遥测的静态依赖台账；不执行真实账户或客户端流量。",
-  "semantic_identity": "d69998809c366ba0f1728af78eb4f168e3ffba7d8a4fd0986aa200d70cb715e9",
+  "semantic_identity": "503f6cbc53b8ef75298b8f78147f6b50d7153c16052f2cc35ab3a9afd310f36a",
   "sources": [
     {
       "authority": "anthropic",

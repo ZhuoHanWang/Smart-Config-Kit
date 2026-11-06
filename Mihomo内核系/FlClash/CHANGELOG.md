@@ -13,10 +13,10 @@
 [![文档中心](../../docs/assets/readme/nav-docs.svg)](../../docs/README.md) [返回 README](../../README.md) · [仓库文档中心](../../docs/README.md)
 
 
-## v6.0.21-flclash.27 (2026-11-06)
+## v6.0.21-flclash.28 (2026-11-06)
 
 - 合并上游 `v6.0.21` 规则与运行时更新，恢复个人规则快照引用；保留 Gemini / Anthropic 覆写、AI 专属节点池和业务组默认项。
-- 区域组继续使用 FlClash 内核支持的 `url-test`。
+- 同步 `DOMAIN-SUFFIX,todesk.com` 个人 DIRECT 例外和 `v6.0.21-fork.2` 快照；区域组继续使用 FlClash 内核支持的 `url-test`。
 
 
 ## v6.0.21-flclash.26 (2026-10-31)

@@ -15,10 +15,10 @@
 [![文档中心](../../docs/assets/readme/nav-docs.svg)](../../docs/README.md) [返回 README](../../README.md) · [仓库文档中心](../../docs/README.md)
 
 
-## v6.0.21-dns.26 / v6.0.21-normal.26 (2026-11-06)
+## v6.0.21-dns.27 / v6.0.21-normal.27 (2026-11-06)
 
 - 合并上游 `v6.0.21` 规则与运行时更新，恢复个人规则快照引用；保留俄罗斯区域、AI 排除与专属节点池、Gemini / Anthropic 业务组和默认项。
-- Smart 继续使用 LightGBM，Normal 使用 `url-test`。
+- 为 `scki-adfp-direct` 增加 `DOMAIN-SUFFIX,todesk.com` 并捕获 `v6.0.21-fork.2` 个人快照；Smart 继续使用 LightGBM，Normal 使用 `url-test`。
 
 
 ## v6.0.21-dns.25 / v6.0.21-normal.25 (2026-10-31)

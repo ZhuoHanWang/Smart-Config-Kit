@@ -27,3 +27,4 @@ host, ocsp.sectigo.com
 host, szlong.weixin.qq.com
 host, hklong.weixin.qq.com
 host, hkshort.weixin.qq.com
+host-suffix, todesk.com

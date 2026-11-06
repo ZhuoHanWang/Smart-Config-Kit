@@ -1105,6 +1105,34 @@
         "negative_examples_match": false,
         "positive_examples_match": true
       }
+    },
+    {
+      "id": "todesk-direct",
+      "provider": "scki-adfp-direct",
+      "rule": "DOMAIN-SUFFIX,todesk.com",
+      "match_scope": "suffix",
+      "target_policy": "DIRECT",
+      "reason": "ToDesk authentication, rendezvous and hole-punching endpoints are kept on a narrow direct suffix exception so broad ad and privacy rules cannot interrupt the desktop client.",
+      "evidence": [
+        {
+          "path": "Mihomo内核系/Clash Party/CHANGELOG.md",
+          "anchor": "DOMAIN-SUFFIX,todesk.com",
+          "level": "historical-owner-decision"
+        }
+      ],
+      "positive_examples": [
+        "todesk.com",
+        "api.todesk.com"
+      ],
+      "negative_examples": [
+        "todesk.com.example",
+        "exampletodesk.com",
+        "other.com"
+      ],
+      "expected_relation": {
+        "negative_examples_match": false,
+        "positive_examples_match": true
+      }
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "source_graph_version": "v6.0.21",
-  "registry_sha256": "f3844f5622fa0d14b085e6d41ce4986c8d36a1681c9f867b0ee52c5bc8e43f72",
-  "total_records": 38,
+  "registry_sha256": "8c55bd6d2913fd6031cbd231b26cbb754f15ddc38ffe89f99694412d92945048",
+  "total_records": 39,
   "coverage": {
-    "scki-adfp-direct": 29,
+    "scki-adfp-direct": 30,
     "scki-adfp-intl-site": 3,
     "scki-adfp-payments": 1,
     "scki-adfp-ai": 5
@@ -19,15 +19,15 @@
   "scope": "Registered payload coverage, matching boundaries and static early first-match probes; no live-client claim.",
   "registry": {
     "path": "rulesets/source/adfp-exceptions.json",
-    "sha256": "f3844f5622fa0d14b085e6d41ce4986c8d36a1681c9f867b0ee52c5bc8e43f72",
-    "bytes": 39591,
+    "sha256": "8c55bd6d2913fd6031cbd231b26cbb754f15ddc38ffe89f99694412d92945048",
+    "bytes": 40497,
     "text_normalization": "LF"
   },
   "payloads": [
     {
       "path": "rulesets/supplemental/clash/adfp-direct.list",
-      "sha256": "8da263ad74d2d7042b0fd5ad9ec2f2267757f87be9a696beed36e86718765716",
-      "bytes": 1251,
+      "sha256": "4b0bb0e93264cae24c662acccec2551164f917e799bbbfd5c157321639683f11",
+      "bytes": 1377,
       "text_normalization": "LF"
     },
     {
@@ -294,6 +294,16 @@
       "host": "hkshort.weixin.qq.com",
       "expected_policy": "DIRECT",
       "exception_id": "wechat-connection-hkshort"
+    },
+    {
+      "host": "todesk.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "todesk-direct"
+    },
+    {
+      "host": "api.todesk.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "todesk-direct"
     }
   ],
   "ordered_positive_probes": [
@@ -1125,6 +1135,40 @@
         "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
         "entry": "DOMAIN,hkshort.weixin.qq.com",
         "entryIndex": 28,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "todesk.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "todesk-direct",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,todesk.com",
+        "entryIndex": 29,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "api.todesk.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "todesk-direct",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,todesk.com",
+        "entryIndex": 29,
         "index": 0,
         "policy": "DIRECT",
         "provider": "scki-fused-001-direct-domain"

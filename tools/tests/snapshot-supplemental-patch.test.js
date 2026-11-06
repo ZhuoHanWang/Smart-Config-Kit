@@ -7,7 +7,7 @@ const path = require('node:path');
 const os = require('node:os');
 const cp = require('node:child_process');
 const { assertGraphUnchanged, assertLocalDelta, assertSupplementalPath, assertFrozenSnapshot,
-  patchSegmentDomains, patchNativeAssets } = require('../lib/snapshot-supplemental-patch');
+  patchSegmentDomains, patchNativeAssets, sameEntrySet } = require('../lib/snapshot-supplemental-patch');
 const { parseArgs } = require('../apply-supplemental-to-snapshot');
 
 const hosts = ['DOMAIN,a-api.anthropic.com', 'DOMAIN,a-cdn.anthropic.com'];
@@ -43,6 +43,11 @@ test('only the explicit typed DOMAIN payload delta is admitted', () => {
   assert.throws(() => assertLocalDelta(old, [...old, 'DOMAIN-SUFFIX,todesk.com', 'DOMAIN,extra.anthropic.com'], ['DOMAIN-SUFFIX,todesk.com'], []), /outside the explicit/);
   assert.throws(() => assertLocalDelta(old, [...old, 'DOMAIN,A-API.anthropic.com'], ['DOMAIN,A-API.anthropic.com'], []), /canonical typed/);
   assert.throws(() => assertLocalDelta(old, [...old, ...hosts], [hosts[0], hosts[0]], []), /duplicate/);
+});
+test('frozen provider binding permits a source projection order difference without duplicates', () => {
+  assert.equal(sameEntrySet(['DOMAIN,a.example', 'DOMAIN,b.example'], ['DOMAIN,b.example', 'DOMAIN,a.example']), true);
+  assert.equal(sameEntrySet(['DOMAIN,a.example', 'DOMAIN,a.example'], ['DOMAIN,a.example', 'DOMAIN,a.example']), false);
+  assert.equal(sameEntrySet(['DOMAIN,a.example'], ['DOMAIN,b.example']), false);
 });
 test('source paths and baseline misalignment fail closed', () => {
   const root = path.resolve(__dirname, '../..');

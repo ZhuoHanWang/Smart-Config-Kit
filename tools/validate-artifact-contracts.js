@@ -24,6 +24,7 @@ const {
   getAssetRevisionFromUrl,
   repositoryAssetUrl,
 } = require('./lib/generated-asset-url');
+const { assertClientSnapshot } = require('./use-personal-rule-snapshot');
 const {
   formatIssues: formatCapabilityMatrixIssues,
   readClientCapabilityMatrix,
@@ -399,6 +400,8 @@ function generatedEgernUrl(id) {
 function validateGeneratedAssetRevision(record) {
   const manifest = readJson('rulesets/generated/fused/manifest.json');
   const assetRevision = manifest.asset_revision;
+  const personalSnapshot = readJson('Mihomo内核系/Clash Party/rulesets/active.json').snapshot;
+  const acceptedRevisions = new Set([assetRevision, personalSnapshot]);
   const expectedRevision = getMihomoNormalizedRoutingGraph().version;
   record.check('generated-assets.manifest-revision', assetRevision === expectedRevision, {
     value: { assetRevision, expectedRevision },
@@ -425,14 +428,23 @@ function validateGeneratedAssetRevision(record) {
   for (const product of products) {
     const source = readText(product.file);
     const urls = generatedAssetUrls(source);
-    const revisionOk = urls.length > 0 && urls.every((url) => getAssetRevisionFromUrl(url) === assetRevision);
+    let personalSnapshotOk = false;
+    if (urls.length === 0 && product.mihomo) {
+      try {
+        assertClientSnapshot(product.file);
+        personalSnapshotOk = true;
+      } catch {}
+    }
+    const revisionOk = urls.length > 0
+      ? urls.every((url) => acceptedRevisions.has(getAssetRevisionFromUrl(url)))
+      : personalSnapshotOk;
     record.check(`generated-assets.${product.id}.revisioned-urls`, revisionOk, {
-      value: { urlCount: urls.length, assetRevision },
-      message: `${product.file} must reference every generated asset with ?scki=${assetRevision}`,
+      value: { urlCount: urls.length, assetRevision, personalSnapshot, personalSnapshotOk },
+      message: `${product.file} must reference revisioned generated assets or match the active personal snapshot ${personalSnapshot}`,
     });
     if (product.mihomo) {
-      const cachePath = `./ruleset/${assetRevision}/`;
-      record.check(`generated-assets.${product.id}.versioned-mihomo-cache`, source.includes(cachePath) && !source.includes(`./ruleset/scki-fused-`), {
+      const cachePaths = [`./ruleset/${assetRevision}/`, `./ruleset/personal/${personalSnapshot}/`];
+      record.check(`generated-assets.${product.id}.versioned-mihomo-cache`, cachePaths.some((cachePath) => source.includes(cachePath)) && !source.includes(`./ruleset/scki-fused-`), {
         message: `${product.file} must use a versioned Mihomo local rule-provider path`,
       });
     }

@@ -3,6 +3,8 @@ DOMAIN,login.nvidia.cn
 ## WeChat HTTPDNS endpoints must remain reachable before generic BlockHttpDNS rejection.
 DOMAIN,dns.weixin.qq.com
 DOMAIN,dns.weixin.qq.com.cn
+## ToDesk authentication, rendezvous and hole-punching endpoints must bypass broad ad/privacy rules.
+DOMAIN-SUFFIX,todesk.com
 ## WeChat connection endpoints: exact DIRECT before the ad-list false positives (Issue #187).
 DOMAIN,szlong.weixin.qq.com
 DOMAIN,hklong.weixin.qq.com
