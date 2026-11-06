@@ -16,7 +16,14 @@
         "mazu.sec.miui.com",
         "ccc.sys.miui.com",
         "register.xmpush.xiaomi.com",
-        "msg.umeng.com"
+        "msg.umeng.com",
+        "crl3.digicert.com",
+        "crl4.digicert.com",
+        "ocsp.digicert.com",
+        "ocsp.sectigo.com",
+        "szlong.weixin.qq.com",
+        "hklong.weixin.qq.com",
+        "hkshort.weixin.qq.com"
       ],
       "domain_suffix": [
         "account.xiaomi.com",

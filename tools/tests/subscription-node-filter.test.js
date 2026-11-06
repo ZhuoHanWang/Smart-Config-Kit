@@ -9,9 +9,9 @@ const { getTrafficOptions, getQuicRules } = require('../../rulesets/source/routi
 
 const root = path.resolve(__dirname, '../..');
 const targets = [
-  'Clash Party/ClashParty(mihomo-smart).js',
-  'Clash Party/ClashParty(mihomo).js',
-  'FlClash/FlClash(mihomo).js',
+  'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js',
+  'Mihomo内核系/Clash Party/ClashParty(mihomo).js',
+  'Mihomo内核系/FlClash/FlClash(mihomo).js',
 ];
 
 function node(name, extra = {}) {
@@ -300,7 +300,8 @@ test('FlClash replaces malformed rule-provider container before fused output', (
     const serialized = JSON.parse(JSON.stringify(input));
     assert.equal(Array.isArray(serialized['rule-providers']), false);
     assert.equal(typeof serialized['rule-providers'], 'object');
-    assert.equal(Object.keys(serialized['rule-providers']).length, 134);
-    assert.equal(serialized.rules.length, 168 + getQuicRules(getTrafficOptions().quicPolicy).length);
+    const fused = JSON.parse(fs.readFileSync(path.join(root, 'rulesets/generated/fused/manifest.json'), 'utf8'));
+    assert.equal(Object.keys(serialized['rule-providers']).length, fused.fused_provider_count + 2);
+    assert.equal(serialized.rules.length, fused.fused_rule_count + 37);
   }
 });

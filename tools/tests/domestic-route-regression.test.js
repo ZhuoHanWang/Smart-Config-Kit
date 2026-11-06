@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+const { resolveContractSegments } = require('../lib/fused-contract-segments');
+const CONTRACT_SEGMENTS = resolveContractSegments();
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -13,7 +15,8 @@ const {
 } = require('../../rulesets/source/routing-graph');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const FUSED_ROOT = path.join(REPO_ROOT, 'rulesets/generated/fused');
+const { loadRepository, parseFusedRules: parseRules, firstDomainRoute: projectDomainRoute, firstMatch, matchEntry } = require('../lib/ordered-rule-semantics');
+const SEMANTICS = loadRepository({ root: REPO_ROOT });
 const CN_SITE = '🏠 国内网站';
 const CN_MEDIA = '📺 国内流媒体';
 const DIRECT = 'DIRECT';
@@ -31,9 +34,10 @@ const WECHAT_HTTPDNS_DIRECT_HOSTS = [
   'dns.weixin.qq.com',
   'dns.weixin.qq.com.cn',
 ];
-const TODESK_DIRECT_HOSTS = [
-  'authds.todesk.com',
-  'st.todesk.com',
+const WECHAT_CONNECTION_DIRECT_HOSTS = [
+  'szlong.weixin.qq.com',
+  'hklong.weixin.qq.com',
+  'hkshort.weixin.qq.com',
 ];
 
 function readText(relativePath) {
@@ -41,50 +45,12 @@ function readText(relativePath) {
 }
 
 function parseFusedRules() {
-  const source = readText('Clash Party/ClashParty(mihomo-smart).js');
-  const match = source.match(/const\s+MIHOMO_FUSED_RULES\s*=\s*(\[[^\r\n]*\])/);
-  assert.ok(match, 'Clash Party Smart must contain MIHOMO_FUSED_RULES');
-  return JSON.parse(match[1]);
+  return parseRules(readText('Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js'));
 }
 
-function ruleSetEntries(segment) {
-  const entry = segment.files && segment.files.clash;
-  const files = Array.isArray(entry && entry.parts) ? entry.parts : [entry && entry.file].filter(Boolean);
-  return files.flatMap((file) => readText(`rulesets/generated/fused/clash/${file}`)
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#')));
-}
-
-function wildcardMatches(pattern, host) {
-  const expression = `^${pattern.split('*').map((part) => part.replace(/[|\\{}()[\]^$+?.]/g, '\\$&')).join('.*')}$`;
-  return new RegExp(expression, 'i').test(host);
-}
-
-function matchesDomainRule(rule, host) {
-  const [type, value] = rule.split(',', 3);
-  const normalized = host.toLowerCase();
-  const candidate = String(value || '').toLowerCase();
-  if (type === 'DOMAIN') return normalized === candidate;
-  if (type === 'DOMAIN-SUFFIX') return normalized === candidate || normalized.endsWith(`.${candidate}`);
-  if (type === 'DOMAIN-KEYWORD') return normalized.includes(candidate);
-  if (type === 'DOMAIN-WILDCARD') return wildcardMatches(candidate, normalized);
-  if (type === 'DOMAIN-REGEX') return new RegExp(value, 'i').test(normalized);
-  return false;
-}
-
+// Deliberate domain-provider projection; this does not assert full connection routing.
 function firstDomainRoute(host) {
-  const manifest = JSON.parse(fs.readFileSync(path.join(FUSED_ROOT, 'manifest.json'), 'utf8'));
-  const segments = new Map(manifest.segments.map((segment) => [segment.id, segment]));
-  for (const rule of parseFusedRules()) {
-    const [type, provider, policy] = rule.split(',', 3);
-    if (type !== 'RULE-SET' || !provider.endsWith('-domain')) continue;
-    const segment = segments.get(provider.slice(0, -'-domain'.length));
-    if (segment && ruleSetEntries(segment).some((entry) => matchesDomainRule(entry, host))) {
-      return { provider, policy };
-    }
-  }
-  return null;
+  return projectDomainRoute(SEMANTICS, host);
 }
 
 test('all generic CDN, geolocation and region fallbacks stay after domestic authority', () => {
@@ -133,18 +99,163 @@ test('reported domestic services and representative shared-CDN hosts keep their 
   }
 });
 
+// This finite projection records the first decidable pure-domain predicate, including
+// residual keywords. Unknown RE2 blockers remain in the shared evidence result;
+// it does not establish complete first-match connection routing.
+function firstAuditDomainRoute(host) {
+  const result = firstMatch(SEMANTICS, { host }, { mode: 'domain-projection' });
+  return result.firstDecidableMatch;
+}
+
+function firstProcessRoute(processName) {
+  for (const row of SEMANTICS.rules) {
+    const provider = SEMANTICS.providers.get(row.provider);
+    for (const entry of provider?.entries || []) {
+      if (!entry.startsWith('PROCESS-NAME,')) continue;
+      if (matchEntry(entry, { processName }).status === 'match') return { policy: row.policy, provider: row.provider };
+    }
+  }
+  return null;
+}
+
+test('confirmed routing audit collisions retain their declared business policy', () => {
+  const cases = [
+    ['www.wegame.com.cn', '🕹️ 国内游戏'],
+    ['ptlogin2.wegame.com.cn', '🕹️ 国内游戏'],
+    ['keepalive.wegame.com.cn', '🕹️ 国内游戏'],
+    ['dir-update.wegame.com.cn', '🕹️ 国内游戏'],
+    ['lol-data-filter.wegame.com.cn', '🕹️ 国内游戏'],
+    ['wegame.gtimg.com', '🕹️ 国内游戏'],
+    ['ied-tqos-tgp.qq.com', '🕹️ 国内游戏'],
+    ['mlol.qt.qq.com', '🕹️ 国内游戏'],
+    ['hn1-k8s-sgp.lol.qq.com', '🕹️ 国内游戏'],
+    ['tqos.gamesafe.qq.com', '🕹️ 国内游戏'],
+    ['tqos.anticheatexpert.com', '🕹️ 国内游戏'],
+    ['cn.voice.gcloudcs.com', '🕹️ 国内游戏'],
+    ['idcconfig.gcloudsdk.com', '🕹️ 国内游戏'],
+    ['lol.ams.game.qq.com', '🕹️ 国内游戏'],
+    ['img.crawler.qq.com', '🕹️ 国内游戏'],
+    ['api.me.com', '🍎 苹果服务'],
+    ['mail.me.com', '🌐 国外网站'],
+    ['api.apple.com', '🍎 苹果服务'],
+    ['login.live.com', 'Ⓜ️ 微软服务'],
+    ['g.live.com', 'Ⓜ️ 微软服务'],
+    ['designerapp.officeapps.live.com', '🤖 AI 服务'],
+    ['edge.microsoft.com', 'Ⓜ️ 微软服务'],
+    ['aks-prod-southeastasia.access-point.cloudmessaging.edge.microsoft.com', 'Ⓜ️ 微软服务'],
+    ['ecs.office.com', 'Ⓜ️ 微软服务'],
+    ['assets.msn.com', 'Ⓜ️ 微软服务'],
+    ['api.msn.com', 'Ⓜ️ 微软服务'],
+    ['ntp.msn.com', 'Ⓜ️ 微软服务'],
+    ['storage.live.com', 'Ⓜ️ 微软服务'],
+    ['nav-edge.smartscreen.microsoft.com', 'Ⓜ️ 微软服务'],
+    ['onedriveclucprodbn20003.blob.core.windows.net', 'Ⓜ️ 微软服务'],
+    ['onedriveclucproddm20046.blob.core.windows.net', 'Ⓜ️ 微软服务'],
+    ['onedrive.live.com', 'Ⓜ️ 微软服务'],
+    ['copilot.microsoft.com', '🤖 AI 服务'],
+    ['cr.m365copilotapp.svc.cloud.microsoft', '🤖 AI 服务'],
+    ['mail.live.com', '🌐 国外网站'],
+    ['outlook.live.com', '🌐 国外网站'],
+    ['odc.officeapps.live.com', 'Ⓜ️ 微软服务'],
+    ['gyao.yahoo.co.jp', '🇯🇵 日韩流媒体'],
+    ['kakaotv.daum.net', '🇯🇵 日韩流媒体'],
+    ['www.yahoo.co.jp', '🔧 工具与服务'],
+    ['aws.amazon.com', '🔧 工具与服务'],
+    ['elasticbeanstalk.com', '🔧 工具与服务'],
+    ['app.heroku.com', '🔧 工具与服务'],
+    ['myapp.herokuapp.com', '🔧 工具与服务'],
+    ['amazon.com', '🌐 国外网站'],
+    ['www.amazon.co.jp', '🌐 国外网站'],
+    ['www.amazon.com', '🌐 国外网站'],
+    ['www.primevideo.com', '🎬 Prime Video'],
+    ['configuration-server-lb-1105093370.us-east-1.elb.amazonaws.com', '🌐 国外网站'],
+    ['generic-cdn-node.cloudfront.net', '🌐 国外网站'],
+    ['client.relay.crisp.chat', '🌐 国外网站'],
+    ['awsstatic.com', '🌐 国外网站'],
+    ['foo.azureedge.net', '🌐 国外网站'],
+    ['foo.azurefd.net', '🌐 国外网站'],
+    ['otelrules.azureedge.net', 'Ⓜ️ 微软服务'],
+    ['mlccdnprod.azureedge.net', 'Ⓜ️ 微软服务'],
+    ['flightsimulator.azureedge.net', 'Ⓜ️ 微软服务'],
+    ['cdn.msecnd.net', 'Ⓜ️ 微软服务'],
+    ['foo.akamai.net', '🌐 国外网站'],
+    ['foo.akamaihd.net', '🌐 国外网站'],
+    ['foo.akamaized.net', '🌐 国外网站'],
+    ['foo.edgesuite.net', '🌐 国外网站'],
+    ['openaiapi-site.azureedge.net', '🤖 AI 服务'],
+    ['cdn.lemon8cdn.com', '📱 社交媒体'],
+    ['api.lemon8-app.com', '📱 社交媒体'],
+    ['api.byteoversea.com', '🎵 TikTok'],
+    ['foo.capcut.com', '🎵 TikTok'],
+    ['api.capcutapi.com', '🎵 TikTok'],
+    ['vcs-sg.byteoversea.com', '🤖 AI 服务'],
+    ['api.marscode.com', '🤖 AI 服务'],
+    ['ntes53.netease.com', CN_MEDIA],
+    ['cdn.bootcss.com', CN_SITE],
+    ['assets.staticfile.org', CN_SITE],
+  ];
+
+  for (const [host, policy] of cases) {
+    assert.equal(firstAuditDomainRoute(host)?.policy, policy, `${host} must keep its intended route`);
+  }
+  assert.notEqual(firstAuditDomainRoute('notmsecnd.net')?.policy, 'Ⓜ️ 微软服务', 'msecnd.net must use a suffix boundary, not a substring match');
+
+  for (const host of [
+    'crl3.digicert.com', 'crl4.digicert.com',
+    'ocsp.digicert.com', 'ocsp.sectigo.com',
+  ]) {
+    assert.equal(firstAuditDomainRoute(host)?.policy, DIRECT, `${host} must use the early certificate-status DIRECT exception`);
+  }
+  for (const host of [
+    'logs.game.qq.com', 'sentry.qt.qq.com', 'prod-diagnostic.lol.qq.com',
+    'self.events.data.microsoft.com', 'c.msn.com', 'srtb.msn.com',
+    'arc.msn.com', 'browser.events.data.msn.com',
+    'd2wy8f7a9ursnm.cloudfront.net',
+  ]) {
+    assert.equal(firstAuditDomainRoute(host)?.policy, '🛑 广告拦截', `${host} must remain blocked before broad product-domain guards`);
+  }
+  assert.notEqual(firstAuditDomainRoute('fakeapple.invalid')?.policy, '🍎 苹果服务');
+
+  for (const [processName, policy] of [
+    ['TikTok', '🎵 TikTok'],
+    ['CapCut', '🎵 TikTok'],
+    ['Lemon8', '📱 社交媒体'],
+  ]) {
+    assert.equal(firstProcessRoute(processName)?.policy, policy, `${processName} must keep its app route`);
+  }
+
+  const downloads = [
+    'windowsupdate.com', 'update.microsoft.com', 'download.microsoft.com',
+    'delivery.mp.microsoft.com', 'officecdn.microsoft.com',
+    'officecdn.microsoft.com.edgesuite.net', 'archive.ubuntu.com',
+    'security.ubuntu.com', 'mirrors.kernel.org', 'dl.fedoraproject.org',
+    'repo.anaconda.com', 'conda.anaconda.org', 'repo.continuum.io',
+    'sourceforge.net', 'fosshub.com', 'filehippo.com', 'softonic.com',
+    'gcr.io', 'ghcr.io', 'quay.io', 'registry.k8s.io',
+    'down.qq.com', 'dldir1.qq.com',
+    'lol-wegame-client-1258344700.file.myqcloud.com',
+  ];
+  for (const host of downloads) {
+    assert.equal(firstAuditDomainRoute(host)?.policy, '📥 下载更新', `${host} must keep its download route`);
+  }
+
+  const ciciaiMirror = readText('mirrors/CiciAi.list');
+  assert.doesNotMatch(ciciaiMirror, /^DOMAIN-KEYWORD,byteoversea$/m);
+  assert.doesNotMatch(ciciaiMirror, /^PROCESS-NAME,(?:TikTok|CapCut|Lemon8)$/m);
+});
+
 test('LINUX DO mainland backup domain stays domestic without broadening the main site', () => {
   const domesticGuard = readText('rulesets/supplemental/clash/cnsite-guard.list');
   const qxGuard = readText('rulesets/supplemental/quantumultx/cnsite-guard.list');
-  const egernProvider = readText('rulesets/generated/egern/provider-scki-fused-013-cn-site-domain.yaml');
-  const qxFused = readText('rulesets/generated/fused/quantumultx/scki-fused-013-cn-site.list');
-  const surgeFused = readText('rulesets/generated/fused/surge/scki-fused-013-cn-site.list');
-  const singBoxFused = JSON.parse(readText('rulesets/generated/fused/sing-box/scki-fused-013-cn-site.json'));
-  const xrayRules = JSON.parse(readText('v2rayN/v2rayN(xray).json'));
-  const xrayDomesticRule = xrayRules.find((rule) => rule.id === 'scki-fused-013-cn-site');
+  const egernProvider = readText(`rulesets/generated/egern/provider-${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}-domain.yaml`);
+  const qxFused = readText(`rulesets/generated/fused/quantumultx/${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}.list`);
+  const surgeFused = readText(`rulesets/generated/fused/surge/${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}.list`);
+  const singBoxFused = JSON.parse(readText(`rulesets/generated/fused/sing-box/${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}.json`));
+  const xrayRules = JSON.parse(readText('Xray内核系/v2rayN/v2rayN(xray).json'));
+  const xrayDomesticRule = xrayRules.find((rule) => rule.id === `${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}`);
   const fusedRules = parseFusedRules();
-  const domesticIndex = fusedRules.indexOf('RULE-SET,scki-fused-013-cn-site-domain,🏠 国内网站');
-  const genericIntlIpIndex = fusedRules.findIndex((rule) => rule.startsWith('RULE-SET,scki-fused-068-intl-site-ipcidr,'));
+  const domesticIndex = fusedRules.indexOf(`RULE-SET,${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}-domain,🏠 国内网站`);
+  const genericIntlIpIndex = fusedRules.findIndex((rule) => rule.startsWith(`RULE-SET,${CONTRACT_SEGMENTS["scki-fused-068-intl-site"]}-ipcidr,`));
   assert.match(domesticGuard, /^DOMAIN-SUFFIX,linuxdo\.org$/m);
   assert.match(qxGuard, /^host-suffix, linuxdo\.org$/m);
   assert.match(egernProvider, /^  - "linuxdo\.org"$/m);
@@ -157,13 +268,13 @@ test('LINUX DO mainland backup domain stays domestic without broadening the main
 
   for (const host of LINUX_DO_MAINLAND_HOSTS) {
     assert.deepEqual(firstDomainRoute(host), {
-      provider: 'scki-fused-013-cn-site-domain',
+      provider: `${CONTRACT_SEGMENTS["scki-fused-013-cn-site"]}-domain`,
       policy: CN_SITE,
     });
   }
 
   assert.deepEqual(firstDomainRoute('linux.do'), {
-    provider: 'scki-fused-059-gfw-domain',
+    provider: `${CONTRACT_SEGMENTS["scki-fused-059-gfw"]}-domain`,
     policy: '🚫 受限网站',
   }, 'linux.do must retain its existing GFW route');
 });
@@ -181,15 +292,15 @@ test('reported NetEase game endpoints use the early direct guard before generic 
   assert.ok(directGuardIndex < domesticGameIndex, 'the direct guard must precede domestic games');
 
   const directGuard = readText('rulesets/supplemental/clash/adfp-direct.list');
-  const shadowrocket = readText('Shadowrocket/Shadowrocket.conf');
-  const shadowrocketDirectRule = `scki-fused-001-direct.list?scki=${SOURCE_GRAPH_VERSION},DIRECT`;
-  const shadowrocketGameRule = `scki-fused-060-game-cn.list?scki=${SOURCE_GRAPH_VERSION},🕹️ 国内游戏`;
+  const shadowrocket = readText('独立内核系/Shadowrocket/Shadowrocket.conf');
+  const shadowrocketDirectRule = `${CONTRACT_SEGMENTS["scki-fused-001-direct"]}.list?scki=${SOURCE_GRAPH_VERSION},DIRECT`;
+  const shadowrocketGameRule = `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}.list?scki=${SOURCE_GRAPH_VERSION},🕹️ 国内游戏`;
   assert.ok(shadowrocket.indexOf(shadowrocketDirectRule) < shadowrocket.indexOf(shadowrocketGameRule), 'Shadowrocket must reference the direct guard before domestic games');
 
   for (const host of NETEASE_GAME_DIRECT_HOSTS) {
     assert.match(directGuard, new RegExp(`^DOMAIN,${host}$`, 'm'));
     assert.deepEqual(firstDomainRoute(host), {
-      provider: 'scki-fused-001-direct-domain',
+      provider: `${CONTRACT_SEGMENTS["scki-fused-001-direct"]}-domain`,
       policy: DIRECT,
     });
   }
@@ -207,7 +318,7 @@ test('NVIDIA China login uses the early exact direct guard before generic NVIDIA
   const directGuard = readText('rulesets/supplemental/clash/adfp-direct.list');
   assert.match(directGuard, new RegExp(`^DOMAIN,${NVIDIA_CHINA_LOGIN_HOST}$`, 'm'));
   assert.deepEqual(firstDomainRoute(NVIDIA_CHINA_LOGIN_HOST), {
-    provider: 'scki-fused-001-direct-domain',
+    provider: `${CONTRACT_SEGMENTS["scki-fused-001-direct"]}-domain`,
     policy: DIRECT,
   });
 
@@ -232,67 +343,41 @@ test('WeChat HTTPDNS endpoints bypass generic BlockHttpDNS rejection through the
   for (const host of WECHAT_HTTPDNS_DIRECT_HOSTS) {
     assert.match(directGuard, new RegExp(`^DOMAIN,${host}$`, 'm'));
     assert.deepEqual(firstDomainRoute(host), {
-      provider: 'scki-fused-001-direct-domain',
+      provider: `${CONTRACT_SEGMENTS["scki-fused-001-direct"]}-domain`,
       policy: DIRECT,
     });
   }
 });
 
-test('ToDesk endpoints bypass generic ad, QUIC rejection and later process-direct rules', () => {
-  const graph = getRawRoutingGraph();
-  const directGuardIndex = graph.rules.indexOf('RULE-SET,scki-adfp-direct,DIRECT');
-  const adIndex = graph.rules.indexOf('RULE-SET,acc-prerepaireasyprivacy,🛑 广告拦截');
-  const quicRejectIndex = graph.rules.indexOf('AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT');
-  const processDirectIndex = graph.rules.indexOf('RULE-SET,scki-local-process-direct,DIRECT');
-  const directGuard = readText('rulesets/supplemental/clash/adfp-direct.list');
-  const privacyResidual = readText('rulesets/generated/mihomo-mrs/acc-prerepaireasyprivacy-classical.yaml');
-  const fusedRules = parseFusedRules();
-  const activeSnapshot = JSON.parse(readText('Clash Party/rulesets/active.json'));
-  const snapshotManifest = JSON.parse(readText(`Clash Party/rulesets/${activeSnapshot.snapshot}/manifest.json`));
-  const directSnapshotProvider = snapshotManifest.providers['scki-fused-001-direct-domain'];
-  const smartSource = readText('Clash Party/ClashParty(mihomo-smart).js');
-  const providerMatch = smartSource.match(/^const MIHOMO_FUSED_RULE_PROVIDERS = (.+)$/m);
-  assert.ok(providerMatch, 'Clash Party Smart must contain its personal fused providers');
-  const smartProviders = JSON.parse(providerMatch[1]);
-  const directGuardEntries = directGuard.split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'));
-  const earlyFusedDirect = 'RULE-SET,scki-fused-001-direct-domain,DIRECT';
-  const ordinaryFusedDirect = 'RULE-SET,scki-fused-008-direct-domain,DIRECT';
-  const earlyFusedDirectIndex = fusedRules.indexOf(earlyFusedDirect);
-  const adFusedRuleIndex = fusedRules.indexOf('RULE-SET,scki-fused-006-ad-residual,🛑 广告拦截');
-  const quicFusedRuleIndex = fusedRules.indexOf('AND,((DST-PORT,443),(NETWORK,UDP),(NOT,((GEOSITE,cn)))),REJECT');
-  const ordinaryFusedDirectIndex = fusedRules.indexOf(ordinaryFusedDirect);
-
-  assert.ok(directGuardIndex >= 0, 'the early direct guard must exist');
-  assert.ok(adIndex >= 0, 'the generic privacy provider must exist');
-  assert.ok(quicRejectIndex >= 0, 'the foreign QUIC rejection rule must exist');
-  assert.ok(processDirectIndex >= 0, 'the later process-direct provider must exist');
-  assert.ok(directGuardIndex < adIndex, 'the direct guard must precede generic privacy rules');
-  assert.ok(directGuardIndex < quicRejectIndex, 'the direct guard must precede foreign QUIC rejection');
-  assert.ok(directGuardIndex < processDirectIndex, 'the direct guard must precede process-direct rules');
-  assert.match(directGuard, /^DOMAIN-SUFFIX,todesk\.com$/m);
-  assert.match(privacyResidual, /DOMAIN-KEYWORD,\s*todesk\.com/);
-  assert.ok(earlyFusedDirectIndex >= 0, 'the ToDesk direct provider must exist in the personal fused rules');
-  assert.ok(adFusedRuleIndex >= 0, 'the fused ad residual must exist');
-  assert.ok(quicFusedRuleIndex >= 0, 'the fused foreign QUIC rejection must exist');
-  assert.ok(ordinaryFusedDirectIndex >= 0, 'the later ordinary direct segment must exist');
-  assert.ok(earlyFusedDirectIndex < adFusedRuleIndex, 'fused direct segment must precede the ad segment');
-  assert.ok(earlyFusedDirectIndex < quicFusedRuleIndex, 'fused direct segment must precede the foreign QUIC rejection');
-  assert.ok(earlyFusedDirectIndex < ordinaryFusedDirectIndex, 'ToDesk direct segment must precede the ordinary direct segment');
-  assert.equal(fusedRules[0], earlyFusedDirect, 'the ToDesk direct provider must be the first fused rule');
-  assert.equal(directSnapshotProvider.file, 'scki-fused-001-direct-domain.mrs');
-  assert.ok(smartProviders['scki-fused-001-direct-domain'].url.includes(`/${activeSnapshot.snapshot}/`), 'the first direct rule must use the active personal snapshot');
-
-  for (const host of TODESK_DIRECT_HOSTS) {
-    const matchingDirectRule = directGuardEntries.find((rule) => matchesDomainRule(rule, host));
-    assert.equal(matchingDirectRule, 'DOMAIN-SUFFIX,todesk.com', `${host} must match the early ToDesk suffix rule`);
-    assert.deepEqual({
-      provider: fusedRules[0].split(',')[1],
-      policy: fusedRules[0].split(',')[2],
-    }, {
-      provider: 'scki-fused-001-direct-domain',
-      policy: DIRECT,
+for (const host of WECHAT_CONNECTION_DIRECT_HOSTS) {
+  for (const [label, processFields] of [
+    ['desktop process', { processName: 'Weixin.exe' }],
+    ['without process metadata', {}],
+  ]) {
+    test(`WeChat connection endpoint ${host} reaches the early direct guard ${label}`, () => {
+      const route = firstMatch(SEMANTICS, {
+        host, network: 'tcp', destinationPort: 443, ...processFields,
+      });
+      assert.equal(route.status, 'match', `${host} must have a decidable first match ${label}`);
+      assert.equal(route.policy, DIRECT, `${host} must reach DIRECT independently of process discovery`);
+      assert.equal(route.hit.provider, `${CONTRACT_SEGMENTS['scki-fused-001-direct']}-domain`);
+      assert.deepEqual(firstDomainRoute(host), {
+        provider: `${CONTRACT_SEGMENTS['scki-fused-001-direct']}-domain`,
+        policy: DIRECT,
+      });
     });
+  }
+}
+
+test('WeChat connection exceptions preserve sibling ad rejection and do not exempt the parent or child domains', () => {
+  for (const host of ['ad.weixin.qq.com', 'log.weixin.qq.com']) {
+    const route = firstMatch(SEMANTICS, {
+      host, network: 'tcp', destinationPort: 443, processName: 'Weixin.exe',
+    });
+    assert.equal(route.status, 'match');
+    assert.equal(route.policy, '🛑 广告拦截', `${host} must retain its existing ad/privacy rejection`);
+  }
+  for (const host of ['weixin.qq.com', ...WECHAT_CONNECTION_DIRECT_HOSTS.map(host => `child.${host}`)]) {
+    assert.equal(firstDomainRoute(host)?.policy, CN_SITE, `${host} must retain the domestic policy outside the exact exceptions`);
   }
 });

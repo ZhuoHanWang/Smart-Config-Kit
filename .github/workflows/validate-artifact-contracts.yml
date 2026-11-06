@@ -3,30 +3,89 @@ name: Validate Artifact Contracts
 on:
   pull_request:
     paths:
-      - 'Clash Party/**/*.js'
-      - 'FlClash/**/*.js'
-      - 'Clash Meta For Android/**/*.yaml'
-      - 'Stash/**/*.yaml'
-      - 'OpenClash/**/*.conf'
-      - 'OpenClash/**/*.sh'
-      - 'Shadowrocket/**/*.conf'
-      - 'Surge/**/*.conf'
-      - 'Loon/**/*.conf'
-      - 'Quantumult X/**/*.conf'
-      - 'SingBox/**/*.json'
-      - 'v2rayN/**/*.json'
-      - 'Passwall/**/*.sh'
-      - 'Passwall/**/*.conf'
-      - 'Passwall/shunt-rules/**/*.list'
-      - 'Passwall2/**/*.sh'
-      - 'Passwall2/**/*.conf'
-      - 'Passwall2/shunt-rules/**/*.list'
+      - 'tools/lib/business-profile*.js'
+      - 'tools/generate-business-profile.js'
+      - 'rulesets/source/business-profiles.json'
+      - 'tools/configure.js'
+      - 'tools/lib/configuration-schema.js'
+      - 'tools/generate-configuration-form.js'
+      - 'tools/build-configuration-pages.js'
+      - 'tools/tests/configuration-pages.test.js'
+      - '.github/workflows/deploy-configuration-pages.yml'
+      - 'tools/lib/flclash-browser-export.js'
+      - 'tools/lib/flclash-browser-local-options.js'
+      - 'tools/lib/offline-*.js'
+      - 'tools/tests/offline-*.test.js'
+      - 'tools/vendor/fflate/**'
+      - 'tools/tests/flclash-browser-export.test.js'
+      - 'tools/tests/business-profile*.test.js'
+      - 'tools/tests/configuration*.test.js'
+      - 'tools/tests/node-dns-hosts-only*.test.js'
+      - 'docs/configuration*'
+      - 'Mihomo内核系/Clash Party/**/*.js'
+      - 'Mihomo内核系/FlClash/**/*.js'
+      - 'Mihomo内核系/Clash Meta For Android/**/*.yaml'
+      - '独立内核系/Stash/**/*.yaml'
+      - 'Mihomo内核系/OpenClash/**/*.conf'
+      - 'Mihomo内核系/OpenClash/**/*.sh'
+      - '独立内核系/Shadowrocket/**/*.conf'
+      - '独立内核系/Surge/**/*.conf'
+      - '独立内核系/Loon/**/*.conf'
+      - '独立内核系/Quantumult X/**/*.conf'
+      - 'Sing-box内核系/SingBox/**/*.json'
+      - 'Sing-box内核系/Karing/**'
+      - 'tools/client-layout.json'
+      - 'tools/lib/client-layout.js'
+      - 'tools/tests/client-layout.test.js'
+      - 'tools/generate-karing.js'
+      - 'rulesets/source/karing-support/**'
+      - 'tools/lib/karing*.js'
+      - 'tools/tests/karing*.js'
+      - 'Xray内核系/v2rayN/**/*.json'
+      - '双内核系/Passwall/**/*.sh'
+      - '双内核系/Passwall/**/*.conf'
+      - '双内核系/Passwall/shunt-rules/**/*.list'
+      - '双内核系/Passwall2/**/*.sh'
+      - '双内核系/Passwall2/**/*.conf'
+      - '双内核系/Passwall2/shunt-rules/**/*.list'
       - 'rulesets/source/routing-graph.js'
+      - 'rulesets/source/business-dns-policy.json'
+      - 'tools/lib/business-dns-policy.js'
+      - 'tools/sync-business-dns-policy.js'
+      - 'tools/tests/business-dns-*.test.js'
+      - 'tools/tests/issue-187-wechat-download.test.js'
       - 'rulesets/source/traffic-options.json'
+      - 'rulesets/source/upstream-sources.json'
+      - 'rulesets/source/adfp-exceptions.json'
+      - 'rulesets/source/semantic-approval.json'
+      - 'rulesets/source/claude-service-dependencies.json'
+      - 'rulesets/source/release-batch-contract.json'
+      - 'tools/*claude-service*.js'
+      - 'tools/*release-batch*.js'
+      - 'tools/*supplemental-to-snapshot*.js'
+      - 'tools/lib/claude-service-dependencies.js'
+      - 'tools/lib/release-batch.js'
+      - 'tools/lib/snapshot-supplemental-patch.js'
+      - 'tools/tests/claude-service-dependencies.test.js'
+      - 'tools/tests/release-batch.test.js'
+      - 'tools/tests/*supplemental-patch.test.js'
+      - 'rulesets/supplemental/**'
+      - 'tools/*rule-quality*.js'
+      - 'tools/*ordered-rule*.js'
+      - 'tools/*adfp*.js'
+      - 'tools/sync-mihomo-mrs-rule-providers.js'
+      - 'tools/lib/*provenance*.js'
+      - 'tools/lib/ordered-rule-semantics.js'
+      - 'tools/lib/adfp-exceptions.js'
+      - 'tools/tests/*provenance*.test.js'
+      - 'tools/tests/ordered-rule-semantics.test.js'
+      - 'tools/tests/adfp-exceptions.test.js'
       - 'rulesets/generated/**'
       - 'tools/build-fused-rule-sets.js'
       - 'tools/configure-traffic-options.js'
       - 'tools/sync-traffic-options.js'
+      - 'tools/lib/local-traffic-options.js'
+      - 'tools/tests/local-traffic-options.test.js'
       - 'tools/lib/write-repository-artifact.js'
       - 'tools/lib/egern-traffic-snapshot.js'
       - 'tools/tests/egern-traffic-options.test.js'
@@ -34,7 +93,7 @@ on:
       - 'tools/generate-egern-supplemental.js'
       - 'tools/generate-egern-from-cmfa.js'
       - 'tools/generate-fused-fallback-artifacts.js'
-      - 'SingBox/SingBox(sing-box)-generator.js'
+      - 'Sing-box内核系/SingBox/SingBox(sing-box)-generator.js'
       - 'tools/tests/traffic-*.test.js'
       - 'tools/tests/stash-traffic-options.test.js'
       - 'tools/lib/client-capability-matrix.js'
@@ -43,6 +102,12 @@ on:
       - 'tools/tests/client-capability-matrix.test.js'
       - 'tools/tests/subscription-adapter-profiles.test.js'
       - 'tools/validate-artifact-contracts.js'
+      - 'tools/cache-official-docs.js'
+      - 'tools/tests/official-docs-cache.test.js'
+      - 'tools/tests/passwall-backend-guard.test.js'
+      - 'tools/tests/singbox-current-schema.test.js'
+      - 'tools/tests/surge-tun-capture.test.js'
+      - 'docs/upstream/**'
       - 'tools/validate-process-name-direct.js'
       - 'tools/runtime/**'
       - 'tools/sync-node-dns-hints-adapters.js'
@@ -60,30 +125,89 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Clash Party/**/*.js'
-      - 'FlClash/**/*.js'
-      - 'Clash Meta For Android/**/*.yaml'
-      - 'Stash/**/*.yaml'
-      - 'OpenClash/**/*.conf'
-      - 'OpenClash/**/*.sh'
-      - 'Shadowrocket/**/*.conf'
-      - 'Surge/**/*.conf'
-      - 'Loon/**/*.conf'
-      - 'Quantumult X/**/*.conf'
-      - 'SingBox/**/*.json'
-      - 'v2rayN/**/*.json'
-      - 'Passwall/**/*.sh'
-      - 'Passwall/**/*.conf'
-      - 'Passwall/shunt-rules/**/*.list'
-      - 'Passwall2/**/*.sh'
-      - 'Passwall2/**/*.conf'
-      - 'Passwall2/shunt-rules/**/*.list'
+      - 'tools/lib/business-profile*.js'
+      - 'tools/generate-business-profile.js'
+      - 'rulesets/source/business-profiles.json'
+      - 'tools/configure.js'
+      - 'tools/lib/configuration-schema.js'
+      - 'tools/generate-configuration-form.js'
+      - 'tools/build-configuration-pages.js'
+      - 'tools/tests/configuration-pages.test.js'
+      - '.github/workflows/deploy-configuration-pages.yml'
+      - 'tools/lib/flclash-browser-export.js'
+      - 'tools/lib/flclash-browser-local-options.js'
+      - 'tools/lib/offline-*.js'
+      - 'tools/tests/offline-*.test.js'
+      - 'tools/vendor/fflate/**'
+      - 'tools/tests/flclash-browser-export.test.js'
+      - 'tools/tests/business-profile*.test.js'
+      - 'tools/tests/configuration*.test.js'
+      - 'tools/tests/node-dns-hosts-only*.test.js'
+      - 'docs/configuration*'
+      - 'Mihomo内核系/Clash Party/**/*.js'
+      - 'Mihomo内核系/FlClash/**/*.js'
+      - 'Mihomo内核系/Clash Meta For Android/**/*.yaml'
+      - '独立内核系/Stash/**/*.yaml'
+      - 'Mihomo内核系/OpenClash/**/*.conf'
+      - 'Mihomo内核系/OpenClash/**/*.sh'
+      - '独立内核系/Shadowrocket/**/*.conf'
+      - '独立内核系/Surge/**/*.conf'
+      - '独立内核系/Loon/**/*.conf'
+      - '独立内核系/Quantumult X/**/*.conf'
+      - 'Sing-box内核系/SingBox/**/*.json'
+      - 'Sing-box内核系/Karing/**'
+      - 'tools/client-layout.json'
+      - 'tools/lib/client-layout.js'
+      - 'tools/tests/client-layout.test.js'
+      - 'tools/generate-karing.js'
+      - 'rulesets/source/karing-support/**'
+      - 'tools/lib/karing*.js'
+      - 'tools/tests/karing*.js'
+      - 'Xray内核系/v2rayN/**/*.json'
+      - '双内核系/Passwall/**/*.sh'
+      - '双内核系/Passwall/**/*.conf'
+      - '双内核系/Passwall/shunt-rules/**/*.list'
+      - '双内核系/Passwall2/**/*.sh'
+      - '双内核系/Passwall2/**/*.conf'
+      - '双内核系/Passwall2/shunt-rules/**/*.list'
       - 'rulesets/source/routing-graph.js'
+      - 'rulesets/source/business-dns-policy.json'
+      - 'tools/lib/business-dns-policy.js'
+      - 'tools/sync-business-dns-policy.js'
+      - 'tools/tests/business-dns-*.test.js'
+      - 'tools/tests/issue-187-wechat-download.test.js'
       - 'rulesets/source/traffic-options.json'
+      - 'rulesets/source/upstream-sources.json'
+      - 'rulesets/source/adfp-exceptions.json'
+      - 'rulesets/source/semantic-approval.json'
+      - 'rulesets/source/claude-service-dependencies.json'
+      - 'rulesets/source/release-batch-contract.json'
+      - 'tools/*claude-service*.js'
+      - 'tools/*release-batch*.js'
+      - 'tools/*supplemental-to-snapshot*.js'
+      - 'tools/lib/claude-service-dependencies.js'
+      - 'tools/lib/release-batch.js'
+      - 'tools/lib/snapshot-supplemental-patch.js'
+      - 'tools/tests/claude-service-dependencies.test.js'
+      - 'tools/tests/release-batch.test.js'
+      - 'tools/tests/*supplemental-patch.test.js'
+      - 'rulesets/supplemental/**'
+      - 'tools/*rule-quality*.js'
+      - 'tools/*ordered-rule*.js'
+      - 'tools/*adfp*.js'
+      - 'tools/sync-mihomo-mrs-rule-providers.js'
+      - 'tools/lib/*provenance*.js'
+      - 'tools/lib/ordered-rule-semantics.js'
+      - 'tools/lib/adfp-exceptions.js'
+      - 'tools/tests/*provenance*.test.js'
+      - 'tools/tests/ordered-rule-semantics.test.js'
+      - 'tools/tests/adfp-exceptions.test.js'
       - 'rulesets/generated/**'
       - 'tools/build-fused-rule-sets.js'
       - 'tools/configure-traffic-options.js'
       - 'tools/sync-traffic-options.js'
+      - 'tools/lib/local-traffic-options.js'
+      - 'tools/tests/local-traffic-options.test.js'
       - 'tools/lib/write-repository-artifact.js'
       - 'tools/lib/egern-traffic-snapshot.js'
       - 'tools/tests/egern-traffic-options.test.js'
@@ -91,7 +215,7 @@ on:
       - 'tools/generate-egern-supplemental.js'
       - 'tools/generate-egern-from-cmfa.js'
       - 'tools/generate-fused-fallback-artifacts.js'
-      - 'SingBox/SingBox(sing-box)-generator.js'
+      - 'Sing-box内核系/SingBox/SingBox(sing-box)-generator.js'
       - 'tools/tests/traffic-*.test.js'
       - 'tools/tests/stash-traffic-options.test.js'
       - 'tools/lib/client-capability-matrix.js'
@@ -100,6 +224,12 @@ on:
       - 'tools/tests/client-capability-matrix.test.js'
       - 'tools/tests/subscription-adapter-profiles.test.js'
       - 'tools/validate-artifact-contracts.js'
+      - 'tools/cache-official-docs.js'
+      - 'tools/tests/official-docs-cache.test.js'
+      - 'tools/tests/passwall-backend-guard.test.js'
+      - 'tools/tests/singbox-current-schema.test.js'
+      - 'tools/tests/surge-tun-capture.test.js'
+      - 'docs/upstream/**'
       - 'tools/validate-process-name-direct.js'
       - 'tools/runtime/**'
       - 'tools/sync-node-dns-hints-adapters.js'
@@ -122,11 +252,13 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -138,13 +270,29 @@ jobs:
         with:
           ruby-version: '3.3'
 
+      - name: Validate optional configuration and hosts-only across adapters
+        run: |
+          npm --prefix tools/js-engine-tests ci --ignore-scripts
+          node tools/generate-configuration-form.js --check
+          node --test tools/tests/configuration-options.test.js tools/tests/configuration-form.test.js tools/tests/configuration-pages.test.js tools/tests/flclash-browser-export.test.js tools/tests/offline-configuration-export.test.js tools/tests/offline-client-options.test.js tools/tests/business-profiles.test.js tools/tests/business-profile-engines.test.js tools/tests/node-dns-hosts-only.test.js tools/tests/node-dns-hosts-only-integration.test.js tools/tests/egern-header-idempotence.test.js
+
+      - name: Validate Karing generation and client layout
+        run: |
+          node tools/generate-karing.js --check
+          node --test tools/tests/client-layout.test.js tools/tests/karing*.test.js
+
       - name: Validate JS overwrite contracts
         run: node tools/validate-js-overwrites.js
+
+      - name: Check synchronized business DNS policy projections
+        run: |
+          node tools/sync-business-dns-policy.js --check
+          node --test tools/tests/business-dns-policy.test.js tools/tests/business-dns-sync.test.js
 
       - name: Check synchronized traffic options and profile regressions
         run: |
           node tools/sync-traffic-options.js --check
-          node --test tools/tests/traffic-options.test.js tools/tests/traffic-cross-clients.test.js tools/tests/stash-traffic-options.test.js tools/tests/traffic-asset-reuse.test.js tools/tests/egern-traffic-options.test.js
+          node --test tools/tests/local-traffic-options.test.js tools/tests/traffic-options.test.js tools/tests/traffic-cross-clients.test.js tools/tests/stash-traffic-options.test.js tools/tests/traffic-asset-reuse.test.js tools/tests/egern-traffic-options.test.js
 
       - name: Check synchronized Node-DNS runtime adapters
         run: node tools/sync-node-dns-hints-adapters.js --check
@@ -170,3 +318,61 @@ jobs:
 
       - name: Validate PROCESS-NAME direct whitelist
         run: node tools/validate-process-name-direct.js
+
+      - name: Verify cached official documentation
+        run: |
+          shopt -s nullglob
+          inventories=(docs/upstream/*/*/sources.json)
+          test "${#inventories[@]}" -gt 0
+          for inventory in "${inventories[@]}"; do
+            node tools/cache-official-docs.js --group "${inventory%/sources.json}" --verify
+          done
+          node --test tools/tests/official-docs-cache.test.js tools/tests/passwall-backend-guard.test.js
+
+      - name: Prepare official sing-box schema check binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for version in 1.14.3 1.13.14; do
+            asset="sing-box-${version}-linux-amd64.tar.gz"
+            destination="$RUNNER_TEMP/sing-box-$version"
+            mkdir -p "$destination"
+            digest=$(gh api "repos/SagerNet/sing-box/releases/tags/v$version" --jq ".assets[] | select(.name == \"$asset\") | .digest")
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            gh release download "v$version" --repo SagerNet/sing-box --pattern "$asset" --dir "$destination"
+            printf '%s  %s\n' "${digest#sha256:}" "$destination/$asset" | sha256sum --check --strict
+            tar -xzf "$destination/$asset" -C "$destination"
+            binary="$destination/sing-box-$version-linux-amd64/sing-box"
+            test -x "$binary"
+            if [ "$version" = 1.14.3 ]; then
+              echo "SING_BOX_114_BIN=$binary" >> "$GITHUB_ENV"
+            else
+              echo "SING_BOX_113_BIN=$binary" >> "$GITHUB_ENV"
+            fi
+          done
+
+      - name: Check both sing-box schemas with official cores
+        run: node --test tools/tests/singbox-current-schema.test.js
+
+      - name: Validate rule asset delivery regressions
+        run: node --test tools/tests/generated-asset-url.test.js tools/tests/issue-186-asset-delivery.test.js tools/tests/rule-asset-downloads.test.js
+
+      - name: Validate Surge Fake IP VIF capture
+        run: node --test tools/tests/surge-tun-capture.test.js
+
+      - name: Validate WeChat download routing and native coverage
+        run: node --test tools/tests/issue-187-wechat-download.test.js
+
+      - name: Validate source receipts, ordered semantics and governed exceptions
+        env:
+          SCKI_BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+        run: |
+          node tools/refresh-rule-quality.js --check
+          node tools/validate-adfp-exceptions.js
+          node tools/validate-claude-service-dependencies.js --check --strict-coverage
+          node --test tools/tests/source-provenance.test.js tools/tests/fused-source-provenance.test.js tools/tests/ordered-rule-semantics.test.js tools/tests/adfp-exceptions.test.js tools/tests/claude-service-dependencies.test.js tools/tests/release-batch.test.js tools/tests/snapshot-supplemental-patch.test.js tools/tests/egern-supplemental-patch.test.js
+          approval_args=()
+          if [ -f rulesets/source/semantic-approval.json ]; then
+            approval_args=(--expected-changes rulesets/source/semantic-approval.json)
+          fi
+          node tools/validate-ordered-rule-semantics.js --baseline-ref "$SCKI_BASELINE_REF" --mode domain-projection --check --output "$RUNNER_TEMP/semantic-diff.json" "${approval_args[@]}"

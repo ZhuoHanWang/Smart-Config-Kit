@@ -8,7 +8,9 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 const {
   SOURCE_GRAPH_ID,
+  normalizeMihomoMrsProviderEntries,
   getRawRoutingGraph,
+  getMihomoNormalizedRoutingGraph,
 } = require('../rulesets/source/routing-graph');
 const {
   partitionMihomoDomainEntries,
@@ -16,9 +18,16 @@ const {
 const {
   localPathForRepositoryRuleUrl,
 } = require('./lib/repository-rule-asset');
+const { readFrozenMrsInput } = require('./lib/frozen-mrs-input');
+const { writeRepositoryArtifact } = require('./lib/write-repository-artifact');
+const {
+  sha256, parseGitSource, acquireSource, createSourceReceipt,
+  buildProviderLedger, buildSnapshotProviderLedger, collectManifestOutputReceipts,
+} = require('./lib/source-provenance');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const OUTPUT_DIR = path.join(REPO_ROOT, 'rulesets/generated/mihomo-mrs');
+const FINAL_OUTPUT_DIR = path.join(REPO_ROOT, 'rulesets/generated/mihomo-mrs');
+let OUTPUT_DIR = FINAL_OUTPUT_DIR;
 const CACHE_DIR = path.join(REPO_ROOT, '.cache/mihomo-mrs');
 const MIHOMO_REPO_API = 'https://api.github.com/repos/MetaCubeX/mihomo/releases/latest';
 const SCKI_GENERATED_MARKERS = [
@@ -39,7 +48,9 @@ const IPCIDR_RULE_TYPES = new Set(['IP-CIDR', 'IP-CIDR6']);
 
 function usage() {
   return [
-    'Usage: node tools/sync-mihomo-mrs-rule-providers.js [--mihomo-bin <path>] [--keep-cache]',
+    'Usage: node tools/sync-mihomo-mrs-rule-providers.js [--mihomo-bin <path>] [--keep-cache] [--offline]',
+    '       node tools/sync-mihomo-mrs-rule-providers.js --legacy-snapshot [--receipt-output <path>]',
+    '       --source-snapshot <manifest> reads explicitly decoded published MRS inputs; original upstream provenance remains unknown.',
     '',
     'Downloads upstream Mihomo rule-providers, converts every safely convertible',
     'domain/ipcidr provider to .mrs, and writes rulesets/generated/mihomo-mrs/.',
@@ -47,7 +58,8 @@ function usage() {
 }
 
 function parseArgs(argv) {
-  const options = { mihomoBin: process.env.MIHOMO_BIN || null, keepCache: false };
+  const options = { mihomoBin: process.env.MIHOMO_BIN || null, keepCache: false,
+    offline: process.env.SCKI_OFFLINE === '1', legacySnapshot: false, receiptOutput: null, sourceSnapshot: null, ids: null };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--help' || arg === '-h') {
@@ -62,6 +74,27 @@ function parseArgs(argv) {
     }
     if (arg === '--keep-cache') {
       options.keepCache = true;
+      continue;
+    }
+    if (arg === '--offline' || arg === '--legacy-snapshot') {
+      options[arg === '--offline' ? 'offline' : 'legacySnapshot'] = true;
+      continue;
+    }
+    if (arg === '--ids') {
+      const value = argv[++i];
+      if (!value) throw new Error('--ids requires a comma-separated provider list');
+      options.ids = [...new Set(value.split(',').map(id => id.trim()).filter(Boolean))];
+      if (!options.ids.length) throw new Error('--ids must name at least one provider');
+      continue;
+    }
+    if (arg === '--source-snapshot') {
+      options.sourceSnapshot = argv[++i];
+      if (!options.sourceSnapshot) throw new Error('--source-snapshot requires an explicit local manifest');
+      continue;
+    }
+    if (arg === '--receipt-output') {
+      options.receiptOutput = argv[++i];
+      if (!options.receiptOutput) throw new Error('--receipt-output requires a path');
       continue;
     }
     throw new Error(`Unknown argument: ${arg}`);
@@ -253,27 +286,41 @@ function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function fetchText(url) {
-  const local = localPathForRepositoryRuleUrl(url);
-  if (local) return readText(local);
-
+async function downloadSource(url, fetchImpl = fetch, resolveMemo = new Map(), { sourceTimeoutMs = 90000 } = {}) {
+  const requestedGit = parseGitSource(url);
+  let resolvedCommit = null;
+  if (requestedGit && !/^[a-f0-9]{40}$/i.test(requestedGit.ref)) {
+    const key = `${requestedGit.repository}@${requestedGit.ref}`;
+    if (!resolveMemo.has(key)) {
+      resolveMemo.set(key, (async () => {
+        const response = await fetchImpl(`https://api.github.com/repos/${requestedGit.repository}/commits/${encodeURIComponent(requestedGit.ref)}`, {
+          headers: { 'user-agent': 'Smart-Config-Kit-MRS-Sync/1.0' }, signal: AbortSignal.timeout(30000),
+        });
+        if (!response.ok) throw new Error(`Git ref resolution HTTP ${response.status}`);
+        const record = await response.json();
+        if (!/^[a-f0-9]{40}$/i.test(record.sha)) throw new Error('Git ref resolution did not return a full commit');
+        return record.sha.toLowerCase();
+      })().catch(() => null)); // Resolution failure permits content addressing only.
+    }
+    resolvedCommit = await resolveMemo.get(key);
+    if (resolvedCommit) url = `https://raw.githubusercontent.com/${requestedGit.repository}/${resolvedCommit}/${requestedGit.file}`;
+  }
   const candidates = [url];
-  if (url.includes('fastly.jsdelivr.net/gh/')) candidates.push(url.replace('https://fastly.jsdelivr.net/gh/', 'https://cdn.jsdelivr.net/gh/'));
-  if (url.includes('cdn.jsdelivr.net/gh/')) candidates.push(url.replace('https://cdn.jsdelivr.net/gh/', 'https://fastly.jsdelivr.net/gh/'));
-  if (url.includes('raw.githubusercontent.com/')) candidates.push(url.replace('https://raw.githubusercontent.com/', 'https://fastly.jsdelivr.net/gh/').replace('/main/', '@main/').replace('/master/', '@master/'));
-  const jsdelivrMatch = url.match(/^https:\/\/(?:fastly\.|cdn\.|testingcf\.)?jsdelivr\.net\/gh\/([^/]+)\/([^@/]+)@([^/]+)\/(.+)$/);
-  if (jsdelivrMatch) {
-    const [, owner, repo, ref, filePath] = jsdelivrMatch;
-    candidates.push(`https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${filePath}`);
+  const gitSource = parseGitSource(url);
+  if (gitSource) {
+    const ref = encodeURIComponent(gitSource.ref);
+    candidates.push(`https://fastly.jsdelivr.net/gh/${gitSource.repository}@${ref}/${gitSource.file}`);
+    candidates.push(`https://cdn.jsdelivr.net/gh/${gitSource.repository}@${ref}/${gitSource.file}`);
+    candidates.push(`https://raw.githubusercontent.com/${gitSource.repository}/${ref}/${gitSource.file}`);
   }
 
   const errors = [];
   for (const candidate of [...new Set(candidates)]) {
     for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt += 1) {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 90000);
+      const timer = setTimeout(() => controller.abort(), sourceTimeoutMs);
       try {
-        const response = await fetch(candidate, {
+        const response = await fetchImpl(candidate, {
           signal: controller.signal,
           headers: { 'user-agent': 'Smart-Config-Kit-MRS-Sync/1.0' },
         });
@@ -282,7 +329,7 @@ async function fetchText(url) {
           error.retryable = response.status >= 500;
           throw error;
         }
-        return Buffer.from(await response.arrayBuffer()).toString('utf8');
+        return { bytes: Buffer.from(await response.arrayBuffer()), effectiveUrl: response.url || candidate, resolvedCommit };
       } catch (error) {
         errors.push(`${candidate} [${attempt}/${FETCH_ATTEMPTS}] -> ${error.message}`);
         if (error.retryable === false || attempt === FETCH_ATTEMPTS) break;
@@ -293,6 +340,18 @@ async function fetchText(url) {
     }
   }
   throw new Error(errors.join('; '));
+}
+
+async function fetchText(url, options = {}, resolveMemo = new Map(), providerId = null, sourceBehavior = null, sourceFormat = null) {
+  const local = localPathForRepositoryRuleUrl(url);
+  if (!local && options.sourceSnapshot) {
+    const frozen = readFrozenMrsInput({ repoRoot: REPO_ROOT, manifestPath: options.sourceSnapshot, providerId, requestedUrl: url, mihomoBin: options.mihomoBin, sourceBehavior, sourceFormat });
+    if (frozen) return frozen;
+  }
+  const result = await acquireSource({ requestedUrl: url, localPath: localPathForRepositoryRuleUrl(url),
+    repoRoot: REPO_ROOT, cacheDir: path.join(CACHE_DIR, 'raw-inputs'), offline: options.offline,
+    keepCache: options.keepCache, fetchSource: candidate => downloadSource(candidate, fetch, resolveMemo) });
+  return { text: result.bytes.toString('utf8'), receipt: result.receipt };
 }
 
 async function downloadJson(url) {
@@ -318,19 +377,38 @@ function platformAssetPattern() {
   throw new Error(`Unsupported platform for automatic mihomo download: ${process.platform}/${arch}`);
 }
 
-async function ensureMihomoBinary(explicitPath) {
-  if (explicitPath) return path.resolve(explicitPath);
-  fs.mkdirSync(CACHE_DIR, { recursive: true });
+async function ensureMihomoBinary(explicitPath, options = {}, cacheDir = CACHE_DIR) {
+  if (explicitPath) {
+    const resolved = path.resolve(explicitPath);
+    if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) throw new Error(`Missing mihomo binary: ${resolved}`);
+    return resolved;
+  }
+  const binaryReceipt = path.join(cacheDir, 'binary.json');
+  if (options.offline) {
+    if (!fs.existsSync(binaryReceipt)) throw new Error('offline mihomo binary cache miss; specify --mihomo-bin');
+    const record = JSON.parse(readText(binaryReceipt));
+    if (!record.file || path.basename(record.file) !== record.file) throw new Error('Invalid cached mihomo binary path');
+    const target = path.join(cacheDir, record.file);
+    if (!fs.existsSync(target)) throw new Error('offline mihomo binary cache miss');
+    const bytes = fs.readFileSync(target);
+    if (sha256(bytes) !== record.sha256 || bytes.length !== record.bytes) throw new Error('Cached mihomo binary hash mismatch');
+    return target;
+  }
+  fs.mkdirSync(cacheDir, { recursive: true });
   const release = await downloadJson(MIHOMO_REPO_API);
   const pattern = platformAssetPattern();
   const asset = release.assets.find((candidate) => pattern.test(candidate.name));
   if (!asset) throw new Error(`No mihomo release asset matches ${pattern}`);
 
   const ext = process.platform === 'win32' ? '.exe' : '';
-  const target = path.join(CACHE_DIR, `mihomo-${release.tag_name}${ext}`);
-  if (fs.existsSync(target)) return target;
+  const target = path.join(cacheDir, `mihomo-${release.tag_name}${ext}`);
+  if (fs.existsSync(target) && fs.existsSync(binaryReceipt)) {
+    const record = JSON.parse(readText(binaryReceipt));
+    const bytes = fs.readFileSync(target);
+    if (record.file === path.basename(target) && record.sha256 === sha256(bytes) && record.bytes === bytes.length) return target;
+  }
 
-  const archive = path.join(CACHE_DIR, asset.name);
+  const archive = path.join(cacheDir, asset.name);
   const response = await fetch(asset.browser_download_url, { headers: { 'user-agent': 'Smart-Config-Kit-MRS-Sync/1.0' } });
   if (!response.ok) throw new Error(`${asset.browser_download_url} -> HTTP ${response.status}`);
   fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
@@ -339,7 +417,7 @@ async function ensureMihomoBinary(explicitPath) {
     fs.writeFileSync(target, zlib.gunzipSync(fs.readFileSync(archive)));
     fs.chmodSync(target, 0o755);
   } else if (asset.name.endsWith('.zip') && process.platform === 'win32') {
-    const unzipDir = path.join(CACHE_DIR, `unzip-${release.tag_name}`);
+    const unzipDir = path.join(cacheDir, `unzip-${release.tag_name}`);
     fs.rmSync(unzipDir, { recursive: true, force: true });
     fs.mkdirSync(unzipDir, { recursive: true });
     const result = childProcess.spawnSync('powershell.exe', ['-NoProfile', '-Command', `Expand-Archive -LiteralPath ${JSON.stringify(archive)} -DestinationPath ${JSON.stringify(unzipDir)} -Force`], { encoding: 'utf8' });
@@ -350,6 +428,9 @@ async function ensureMihomoBinary(explicitPath) {
   } else {
     throw new Error(`Unsupported mihomo archive: ${asset.name}`);
   }
+  const bytes = fs.readFileSync(target);
+  fs.writeFileSync(binaryReceipt, `${JSON.stringify({ file: path.basename(target), sha256: sha256(bytes), bytes: bytes.length,
+    release_tag: release.tag_name, download_url: asset.browser_download_url }, null, 2)}\n`, 'utf8');
   return target;
 }
 
@@ -397,7 +478,27 @@ async function runLimited(items, limit, worker) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const mihomoBin = await ensureMihomoBinary(options.mihomoBin);
+  if (options.legacySnapshot) {
+    const mrsManifest = JSON.parse(readText(path.join(OUTPUT_DIR, 'manifest.json')));
+    const ledger = buildSnapshotProviderLedger({ rawGraph: getRawRoutingGraph(), normalizedGraph: getMihomoNormalizedRoutingGraph(), mrsManifest, repoRoot: REPO_ROOT });
+    const output = options.receiptOutput ? path.resolve(REPO_ROOT, options.receiptOutput) : path.join(OUTPUT_DIR, 'legacy-source-ledger.json');
+    writeRepositoryArtifact(output, `${JSON.stringify(ledger, null, 2)}\n`);
+    console.log(`legacy MRS receipts: providers=${ledger.provider_count} unknown=${ledger.stats.unknown_provenance}; no upstream refresh`);
+    return;
+  }
+  const additionalReceipt = options.receiptOutput && path.resolve(REPO_ROOT, options.receiptOutput);
+  if (additionalReceipt) {
+    const relative = path.relative(FINAL_OUTPUT_DIR, additionalReceipt);
+    const insidePublished = !relative || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
+    if (insidePublished && additionalReceipt !== path.join(FINAL_OUTPUT_DIR, 'source-ledger.json')) {
+      throw new Error('--receipt-output inside the published MRS directory must be source-ledger.json');
+    }
+    const repositoryRelative = path.relative(REPO_ROOT, additionalReceipt);
+    if (!repositoryRelative || repositoryRelative.startsWith(`..${path.sep}`) || repositoryRelative === '..' || path.isAbsolute(repositoryRelative)) {
+      throw new Error('--receipt-output must be inside the repository');
+    }
+  }
+  const mihomoBin = await ensureMihomoBinary(options.mihomoBin, options);
   const previousProviderByName = new Map(providersFromPreviousManifest(readPreviousManifest()).map((provider) => [provider.name, provider]));
   const providerByName = new Map();
   const clashProviders = loadSourceGraphProviders();
@@ -413,15 +514,22 @@ async function main() {
     .filter((provider) => generatedProviderUrl(provider.url))
     .map((provider) => previousProviderByName.get(provider.name))
     .filter(Boolean)) providerByName.set(provider.name, provider);
-  const providers = [...providerByName.values()];
+  const selected = options.ids && new Set(options.ids);
+  if (selected && [...selected].some(id => !providerByName.has(id))) throw new Error('Unknown incremental provider ID');
+  const providers = [...providerByName.values()].filter(row => !selected || selected.has(row.name));
+  const previous = selected ? JSON.parse(readText(path.join(FINAL_OUTPUT_DIR, 'manifest.json'))) : null;
+  const stage = path.join(CACHE_DIR, 'output-' + process.pid);
+  fs.rmSync(stage, { recursive: true, force: true });
+  if (selected) fs.cpSync(FINAL_OUTPUT_DIR, stage, { recursive: true });
+  OUTPUT_DIR = stage;
 
   const tempDir = path.join(CACHE_DIR, 'sources');
   fs.rmSync(tempDir, { recursive: true, force: true });
-  fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
+  if (!selected) fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
   fs.mkdirSync(tempDir, { recursive: true });
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  const manifest = {
+  const manifest = previous || {
     generated_at: new Date().toISOString(),
     source: `${SOURCE_GRAPH_ID} raw provider graph before Mihomo MRS normalization`,
     mihomo_bin: path.basename(mihomoBin),
@@ -433,6 +541,13 @@ async function main() {
     retained: [],
     failed: [],
   };
+  if (selected) {
+    for (const category of ['converted', 'split', 'partial', 'existing_mrs', 'retained', 'failed']) manifest[category] = (manifest[category] || []).filter(row => !selected.has(row.id));
+    manifest.generated_at = new Date().toISOString();
+    manifest.mihomo_bin = path.basename(mihomoBin);
+  }
+  const receipts = {};
+  const resolveMemo = new Map();
 
   await runLimited(providers, CONCURRENCY, async (provider) => {
     if (provider.format === 'mrs') {
@@ -440,13 +555,16 @@ async function main() {
         id: provider.name,
         behavior: provider.behavior,
         url: provider.url,
+        source_receipt: createSourceReceipt({ requestedUrl: provider.url, inputKind: 'binary-source', acquisition: 'unread-reference' }),
       });
       return;
     }
 
     try {
-      const text = await fetchText(provider.url);
-      const entries = parsePayloadEntries(text);
+      const { text, receipt } = await fetchText(provider.url, options, resolveMemo, provider.name, provider.behavior || 'classical', provider.format || 'yaml');
+      receipts[provider.name] = receipt;
+      const sourceEntries = parsePayloadEntries(text);
+      const entries = normalizeMihomoMrsProviderEntries(provider.name, sourceEntries);
       const typeCounts = {};
       for (const entry of entries) {
         const type = classifyEntry(entry);
@@ -490,7 +608,8 @@ async function main() {
           source_behavior: provider.behavior || 'classical',
           source_format: provider.format || 'yaml',
           source_url: provider.url,
-          type_counts: typeCounts,
+          source_entry_count: sourceEntries.length,
+        type_counts: typeCounts,
           generated,
         };
         if (generated.length === 1) manifest.converted.push(row);
@@ -504,6 +623,7 @@ async function main() {
           source_behavior: provider.behavior || 'classical',
           source_format: provider.format || 'yaml',
           source_url: provider.url,
+          source_entry_count: sourceEntries.length,
           type_counts: typeCounts,
           generated,
           residual: writeResidualRuleSet(provider.name, residualEntries),
@@ -530,9 +650,40 @@ async function main() {
   manifest.existing_mrs.sort((a, b) => a.id.localeCompare(b.id));
   manifest.retained.sort((a, b) => a.id.localeCompare(b.id));
   manifest.failed.sort((a, b) => a.id.localeCompare(b.id));
-  fs.writeFileSync(path.join(OUTPUT_DIR, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  if (manifest.failed.length) throw new Error('MRS stage contains failed providers; published output kept unchanged: ' + manifest.failed.map(row => row.id).join(', '));
+  const allowed = new Set(['manifest.json', 'source-ledger.json', 'legacy-source-ledger.json']);
+  for (const row of [...manifest.converted, ...manifest.split, ...manifest.partial]) for (const output of [...row.generated, ...(row.residual ? [row.residual] : [])]) allowed.add(output.file);
+  for (const file of fs.readdirSync(OUTPUT_DIR)) if (!allowed.has(file)) fs.rmSync(path.join(OUTPUT_DIR, file), { force: true });
+  const outputReceipts = collectManifestOutputReceipts({ mrsManifest: manifest, outputDir: OUTPUT_DIR, repoRoot: REPO_ROOT });
+  for (const output of Object.values(outputReceipts)) {
+    output.local_path = 'rulesets/generated/mihomo-mrs/' + path.basename(output.local_path);
+    output.source.source_path = output.local_path;
+  }
+  for (const category of ['converted', 'split', 'partial', 'retained', 'failed']) {
+    for (const row of manifest[category]) {
+      row.source_receipt = receipts[row.id] || row.source_receipt || createSourceReceipt({ requestedUrl: row.source_url || row.url, acquisition: 'failed' });
+      for (const output of [...(row.generated || []), ...(row.residual ? [row.residual] : [])]) output.output_receipt = outputReceipts[output.file];
+    }
+  }
+  writeRepositoryArtifact(path.join(OUTPUT_DIR, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  const ledger = buildProviderLedger({ rawGraph: getRawRoutingGraph(), mrsManifest: manifest, receipts, outputReceipts });
+  const ledgerText = `${JSON.stringify(ledger, null, 2)}\n`;
+  // The authoritative receipt always belongs to the same staged publication as
+  // the manifest and assets. Custom paths are additional copies, never substitutes.
+  writeRepositoryArtifact(path.join(OUTPUT_DIR, 'source-ledger.json'), ledgerText);
 
+  const backup = path.join(CACHE_DIR, 'backup-' + process.pid);
+  fs.rmSync(backup, { recursive: true, force: true });
+  fs.renameSync(FINAL_OUTPUT_DIR, backup);
+  try { fs.renameSync(OUTPUT_DIR, FINAL_OUTPUT_DIR); }
+  catch (error) { fs.renameSync(backup, FINAL_OUTPUT_DIR); throw error; }
+  OUTPUT_DIR = FINAL_OUTPUT_DIR;
+  fs.rmSync(backup, { recursive: true, force: true });
   if (!options.keepCache) fs.rmSync(tempDir, { recursive: true, force: true });
+  if (additionalReceipt && additionalReceipt !== path.join(FINAL_OUTPUT_DIR, 'source-ledger.json')) {
+    try { writeRepositoryArtifact(additionalReceipt, ledgerText); }
+    catch (error) { throw new Error(`MRS output published successfully, but additional receipt copy failed: ${error.message}`, { cause: error }); }
+  }
   console.log(`mihomo mrs sync: converted=${manifest.converted.length} split=${manifest.split.length} partial=${manifest.partial.length} existing=${manifest.existing_mrs.length} retained=${manifest.retained.length} failed=${manifest.failed.length}`);
   if (manifest.failed.length > 0) {
     for (const failure of manifest.failed) console.error(`${failure.id}: ${failure.error}`);
@@ -540,7 +691,11 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error.stack || error.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.stack || error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { parseArgs, downloadSource, ensureMihomoBinary, parsePayloadEntries, classifyEntry };

@@ -6,8 +6,8 @@
 
 | 范围 | 入口 |
 | --- | --- |
-| Clash Party Smart / Normal | `Clash Party/ClashParty(mihomo-smart).js`、`Clash Party/ClashParty(mihomo).js` |
-| FlClash | `FlClash/FlClash(mihomo).js` |
+| Clash Party Smart / Normal | `Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js`、`Mihomo内核系/Clash Party/ClashParty(mihomo).js` |
+| FlClash Normal / Smart（Smart 待内核支持） | `Mihomo内核系/FlClash/FlClash(mihomo).js`、`Mihomo内核系/FlClash/FlClash(mihomo-smart).js` |
 | SubStore | `SubStore/scripts/`、`SubStore/templates/` 及脱敏配置示例 |
 | 配套文件 | 与本次修改有关的验证工具、共享运行时、文档和 `.gitignore` |
 
@@ -18,11 +18,12 @@
 
 ## 修改约定
 
-- 共用的节点分类、过滤、订阅清理、fallback、DNS 和业务分流修改，检查并同步上述三份 JS；平台差异只改对应入口。SubStore 独立脚本/模板修改无需联动其他客户端。
+- 用户维护偏好：每次更新正式 JS 脚本，都检查并同步 FlClash Smart 变体。当前 FlClash 官方构建所绑定的 `chen08209/Clash.Meta` `FlClash` 分支不支持 `type: smart`；在其解析器支持前，不生成会被该内核拒绝的伪 Smart 脚本，继续维护现有 FlClash `url-test` 版本。适配时核对 [FlClash 官方源码](https://github.com/chen08209/Clash.Meta/blob/FlClash/adapter/outboundgroup/parser.go) 并将 Smart 变体加入验证工具。
+- 共用的节点分类、过滤、订阅清理、fallback、DNS 和业务分流修改，检查并同步 Clash Party Smart / Normal 与 FlClash Normal；一旦 FlClash Smart 内核支持并创建该入口，也同步更新 FlClash Smart。平台差异只改对应入口。SubStore 独立脚本/模板修改无需联动其他客户端。
 - 保留现有 Gemini 独立组、俄罗斯区域、AI 排除港台澳俄、业务组首选项及个人直连规则，除非本次任务要求调整。组名与 emoji 引用必须一致，候选组不得悬空或为空。
 - `AI专属` 优先采用订阅提供的显式节点池；仅在显式组缺失时按独立 `JMS` 标识自动识别。显式空组/无效组不擅自回退。专属节点不参与普通区域/家宽分类；有效组接入全部业务组，AI/Gemini 默认优先；无专属节点时普通订阅正常工作。
-- Smart / LightGBM 仅用于 Clash Party Smart；Normal 与 FlClash 使用 `url-test`。FlClash 的 TUN/端口由 App UI 管理，脚本兼容 QuickJS，保持客户端要求的数组引用并保护 `console` 调用。
-- 三份正式 JS 的融合规则与 Gemini provider 指向个人 Fork 的 `Clash Party/rulesets/<快照版本>/`；快照与匹配的主规则一起保存，不修改已发布快照。合并上游后用 `node tools/use-personal-rule-snapshot.js` 恢复个人引用；有意升级才用 `--create vX.Y.Z-fork.N` 复制已编译文件并捕获 Gemini。无需运行全端编译；保留规则相对顺序和最后的 `MATCH`。旧 `ai-gemini.js` 是被忽略的本地副本，需同步时追加 `--include-local-gemini`。
+- Smart / LightGBM 用于 Clash Party Smart；Clash Party Normal 与当前 FlClash 内核使用 `url-test`。用户要求增加 FlClash Smart 变体，作为后续脚本更新的同步目标；先确认对应 FlClash 内核已支持 `smart`，FlClash 的 TUN/端口由 App UI 管理，脚本兼容 QuickJS，保持客户端要求的数组引用并保护 `console` 调用。
+- 正式 JS 的融合规则与 Gemini provider 指向个人 Fork 的 `Mihomo内核系/Clash Party/rulesets/<快照版本>/`；快照与匹配的主规则一起保存，不修改已发布快照。合并上游后用 `node tools/use-personal-rule-snapshot.js` 恢复个人引用；有意升级才用 `--create vX.Y.Z-fork.N` 复制已编译文件并捕获 Gemini。无需运行全端编译；保留规则相对顺序和最后的 `MATCH`。旧 `ai-gemini.js` 是被忽略的本地副本，需同步时追加 `--include-local-gemini`。
 - 修改带生成标记的共享代码块时，先定位对应 `tools/runtime/` / `tools/lib/` 源文件与验证依赖，再更新三份 JS 的嵌入块；运行同步脚本前核对写入范围，避免覆盖个人定制或重写无关客户端。
 - DNS 修改保留 `fake-ip-filter` 清理逻辑，避免引用已被覆写删除的 provider。Clash Party 的原始订阅 DNS guard 与 JS 执行分开核对，以最终配置为准。
 - 涉及新字段、客户端 API 或兼容性时，只核对目标平台的官方文档/源码并注明依据：[Mihomo](https://wiki.metacubex.one/config/)、[Clash Party](https://github.com/mihomo-party-org/clash-party)、[FlClash](https://github.com/chen08209/FlClash)、[Sub-Store](https://github.com/sub-store-org/Sub-Store)、[Cloudflare 兼容版](https://github.com/realchendahuang/sub-store-cloudflare)。纯文档修改无需刷新所有 REFERENCE。

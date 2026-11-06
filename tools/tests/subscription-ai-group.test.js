@@ -8,9 +8,9 @@ const vm = require('node:vm');
 
 const ROOT = path.resolve(__dirname, '../..');
 const TARGETS = [
-  { file: 'Clash Party/ClashParty(mihomo-smart).js', regionType: 'smart' },
-  { file: 'Clash Party/ClashParty(mihomo).js', regionType: 'url-test' },
-  { file: 'FlClash/FlClash(mihomo).js', regionType: 'url-test' },
+  { file: 'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js', regionType: 'smart' },
+  { file: 'Mihomo内核系/Clash Party/ClashParty(mihomo).js', regionType: 'url-test' },
+  { file: 'Mihomo内核系/FlClash/FlClash(mihomo).js', regionType: 'url-test' },
 ];
 const BUSINESS_DEFAULTS = [
   ['🤖 AI 服务', 'AI专属'], ['🧠 Anthropic 服务', 'AI专属（手动）'], ['✨ Gemini 服务', 'AI专属'],
@@ -101,6 +101,10 @@ for (const target of TARGETS) {
       const output = run(input);
       assertValidGroups(output);
       assert.equal(output.proxies, proxiesRef);
+      const toDeskDirectIndex = output.rules.indexOf('DOMAIN-SUFFIX,todesk.com,DIRECT');
+      const firstFusedRuleIndex = output.rules.findIndex((rule) => rule.startsWith('RULE-SET,scki-fused-'));
+      assert.ok(toDeskDirectIndex >= 0, 'the personal ToDesk DIRECT overlay must be retained');
+      assert.ok(toDeskDirectIndex < firstFusedRuleIndex, 'ToDesk must bypass broad fused rules');
       const aiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属');
       assert.ok(aiGroup);
       assert.equal(aiGroup.type, target.regionType);
@@ -130,7 +134,7 @@ for (const target of TARGETS) {
       const firstAnthropicRule = output.rules.indexOf(ANTHROPIC_RULES[0]);
       const firstFusedRule = output.rules.findIndex((rule) => String(rule).startsWith('RULE-SET,scki-fused-'));
       assert.ok(firstAnthropicRule !== -1 && firstAnthropicRule < firstFusedRule, 'Anthropic rules precede fused rule sets');
-      if (target.file.startsWith('FlClash/')) {
+      if (target.file.startsWith('Mihomo内核系/FlClash/')) {
         assert.equal(output.rules, rulesRef, 'FlClash must preserve rule array identity');
         assert.equal(output['proxy-groups'], groupsRef, 'FlClash must preserve group array identity');
       }
@@ -193,7 +197,7 @@ for (const target of TARGETS) {
       const manualAiGroup = output['proxy-groups'].find((group) => group.name === 'AI专属（手动）');
       assert.equal(manualAiGroup.type, 'select');
       assert.deepEqual(Array.from(manualAiGroup.proxies), jmsNames);
-      if (target.file.startsWith('FlClash/')) {
+      if (target.file.startsWith('Mihomo内核系/FlClash/')) {
         assert.equal(output.rules, rulesRef);
         assert.equal(output['proxy-groups'], groupsRef);
       }

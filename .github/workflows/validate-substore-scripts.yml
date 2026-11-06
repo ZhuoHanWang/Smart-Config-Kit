@@ -4,11 +4,29 @@ on:
   pull_request:
     paths:
       - 'SubStore/**/*.js'
+      - 'SubStore/**/*.mjs'
+      - 'SubStore/edge-extension/**'
+      - 'tools/tests/fusion-publication-guard.test.js'
+      - 'tools/tests/fusion-worker-patch.test.js'
+      - 'tools/tests/extension-sync-route.test.js'
+      - 'tools/tests/download-gateway-fallback.test.js'
+      - 'tools/tests/web-management-route.test.js'
+      - 'tools/tests/source-snapshot.test.js'
+      - 'tools/tests/local-snapshot.test.js'
       - '.github/workflows/validate-substore-scripts.yml'
   push:
     branches: [main]
     paths:
       - 'SubStore/**/*.js'
+      - 'SubStore/**/*.mjs'
+      - 'SubStore/edge-extension/**'
+      - 'tools/tests/fusion-publication-guard.test.js'
+      - 'tools/tests/fusion-worker-patch.test.js'
+      - 'tools/tests/extension-sync-route.test.js'
+      - 'tools/tests/download-gateway-fallback.test.js'
+      - 'tools/tests/web-management-route.test.js'
+      - 'tools/tests/source-snapshot.test.js'
+      - 'tools/tests/local-snapshot.test.js'
       - '.github/workflows/validate-substore-scripts.yml'
   workflow_dispatch:
 
@@ -33,3 +51,37 @@ jobs:
         run: |
           node --check SubStore/scripts/local/merge-subscription-userinfo.js
           node --test SubStore/scripts/local/merge-subscription-userinfo.test.js
+      - name: Validate browser link sync
+        run: |
+          node SubStore/edge-extension/build.mjs --check
+          node --test SubStore/edge-extension/*.test.mjs SubStore/edge-extension/*.test.cjs
+      - name: Validate publication completeness and extension API
+        run: |
+          node --check SubStore/scripts/fusion-publication-guard.mjs
+          node --check SubStore/scripts/patch-fusion-worker.mjs
+          node --check SubStore/scripts/extension-sync-route.mjs
+          node --check SubStore/scripts/patch-extension-sync-worker.mjs
+          node --check SubStore/scripts/download-gateway-fallback.mjs
+          node --check SubStore/scripts/patch-download-gateway-worker.mjs
+          node --check SubStore/scripts/web-management-route.mjs
+          node --check SubStore/scripts/patch-web-management-worker.mjs
+          node --check SubStore/scripts/local-snapshot.mjs
+          node --check SubStore/scripts/patch-local-snapshot-worker.mjs
+          node --test tools/tests/fusion-publication-guard.test.js tools/tests/fusion-worker-patch.test.js tools/tests/extension-sync-route.test.js tools/tests/download-gateway-fallback.test.js tools/tests/web-management-route.test.js tools/tests/source-snapshot.test.js tools/tests/local-snapshot.test.js
+
+  browser-e2e:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install pinned browser harness
+        run: npm install --ignore-scripts --no-save --no-package-lock playwright@1.62.1
+      - name: Verify automatic browser flow in an isolated profile
+        env:
+          BROWSER_EXECUTABLE: 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+        run: |
+          node SubStore/edge-extension/build.mjs --check
+          node SubStore/edge-extension/browser-e2e.mjs

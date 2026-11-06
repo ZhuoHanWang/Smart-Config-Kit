@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+const { resolveContractSegments } = require('./lib/fused-contract-segments');
+const CONTRACT_SEGMENTS = resolveContractSegments();
 
 const childProcess = require('node:child_process');
 const crypto = require('node:crypto');
@@ -9,9 +11,15 @@ const path = require('node:path');
 const vm = require('node:vm');
 const {
   MAX_JSDELIVR_ASSET_BYTES,
+  generatedAssetUrls,
   validateGeneratedRemoteAssetSizes,
 } = require('./validate-generated-remote-asset-size');
 const { validateEgernGenerationManifest } = require('./lib/egern-generation-manifest');
+const { buildKaring, readInputs: readKaringInputs, checkKaringOutputs,
+  PROFILE_PATH: KARING_PROFILE_PATH, MANIFEST_PATH: KARING_MANIFEST_PATH } = require('./generate-karing');
+const { parseCidr } = require('./lib/fused-rule-optimizer');
+const { prepareUpdates: prepareBusinessDnsUpdates, renderBlock: renderBusinessDnsBlock } = require('./sync-business-dns-policy');
+const { compileBusinessDnsPolicy } = require('./lib/business-dns-policy');
 const {
   getAssetRevisionFromUrl,
   repositoryAssetUrl,
@@ -37,38 +45,43 @@ const {
 } = require('../rulesets/source/routing-graph');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
+const CURRENT_FUSED = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'rulesets/generated/fused/manifest.json'), 'utf8'));
+const CURRENT_MRS = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'rulesets/generated/mihomo-mrs/manifest.json'), 'utf8'));
+const CURRENT_SOURCE = getMihomoNormalizedRoutingGraph();
+const GAME_CN_GUARD_ID = CURRENT_FUSED.source_segments.find(row => row.policy === '🕹️ 国内游戏' && row.source_rules.some(rule => rule.startsWith('RULE-SET,scki-game-cn-guard,')))?.id;
+if (!GAME_CN_GUARD_ID) throw new Error('Missing source-bound domestic game guard segment');
 const EXPECTED_GROUPS = 55;
 const EXPECTED_BUSINESS_GROUPS = 33;
 const EXPECTED_REGION_GROUPS = EXPECTED_GROUPS - EXPECTED_BUSINESS_GROUPS;
 const EXPECTED_SINGBOX_GROUPS = 54;
 const EXPECTED_SINGBOX_URLTEST_GROUPS = 2;
-const EXPECTED_PASSWALL_RULES = 69;
+const EXPECTED_PASSWALL_RULES = CURRENT_FUSED.generated_passwall_files;
 const TRAFFIC_OPTIONS = getTrafficOptions();
 const EXPECTED_REGION_TEST_INTERVAL_SECONDS = TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? 900 : 300;
 const EXPECTED_SINGBOX_URLTEST_INTERVAL = TRAFFIC_OPTIONS.healthCheckProfile === 'power-save' ? '15m' : '5m';
 const EXPECTED_QUIC_RULES = getQuicRules(TRAFFIC_OPTIONS.quicPolicy);
-const SOURCE_FULL_PROVIDERS = 514;
-const SOURCE_FULL_RULES = 968 + EXPECTED_QUIC_RULES.length;
-const MIN_FULL_PROVIDERS = 132;
+const SOURCE_FULL_PROVIDERS = Object.keys(CURRENT_SOURCE["rule-providers"]).length;
+const SOURCE_FULL_RULES = CURRENT_SOURCE.rules.length;
+const MIN_FULL_PROVIDERS = CURRENT_FUSED.fused_provider_count;
 const EXPECTED_SINGBOX_RUNTIME_GEO_RULE_SETS = 7;
-const MIN_FULL_RULES = 146 + EXPECTED_QUIC_RULES.length;
-const EXPECTED_FUSED_SEGMENTS = 72;
-const EXPECTED_FUSED_MOBILE_SEGMENTS = 69;
-const EXPECTED_FUSED_INLINE_RULES = 14 + EXPECTED_QUIC_RULES.length;
-const EXPECTED_FUSED_MRS_FILES = 96;
-const EXPECTED_FUSED_SRS_FILES = 69;
-const EXPECTED_FUSED_PASSWALL_FILES = 69;
-const EXPECTED_FUSED_XRAY_SEGMENTS = 69;
-const EXPECTED_XRAY_RULES = TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? 89 : 84;
-const EXPECTED_MIHOMO_MRS_CONVERTED = 237;
-const EXPECTED_MIHOMO_MRS_SPLIT = 28;
-const EXPECTED_MIHOMO_MRS_PARTIAL = 70;
-const EXPECTED_MIHOMO_MRS_EXISTING = 35;
-const EXPECTED_MIHOMO_MRS_RETAINED = 23;
-const EXPECTED_MIHOMO_MRS_FILES = 386;
-const EXPECTED_MIHOMO_MRS_RESIDUAL_FILES = 70;
+const MIN_FULL_RULES = CURRENT_FUSED.fused_rule_count;
+const EXPECTED_FUSED_SEGMENTS = CURRENT_FUSED.segment_count;
+const EXPECTED_FUSED_MOBILE_SEGMENTS = CURRENT_FUSED.generated_srs_files;
+const EXPECTED_FUSED_INLINE_RULES = CURRENT_FUSED.inline_rule_count;
+const EXPECTED_FUSED_MRS_FILES = CURRENT_FUSED.generated_mrs_files;
+const EXPECTED_FUSED_SRS_FILES = CURRENT_FUSED.generated_srs_files;
+const EXPECTED_FUSED_PASSWALL_FILES = CURRENT_FUSED.generated_passwall_files;
+const EXPECTED_FUSED_XRAY_SEGMENTS = CURRENT_FUSED.generated_xray_fused_segments;
+const EXPECTED_XRAY_RULES = CURRENT_FUSED.generated_xray_rules;
+const EXPECTED_MIHOMO_MRS_CONVERTED = CURRENT_MRS.converted.length;
+const EXPECTED_MIHOMO_MRS_SPLIT = CURRENT_MRS.split.length;
+const EXPECTED_MIHOMO_MRS_PARTIAL = CURRENT_MRS.partial.length;
+const EXPECTED_MIHOMO_MRS_EXISTING = CURRENT_MRS.existing_mrs.length;
+const EXPECTED_MIHOMO_MRS_RETAINED = CURRENT_MRS.retained.length;
+const EXPECTED_MIHOMO_MRS_FILES = [...CURRENT_MRS.converted, ...CURRENT_MRS.split, ...CURRENT_MRS.partial].reduce((sum, row) => sum + row.generated.length, 0);
+const EXPECTED_MIHOMO_MRS_RESIDUAL_FILES = CURRENT_MRS.partial.length;
 const EXPECTED_MIHOMO_MRS_PROVIDER_REFS = EXPECTED_MIHOMO_MRS_FILES + EXPECTED_MIHOMO_MRS_EXISTING;
-const EXPECTED_SINGBOX_ROUTE_RULES = 82 + (TRAFFIC_OPTIONS.quicPolicy === 'block-foreign' ? 6 : 0);
+const EXPECTED_SINGBOX_ROUTE_RULES = CURRENT_FUSED.generated_xray_rules - 1;
 const RESTRICTED_SITE = '\u{1F6AB} \u53D7\u9650\u7F51\u7AD9';
 const RESTRICTED_SITE_RUBY = '\\U0001F6AB \u53D7\u9650\u7F51\u7AD9';
 const CLOUD_CDN = '\u2601\uFE0F \u4E91\u4E0ECDN';
@@ -243,25 +256,28 @@ const LOON_REGION_GROUP_TO_FILTER = {
 };
 
 const ARTIFACT_FILES = [
-  'Clash Party/ClashParty(mihomo-smart).js',
-  'Clash Party/ClashParty(mihomo).js',
-  'FlClash/FlClash(mihomo).js',
-  'Clash Meta For Android/CMFA(mihomo).yaml',
-  'Stash/Stash.yaml',
-  'OpenClash/OpenClash(mihomo).conf',
-  'OpenClash/OpenClash(mihomo).sh',
-  'OpenClash/OpenClash(mihomo-smart).sh',
-  'Shadowrocket/Shadowrocket.conf',
-  'Surge/Surge.conf',
-  'Loon/Loon.conf',
-  'Quantumult X/QuantumultX.conf',
-  'SingBox/SingBox(sing-box)-full.json',
-  'Egern/Egern.yaml',
-  'v2rayN/v2rayN(xray).json',
-  'Passwall/Passwall(xray+sing-box)-apply.sh',
-  'Passwall/Passwall(xray+sing-box).conf',
-  'Passwall2/Passwall2(xray+sing-box)-apply.sh',
-  'Passwall2/Passwall2(xray+sing-box).conf',
+  KARING_PROFILE_PATH,
+  KARING_MANIFEST_PATH,
+  'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js',
+  'Mihomo内核系/Clash Party/ClashParty(mihomo).js',
+  'Mihomo内核系/FlClash/FlClash(mihomo).js',
+  'Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml',
+  '独立内核系/Stash/Stash.yaml',
+  'Mihomo内核系/OpenClash/OpenClash(mihomo).conf',
+  'Mihomo内核系/OpenClash/OpenClash(mihomo).sh',
+  'Mihomo内核系/OpenClash/OpenClash(mihomo-smart).sh',
+  '独立内核系/Shadowrocket/Shadowrocket.conf',
+  '独立内核系/Surge/Surge.conf',
+  '独立内核系/Loon/Loon.conf',
+  '独立内核系/Quantumult X/QuantumultX.conf',
+  'Sing-box内核系/SingBox/SingBox(sing-box)-full.json',
+  'Sing-box内核系/SingBox/SingBox(sing-box)-1.13.json',
+  '独立内核系/Egern/Egern.yaml',
+  'Xray内核系/v2rayN/v2rayN(xray).json',
+  '双内核系/Passwall/Passwall(xray+sing-box)-apply.sh',
+  '双内核系/Passwall/Passwall(xray+sing-box).conf',
+  '双内核系/Passwall2/Passwall2(xray+sing-box)-apply.sh',
+  '双内核系/Passwall2/Passwall2(xray+sing-box).conf',
 ];
 
 function usage() {
@@ -380,12 +396,6 @@ function generatedEgernUrl(id) {
   return `${SUPPLEMENTAL_RULESET_BASE.replace('/rulesets/supplemental', '/rulesets/generated/egern')}/provider-${id}.yaml`;
 }
 
-const GENERATED_ASSET_URL_RE = /https:\/\/(?:fastly\.)?jsdelivr\.net\/gh\/IvanSolis1989\/Smart-Config-Kit@main\/rulesets\/generated\/(?:fused|egern)\/[^\s,"'\\]+/g;
-
-function generatedAssetUrls(source) {
-  return [...source.matchAll(GENERATED_ASSET_URL_RE)].map((match) => match[0]);
-}
-
 function validateGeneratedAssetRevision(record) {
   const manifest = readJson('rulesets/generated/fused/manifest.json');
   const assetRevision = manifest.asset_revision;
@@ -396,21 +406,21 @@ function validateGeneratedAssetRevision(record) {
   });
 
   const products = [
-    { id: 'clash-party-smart', file: 'Clash Party/ClashParty(mihomo-smart).js', mihomo: true },
-    { id: 'clash-party-normal', file: 'Clash Party/ClashParty(mihomo).js', mihomo: true },
-    { id: 'flclash', file: 'FlClash/FlClash(mihomo).js', mihomo: true },
-    { id: 'cmfa', file: 'Clash Meta For Android/CMFA(mihomo).yaml', mihomo: true },
-    { id: 'stash', file: 'Stash/Stash.yaml', mihomo: true },
-    { id: 'openclash-normal', file: 'OpenClash/OpenClash(mihomo).sh', mihomo: true },
-    { id: 'openclash-smart', file: 'OpenClash/OpenClash(mihomo-smart).sh', mihomo: true },
-    { id: 'shadowrocket', file: 'Shadowrocket/Shadowrocket.conf' },
-    { id: 'surge', file: 'Surge/Surge.conf' },
-    { id: 'loon', file: 'Loon/Loon.conf' },
-    { id: 'quantumult-x', file: 'Quantumult X/QuantumultX.conf' },
-    { id: 'egern', file: 'Egern/Egern.yaml' },
-    { id: 'sing-box', file: 'SingBox/SingBox(sing-box)-full.json' },
-    { id: 'passwall', file: 'Passwall/Passwall(xray+sing-box)-apply.sh' },
-    { id: 'passwall2', file: 'Passwall2/Passwall2(xray+sing-box)-apply.sh' },
+    { id: 'clash-party-smart', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js', mihomo: true },
+    { id: 'clash-party-normal', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo).js', mihomo: true },
+    { id: 'flclash', file: 'Mihomo内核系/FlClash/FlClash(mihomo).js', mihomo: true },
+    { id: 'cmfa', file: 'Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml', mihomo: true },
+    { id: 'stash', file: '独立内核系/Stash/Stash.yaml', mihomo: true },
+    { id: 'openclash-normal', file: 'Mihomo内核系/OpenClash/OpenClash(mihomo).sh', mihomo: true },
+    { id: 'openclash-smart', file: 'Mihomo内核系/OpenClash/OpenClash(mihomo-smart).sh', mihomo: true },
+    { id: 'shadowrocket', file: '独立内核系/Shadowrocket/Shadowrocket.conf' },
+    { id: 'surge', file: '独立内核系/Surge/Surge.conf' },
+    { id: 'loon', file: '独立内核系/Loon/Loon.conf' },
+    { id: 'quantumult-x', file: '独立内核系/Quantumult X/QuantumultX.conf' },
+    { id: 'egern', file: '独立内核系/Egern/Egern.yaml' },
+    { id: 'sing-box', file: 'Sing-box内核系/SingBox/SingBox(sing-box)-full.json' },
+    { id: 'passwall', file: '双内核系/Passwall/Passwall(xray+sing-box)-apply.sh' },
+    { id: 'passwall2', file: '双内核系/Passwall2/Passwall2(xray+sing-box)-apply.sh' },
   ];
   for (const product of products) {
     const source = readText(product.file);
@@ -422,7 +432,7 @@ function validateGeneratedAssetRevision(record) {
     });
     if (product.mihomo) {
       const cachePath = `./ruleset/${assetRevision}/`;
-      record.check(`generated-assets.${product.id}.versioned-mihomo-cache`, source.includes(cachePath) && !source.includes('./ruleset/scki-fused-'), {
+      record.check(`generated-assets.${product.id}.versioned-mihomo-cache`, source.includes(cachePath) && !source.includes(`./ruleset/scki-fused-`), {
         message: `${product.file} must use a versioned Mihomo local rule-provider path`,
       });
     }
@@ -520,9 +530,9 @@ function validateMihomoMrsRuleSets(record) {
   checkMihomoQuicPolicy(record, 'source-graph', (normalizedGraph.rules || []).join('\n'));
 
   for (const spec of [
-    { id: 'js-smart', file: 'Clash Party/ClashParty(mihomo-smart).js' },
-    { id: 'js-normal', file: 'Clash Party/ClashParty(mihomo).js' },
-    { id: 'flclash', file: 'FlClash/FlClash(mihomo).js' },
+    { id: 'js-smart', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js' },
+    { id: 'js-normal', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo).js' },
+    { id: 'flclash', file: 'Mihomo内核系/FlClash/FlClash(mihomo).js' },
   ]) {
     const source = readText(spec.file);
     record.check(`mihomo-mrs.${spec.id}.no-source-mrs-block`, !source.includes('SCKI_DISABLE_MIHOMO_MRS_OVERRIDES'), {
@@ -637,11 +647,11 @@ function validateMihomoDomainPayloadGrammar(record, manifest, fusedDir) {
 
   const requiredAiDomainPayloads = [
     {
-      segmentId: 'scki-fused-014-ai',
+      segmentId: `${CONTRACT_SEGMENTS["scki-fused-014-ai"]}`,
       entries: ['+.chatgpt.com', '+.oaistatic.com', '+.openai.com'],
     },
     {
-      segmentId: 'scki-fused-024-ai',
+      segmentId: `${CONTRACT_SEGMENTS["scki-fused-024-ai"]}`,
       entries: ['+.a.nel.cloudflare.com'],
     },
   ];
@@ -652,9 +662,9 @@ function validateMihomoDomainPayloadGrammar(record, manifest, fusedDir) {
     });
   }
 
-  const openAiIndex = (manifest.segments || []).findIndex((segment) => segment.id === 'scki-fused-014-ai');
-  const aiAuxIndex = (manifest.segments || []).findIndex((segment) => segment.id === 'scki-fused-024-ai');
-  const intlSiteIndex = (manifest.segments || []).findIndex((segment) => segment.id === 'scki-fused-062-intl-site');
+  const openAiIndex = (manifest.segments || []).findIndex((segment) => segment.id === `${CONTRACT_SEGMENTS["scki-fused-014-ai"]}`);
+  const aiAuxIndex = (manifest.segments || []).findIndex((segment) => segment.id === `${CONTRACT_SEGMENTS["scki-fused-024-ai"]}`);
+  const intlSiteIndex = (manifest.segments || []).findIndex((segment) => segment.id === `${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}`);
   record.check('fused.chatgpt-ai-before-intl-site', openAiIndex !== -1 && aiAuxIndex !== -1 && intlSiteIndex !== -1 && openAiIndex < intlSiteIndex && aiAuxIndex < intlSiteIndex, {
     value: { openAiIndex, aiAuxIndex, intlSiteIndex },
     message: 'ChatGPT/OpenAI domain segments must precede the final international-site fallback',
@@ -709,7 +719,7 @@ function validateFusedRuleSets(record) {
   record.check('fused.unresolved-providers', (manifest.unresolved_providers || []).length === 0, { value: manifest.unresolved_providers });
   record.check('fused.unresolved-sources', (manifest.unresolved_sources || []).length === 0, { value: manifest.unresolved_sources });
   record.check('fused.passthrough-providers', (manifest.passthrough_providers || []).length === 0, { value: manifest.passthrough_providers });
-  record.check('fused.pruned-empty-segments', JSON.stringify(manifest.pruned_empty_segments || []) === JSON.stringify(['scki-fused-073-cn-site']), {
+  record.check('fused.pruned-empty-segments', (manifest.pruned_empty_segments || []).includes(CONTRACT_SEGMENTS['scki-fused-073-cn-site']) && (manifest.pruned_empty_segments || []).every(id => manifest.source_segments.some(row => row.id === id) && !manifest.segments.some(row => row.id === id)), {
     value: manifest.pruned_empty_segments,
   });
   validateMihomoDomainPayloadGrammar(record, manifest, fusedDir);
@@ -723,23 +733,23 @@ function validateFusedRuleSets(record) {
   checkTargetFileNames('sing-box', '.srs', 'sing_box');
   checkTargetFileNames('passwall', '.list');
   for (const id of [
-    'scki-fused-006-ad',
-    'scki-fused-008-direct',
-    'scki-fused-009-work',
-    'scki-fused-022-google',
-    'scki-fused-036-work',
-    'scki-fused-039-tiktok',
-    'scki-fused-059-gfw',
-    'scki-fused-060-game-cn',
-    'scki-fused-061-game-intl',
-    'scki-fused-062-intl-site',
+    `${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-008-direct"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-009-work"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-022-google"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-036-work"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-059-gfw"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}`,
   ]) {
     const segment = (manifest.segments || []).find((row) => row.id === id);
     record.check(`fused.segment.${id}`, Boolean(segment), { message: `missing ${id}` });
     record.check(`fused.segment-passwall.${id}`, Boolean(segment && segment.files && segment.files.passwall && segment.files.passwall.file === `${id}.list`), {
       message: `missing Passwall fused mapping for ${id}`,
     });
-    record.check(`fused.segment-xray.${id}`, Boolean(segment && segment.files && segment.files.xray && segment.files.xray.file === 'v2rayN/v2rayN(xray).json'), {
+    record.check(`fused.segment-xray.${id}`, Boolean(segment && segment.files && segment.files.xray && segment.files.xray.file === 'Xray内核系/v2rayN/v2rayN(xray).json'), {
       message: `missing Xray fused mapping for ${id}`,
     });
   }
@@ -747,18 +757,18 @@ function validateFusedRuleSets(record) {
 
 function checkSupplementalProviderRefs(record, id, providersBlock) {
   for (const expected of [
-    'scki-fused-002-intl-site-domain',
-    'scki-fused-005-cnmedia-domain',
-    'scki-fused-006-ad-domain',
-    'scki-fused-007-cn-site-domain',
-    'scki-fused-008-direct-residual',
-    'scki-fused-009-work-residual',
-    'scki-fused-022-google-domain',
-    'scki-fused-036-work-residual',
-    'scki-fused-039-tiktok-domain',
-    'scki-fused-060-game-cn-domain',
-    'scki-fused-061-game-intl-domain',
-    'scki-fused-062-intl-site-domain',
+    `${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-006-ad"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-008-direct"]}-residual`,
+    `${CONTRACT_SEGMENTS["scki-fused-009-work"]}-residual`,
+    `${CONTRACT_SEGMENTS["scki-fused-022-google"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-036-work"]}-residual`,
+    `${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain`,
+    `${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}-domain`,
   ]) {
     const hasProvider = new RegExp(`^\\s{2}${expected}:\\s*$`, 'm').test(providersBlock);
     const hasUrl = providersBlock.includes(`/rulesets/generated/fused/mihomo/${expected.replace(/-residual$/, '-residual.yaml').replace(/-(domain|ipcidr|ipcidr-no-resolve)$/, '-$1.mrs')}`);
@@ -770,58 +780,70 @@ function checkSupplementalProviderRefs(record, id, providersBlock) {
 
 function checkSupplementalMihomoRules(record, id, rulesSource) {
   for (const needle of [
-    'RULE-SET,scki-fused-002-intl-site-domain,🌐 国外网站',
-    'RULE-SET,scki-fused-005-cnmedia-domain,📺 国内流媒体',
-    'RULE-SET,scki-fused-006-ad-domain,🛑 广告拦截',
-    'RULE-SET,scki-fused-007-cn-site-domain,🏠 国内网站',
-    'RULE-SET,scki-fused-008-direct-residual,DIRECT',
-    'RULE-SET,scki-fused-009-work-residual,🧑‍💼 会议协作',
-    'RULE-SET,scki-fused-022-google-domain,🔍 Google 服务',
-    'RULE-SET,scki-fused-036-work-residual,🧑‍💼 会议协作',
-    'RULE-SET,scki-fused-039-tiktok-domain,🎵 TikTok',
-    'RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏',
-    'RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏',
-    'RULE-SET,scki-fused-062-intl-site-domain,🌐 国外网站',
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}-domain,🌐 国外网站`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}-domain,📺 国内流媒体`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-006-ad"]}-domain,🛑 广告拦截`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}-domain,🏠 国内网站`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-008-direct"]}-residual,DIRECT`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-009-work"]}-residual,🧑‍💼 会议协作`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-022-google"]}-domain,🔍 Google 服务`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-036-work"]}-residual,🧑‍💼 会议协作`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}-domain,🎵 TikTok`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain,🕹️ 国内游戏`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain,🎮 国外游戏`,
+    `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}-domain,🌐 国外网站`,
   ]) {
     record.check(`${id}.fused-rule.${needle.split(',')[1]}`, rulesSource.includes(needle), {
       message: `missing ${needle}`,
     });
   }
-  checkNeedleBefore(record, `${id}.fused.cloudflarestorage-before-ads`, rulesSource, 'RULE-SET,scki-fused-002-intl-site-domain,🌐 国外网站', 'RULE-SET,scki-fused-006-ad-domain,🛑 广告拦截');
-  checkNeedleBefore(record, `${id}.fused.cnmedia-before-tiktok`, rulesSource, 'RULE-SET,scki-fused-005-cnmedia-domain,📺 国内流媒体', 'RULE-SET,scki-fused-039-tiktok-domain,🎵 TikTok');
-  checkNeedleBefore(record, `${id}.fused.cnmedia-before-foreign-tail`, rulesSource, 'RULE-SET,scki-fused-005-cnmedia-domain,📺 国内流媒体', 'RULE-SET,scki-fused-062-intl-site-domain,🌐 国外网站');
-  checkNeedleBefore(record, `${id}.fused.cnsite-before-foreign-tail`, rulesSource, 'RULE-SET,scki-fused-007-cn-site-domain,🏠 国内网站', 'RULE-SET,scki-fused-062-intl-site-domain,🌐 国外网站');
-  checkNeedleBefore(record, `${id}.fused.cn-game-before-intl-game`, rulesSource, 'RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏', 'RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏');
+  checkNeedleBefore(record, `${id}.fused.cloudflarestorage-before-ads`, rulesSource, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}-domain,🌐 国外网站`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-006-ad"]}-domain,🛑 广告拦截`);
+  checkNeedleBefore(record, `${id}.fused.cnmedia-before-tiktok`, rulesSource, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}-domain,📺 国内流媒体`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}-domain,🎵 TikTok`);
+  checkNeedleBefore(record, `${id}.fused.cnmedia-before-foreign-tail`, rulesSource, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}-domain,📺 国内流媒体`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}-domain,🌐 国外网站`);
+  checkNeedleBefore(record, `${id}.fused.cnsite-before-foreign-tail`, rulesSource, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}-domain,🏠 国内网站`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}-domain,🌐 国外网站`);
+  checkNeedleBefore(record, `${id}.fused.cn-game-before-intl-game`, rulesSource, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain,🕹️ 国内游戏`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain,🎮 国外游戏`);
 }
 
 function checkSupplementalMobileRules(record, id, source, flavor, options = {}, fusedManifest) {
   const platform = options.qx ? 'quantumultx' : id === 'surge' ? 'surge' : 'clash';
   const segments = [
-    'scki-fused-002-intl-site',
-    'scki-fused-005-cnmedia',
-    'scki-fused-006-ad',
-    'scki-fused-007-cn-site',
-    'scki-fused-008-direct',
-    'scki-fused-009-work',
-    'scki-fused-022-google',
-    'scki-fused-036-work',
-    'scki-fused-039-tiktok',
-    'scki-fused-060-game-cn',
-    'scki-fused-061-game-intl',
-    'scki-fused-062-intl-site',
+    `${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-008-direct"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-009-work"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-022-google"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-036-work"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`,
+    `${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}`,
   ];
   const urlsFor = (segment) => fusedTextRuleSetUrls(fusedManifest, platform, segment);
+  const isNonEmptyUrl = (url) => {
+    const marker = '/rulesets/generated/';
+    const asset = decodeURIComponent(new URL(url).pathname.split(marker)[1]);
+    return readText(`rulesets/generated/${asset}`).split(/\r?\n/)
+      .some((line) => line.trim() && !line.trim().startsWith('#'));
+  };
+  const effectiveUrlsFor = (segment) => urlsFor(segment).filter(isNonEmptyUrl);
   for (const segment of segments) {
-    const urls = urlsFor(segment);
-    record.check(`${id}.fused-manifest.${segment}`, urls.length > 0, {
+    const mappedUrls = urlsFor(segment);
+    const urls = effectiveUrlsFor(segment);
+    const emptyUrls = mappedUrls.filter((url) => !isNonEmptyUrl(url));
+    record.check(`${id}.fused-manifest.${segment}`, mappedUrls.length > 0, {
       message: `missing ${platform} fused manifest mapping for ${segment}`,
     });
-    record.check(`${id}.fused-rule.${segment}`, urls.length > 0 && urls.every((url) => source.includes(url)), {
+    record.check(`${id}.fused-rule.${segment}`, mappedUrls.length > 0 && urls.every((url) => source.includes(url)), {
       message: `missing fused ${segment} part in ${id}`,
+    });
+    record.check(`${id}.fused-rule.${segment}.empty-assets-excluded`, emptyUrls.every((url) => !source.includes(url)), {
+      message: `empty ${platform} fused assets must not be referenced by ${id}: ${emptyUrls.join(', ')}`,
     });
     checkNeedleSequence(record, `${id}.fused-rule.${segment}.part-order`, source, urls);
   }
-  checkNeedleSequence(record, `${id}.fused.timeline-order`, source, segments.flatMap((segment) => urlsFor(segment)));
+  checkNeedleSequence(record, `${id}.fused.timeline-order`, source, segments.flatMap((segment) => effectiveUrlsFor(segment)));
 }
 
 function countLiteral(source, literal) {
@@ -1245,15 +1267,17 @@ function checkMihomoQuicPolicy(record, id, rulesText, expectedRules = EXPECTED_Q
 }
 
 function validateJsProducts(record) {
-  const smart = compileJs('Clash Party/ClashParty(mihomo-smart).js');
-  const normal = compileJs('Clash Party/ClashParty(mihomo).js');
-  const flclash = compileJs('FlClash/FlClash(mihomo).js');
+  const smart = compileJs('Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js');
+  const normal = compileJs('Mihomo内核系/Clash Party/ClashParty(mihomo).js');
+  const flclash = compileJs('Mihomo内核系/FlClash/FlClash(mihomo).js');
   const runtimeVersion = extractJsVersion(smart);
   // A runtime-only Adapter can receive a platform suffix without changing the
   // source routing-graph revision consumed by static client artifacts.
   const baselineVersion = extractVersionPrefix(runtimeVersion);
   const normalVersion = extractJsVersion(normal);
   const flclashVersion = extractJsVersion(flclash);
+  record.check('js.smart.no-removed-strategy', !/strategy:\s*['"]sticky-sessions['"]/.test(smart));
+  record.check('openclash.smart.no-removed-strategy', !/"strategy"\s*=>\s*"sticky-sessions"/.test(readText('Mihomo内核系/OpenClash/OpenClash(mihomo-smart).sh')));
 
   record.check('js.smart.version', /^v\d+\.\d+\.\d+(?:-[a-z0-9]+(?:\.[a-z0-9]+)*)?$/.test(String(runtimeVersion)), { value: runtimeVersion, message: `got ${runtimeVersion}` });
   record.check('js.smart.routing-baseline', Boolean(baselineVersion), { value: baselineVersion, message: `cannot extract routing baseline from ${runtimeVersion}` });
@@ -1276,6 +1300,11 @@ function validateJsProducts(record) {
       && source.includes('SckiTrafficOptions.applyQuicPolicy(config.rules, SCKI_QUIC_POLICY)'), {
       message: `JS option must match ${TRAFFIC_OPTIONS.quicPolicy} and be applied to runtime rules`,
     });
+    record.check(`js.${id}.zerotier-local-default`, source.includes('const SCKI_ZEROTIER_PLANET_PROXY = false')
+      && source.includes('SckiTrafficOptions.applyZeroTierPlanetProxy(config.rules, SCKI_ZEROTIER_PLANET_PROXY,')
+      && source.includes('SckiTrafficOptions.requireZeroTierPlanetProxyTarget(true,'), {
+      message: 'ZeroTier planet proxy must be default-off, validate its existing target before writes, and apply through the shared runtime',
+    });
   }
   record.check('js.no-legacy-fast-region-interval', !/interval:\s*(120|180),\s*tolerance:/.test(`${smart}\n${normal}\n${flclash}`), {
     message: 'JS region interval must not regress to 120s/180s',
@@ -1284,7 +1313,7 @@ function validateJsProducts(record) {
 }
 
 function validateClashYaml(record, baselineVersion, options) {
-  const file = 'Clash Meta For Android/CMFA(mihomo).yaml';
+  const file = 'Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml';
   const source = readText(file);
   validateYamlGroupFilterSyntax(record, 'cmfa', extractYamlGroupFilters(source));
   const providersBlock = extractYamlBlock(source, 'rule-providers');
@@ -1397,11 +1426,11 @@ function validateClashYaml(record, baselineVersion, options) {
     const hasPortRule = source.includes(`DST-PORT,${port},DIRECT`);
     record.check(`cmfa.stun-port.${port}`, hasPortRule, failureMessage(hasPortRule, `missing DST-PORT,${port},DIRECT`));
   }
-  checkNeedleBefore(record, 'cmfa.cn-game-before-intl-game-fused', rulesBlock, 'RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏', 'RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏');
+  checkNeedleBefore(record, 'cmfa.cn-game-before-intl-game-fused', rulesBlock, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain,🕹️ 国内游戏`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain,🎮 国外游戏`);
 }
 
 function validateStashYaml(record, baselineVersion, options) {
-  const file = 'Stash/Stash.yaml';
+  const file = '独立内核系/Stash/Stash.yaml';
   const source = readText(file);
   validateYamlGroupFilterSyntax(record, 'stash', extractYamlGroupFilters(source));
   const generator = readText('tools/generate-stash-from-cmfa.js');
@@ -1423,7 +1452,7 @@ function validateStashYaml(record, baselineVersion, options) {
     message: `missing Stash Smart ${baselineVersion}-stash.*`,
   });
   record.check('stash.generated-header', source.includes('node tools/generate-stash-from-cmfa.js'));
-  record.check('stash.generator-from-cmfa', generator.includes('Clash Meta For Android/CMFA(mihomo).yaml'));
+  record.check('stash.generator-from-cmfa', generator.includes('Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml'));
   record.check('stash.generator-not-reading-generated-output', !/readFileSync\([^)]*Stash\/Stash\.yaml/.test(generator));
   record.check('stash.rule-provider-singleton', countMatches(source, /^rule-providers:$/gm) === 1, { value: countMatches(source, /^rule-providers:$/gm) });
   record.check('stash.rules-singleton', countMatches(source, /^rules:$/gm) === 1, { value: countMatches(source, /^rules:$/gm) });
@@ -1559,11 +1588,11 @@ function validateStashYaml(record, baselineVersion, options) {
     const hasPortRule = source.includes(`DST-PORT,${port},DIRECT`);
     record.check(`stash.stun-port.${port}`, hasPortRule, failureMessage(hasPortRule, `missing DST-PORT,${port},DIRECT`));
   }
-  checkNeedleBefore(record, 'stash.cn-game-before-intl-game-fused', rulesBlock, 'RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏', 'RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏');
+  checkNeedleBefore(record, 'stash.cn-game-before-intl-game-fused', rulesBlock, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain,🕹️ 国内游戏`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain,🎮 国外游戏`);
 }
 
 function validateOpenClash(record, baselineVersion, options) {
-  const conf = readText('OpenClash/OpenClash(mihomo).conf');
+  const conf = readText('Mihomo内核系/OpenClash/OpenClash(mihomo).conf');
   if (!conf.includes(baselineVersion)) {
     record.warn('openclash.conf.baseline', `OpenClash(mihomo).conf does not advertise ${baselineVersion}; primary .sh artifacts remain authoritative`);
   }
@@ -1578,8 +1607,8 @@ function validateOpenClash(record, baselineVersion, options) {
   }
 
   for (const spec of [
-    { id: 'normal', file: 'OpenClash/OpenClash(mihomo).sh', suffix: 'oc-normal', minProviders: MIN_FULL_PROVIDERS, minRules: MIN_FULL_RULES },
-    { id: 'smart', file: 'OpenClash/OpenClash(mihomo-smart).sh', suffix: 'oc-smart', minProviders: MIN_FULL_PROVIDERS, minRules: MIN_FULL_RULES },
+    { id: 'normal', file: 'Mihomo内核系/OpenClash/OpenClash(mihomo).sh', suffix: 'oc-normal', minProviders: MIN_FULL_PROVIDERS, minRules: MIN_FULL_RULES },
+    { id: 'smart', file: 'Mihomo内核系/OpenClash/OpenClash(mihomo-smart).sh', suffix: 'oc-smart', minProviders: MIN_FULL_PROVIDERS, minRules: MIN_FULL_RULES },
   ]) {
     const source = readText(spec.file);
     const yaml = extractOpenClashOverride(spec.file);
@@ -1667,7 +1696,7 @@ function validateOpenClash(record, baselineVersion, options) {
       const hasPortRule = yaml.includes(`DST-PORT,${port},DIRECT`);
       record.check(`openclash.${spec.id}.stun-port.${port}`, hasPortRule, failureMessage(hasPortRule, `missing DST-PORT,${port},DIRECT`));
     }
-    checkNeedleBefore(record, `openclash.${spec.id}.cn-game-before-intl-game-fused`, rulesOnly, 'RULE-SET,scki-fused-060-game-cn-domain,🕹️ 国内游戏', 'RULE-SET,scki-fused-061-game-intl-domain,🎮 国外游戏');
+    checkNeedleBefore(record, `openclash.${spec.id}.cn-game-before-intl-game-fused`, rulesOnly, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain,🕹️ 国内游戏`, `RULE-SET,${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain,🎮 国外游戏`);
 
     if (rubyPath) {
       try {
@@ -1701,10 +1730,10 @@ function validateOpenClash(record, baselineVersion, options) {
 function validateConfProducts(record, baselineVersion) {
   const fusedManifest = readJson('rulesets/generated/fused/manifest.json');
   const specs = [
-    { id: 'shadowrocket', file: 'Shadowrocket/Shadowrocket.conf', regex: / = select,|= url-test,/g },
-    { id: 'surge', file: 'Surge/Surge.conf', regex: / = select,|= url-test,/g },
-    { id: 'loon', file: 'Loon/Loon.conf', regex: / = select,|= url-test,/g },
-    { id: 'qx', file: 'Quantumult X/QuantumultX.conf', regex: /^(url-latency-benchmark|static)=/gm },
+    { id: 'shadowrocket', file: '独立内核系/Shadowrocket/Shadowrocket.conf', regex: / = select,|= url-test,/g },
+    { id: 'surge', file: '独立内核系/Surge/Surge.conf', regex: / = select,|= url-test,/g },
+    { id: 'loon', file: '独立内核系/Loon/Loon.conf', regex: / = select,|= url-test,/g },
+    { id: 'qx', file: '独立内核系/Quantumult X/QuantumultX.conf', regex: /^(url-latency-benchmark|static)=/gm },
   ];
   for (const spec of specs) {
     const source = readText(spec.file);
@@ -1725,10 +1754,25 @@ function validateConfProducts(record, baselineVersion) {
     });
   }
 
-  const shadowrocket = readText('Shadowrocket/Shadowrocket.conf');
-  const surge = readText('Surge/Surge.conf');
-  const loon = readText('Loon/Loon.conf');
-  const qx = readText('Quantumult X/QuantumultX.conf');
+  const shadowrocket = readText('独立内核系/Shadowrocket/Shadowrocket.conf');
+  const surge = readText('独立内核系/Surge/Surge.conf');
+  const loon = readText('独立内核系/Loon/Loon.conf');
+  const qx = readText('独立内核系/Quantumult X/QuantumultX.conf');
+  // Surge DNS responders and Fake IP destinations must remain inside VIF.
+  // https://manual.nssurge.com/dns/advanced.html (issue #190)
+  const surgeFakeIpPool = parseCidr('198.18.0.0/15');
+  const surgeFakeIpBypass = [...extractConfSection(surge, 'General')
+    .matchAll(/^\s*tun-excluded-routes\s*=\s*([^#\r\n]*)/gmi)]
+    .flatMap(match => match[1].split(',').map(value => value.trim()).filter(Boolean))
+    .filter(value => {
+      const route = parseCidr(value);
+      if (route.family !== surgeFakeIpPool.family) return false;
+      const shift = BigInt(route.bits - Math.min(route.prefix, surgeFakeIpPool.prefix));
+      return (route.network >> shift) === (surgeFakeIpPool.network >> shift);
+    });
+  record.check('surge.tun.fake-ip-captured', surgeFakeIpBypass.length === 0, {
+    message: `tun-excluded-routes must not overlap Surge Fake IP/DNS range 198.18.0.0/15: ${surgeFakeIpBypass.join(', ')}`,
+  });
   const loonRemoteRule = extractConfSection(loon, 'Remote Rule');
   const loonRuleSection = extractConfSection(loon, 'Rule');
   const qxFilterRemote = extractConfSection(qx, 'filter_remote');
@@ -1771,13 +1815,17 @@ function validateConfProducts(record, baselineVersion) {
   record.check('shadowrocket.dns.nameserver-doh-over-ip', srNorm(shadowrocket).includes('dns-server = https://223.5.5.5/dns-query,https://223.6.6.6/dns-query,https://8.8.8.8/dns-query,https://1.1.1.1/dns-query'));
   record.check('shadowrocket.dns.proxy-server-doh-over-ip', srNorm(shadowrocket).includes('proxy-dns-server = https://8.8.8.8/dns-query,https://1.1.1.1/dns-query,https://223.5.5.5/dns-query,https://223.6.6.6/dns-query'));
   record.check('shadowrocket.dns.fallback-doh-over-ip', srNorm(shadowrocket).includes('fallback-dns-server = https://8.8.8.8/dns-query,https://1.1.1.1/dns-query'));
-  record.check('surge.dns.bootstrap-plaintext-fallback', surge.includes('dns-server = 223.5.5.5, 119.29.29.29, 1.1.1.1, 8.8.8.8'));
+  record.check('surge.dns.bootstrap-plaintext', surge.includes('dns-server = 223.5.5.5, 119.29.29.29, 1.1.1.1, 8.8.8.8'));
   record.check('surge.dns.encrypted-doh-over-ip', surge.includes('encrypted-dns-server = https://223.5.5.5/dns-query, https://223.6.6.6/dns-query, https://8.8.8.8/dns-query, https://1.1.1.1/dns-query'));
-  record.check('surge.dns.fallback-doh-over-ip', surge.includes('fallback-dns-server = https://8.8.8.8/dns-query, https://1.1.1.1/dns-query'));
+  record.check('surge.dns.no-unsupported-section', !/^\s*\[DNS\]\s*$/mi.test(surge));
+  record.check('surge.dns.no-unsupported-fallback', !/^\s*(?:fallback-dns-server|dns-direct-fallback-proxy)\s*=/mi.test(surge));
   record.check('loon.dns.bootstrap-plaintext-fallback', loon.includes('dns-server = 223.5.5.5, 119.29.29.29, 1.1.1.1, 8.8.8.8'));
   record.check('loon.dns.doh-over-ip', loon.includes('doh-server = https://223.5.5.5/dns-query, https://223.6.6.6/dns-query, https://8.8.8.8/dns-query, https://1.1.1.1/dns-query'));
   for (const server of DNS_BOOTSTRAP_PLAINTEXT) record.check(`qx.dns.server.${server}`, qx.includes(`server=${server}`));
-  for (const server of DNS_BOOTSTRAP_DOH_OVER_IP) record.check(`qx.dns.doh-server.${server}`, qx.includes(`doh-server=${server}`));
+  const qxDohLines = [...qx.matchAll(/^\s*doh-server\s*=([^\r\n]+)$/gm)];
+  record.check('qx.dns.single-concurrent-doh-line', qxDohLines.length === 1, { value: qxDohLines.length });
+  const qxDohServers = qxDohLines.flatMap(match => match[1].split(',').map(value => value.trim()));
+  checkExactList(record, 'qx.dns.concurrent-doh-order', qxDohServers, DNS_BOOTSTRAP_DOH_OVER_IP);
   for (const port of STUN_DIRECT_PORTS) {
     const srHasPortRule = shadowrocket.includes(`DST-PORT,${port},DIRECT`);
     const surgeHasPortRule = surge.includes(`DEST-PORT,${port},DIRECT`);
@@ -1825,15 +1873,15 @@ function validateConfProducts(record, baselineVersion) {
 
 function validateRuntimeNodeNameProducts(record) {
   for (const spec of [
-    { id: 'cmfa', file: 'Clash Meta For Android/CMFA(mihomo).yaml' },
-    { id: 'stash', file: 'Stash/Stash.yaml' },
-    { id: 'egern', file: 'Egern/Egern.yaml' },
+    { id: 'cmfa', file: 'Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml' },
+    { id: 'stash', file: '独立内核系/Stash/Stash.yaml' },
+    { id: 'egern', file: '独立内核系/Egern/Egern.yaml' },
   ]) {
     const filters = extractYamlGroupFilters(readText(spec.file));
     validateNumberedLowercaseRegionFilters(record, spec.id, (groupName) => filters.get(groupName));
   }
 
-  const loon = readText('Loon/Loon.conf');
+  const loon = readText('独立内核系/Loon/Loon.conf');
   validateNumberedLowercaseRegionFilters(
     record,
     'loon',
@@ -1841,9 +1889,9 @@ function validateRuntimeNodeNameProducts(record) {
   );
 
   for (const spec of [
-    { id: 'shadowrocket', file: 'Shadowrocket/Shadowrocket.conf', key: 'policy-regex-filter' },
-    { id: 'surge', file: 'Surge/Surge.conf', key: 'policy-regex-filter' },
-    { id: 'qx', file: 'Quantumult X/QuantumultX.conf', key: 'server-tag-regex' },
+    { id: 'shadowrocket', file: '独立内核系/Shadowrocket/Shadowrocket.conf', key: 'policy-regex-filter' },
+    { id: 'surge', file: '独立内核系/Surge/Surge.conf', key: 'policy-regex-filter' },
+    { id: 'qx', file: '独立内核系/Quantumult X/QuantumultX.conf', key: 'server-tag-regex' },
   ]) {
     const source = readText(spec.file);
     validateNumberedLowercaseRegionFilters(
@@ -1860,8 +1908,9 @@ function validateRuntimeNodeNameProducts(record) {
 }
 
 function validateJsonProducts(record, baselineVersion) {
-  const singbox = readJson('SingBox/SingBox(sing-box)-full.json');
-  const singboxGenerator = readText('SingBox/SingBox(sing-box)-generator.js');
+  const singbox = readJson('Sing-box内核系/SingBox/SingBox(sing-box)-full.json');
+  const singboxCompat = readJson('Sing-box内核系/SingBox/SingBox(sing-box)-1.13.json');
+  const singboxGenerator = readText('Sing-box内核系/SingBox/SingBox(sing-box)-generator.js');
   const generatorVersion = (singboxGenerator.match(/const\s+VERSION\s*=\s*'([^']+)'/) || [])[1];
   const generatorBuild = (singboxGenerator.match(/const\s+BUILD(?:_DATE)?\s*=\s*'([^']+)'/) || [])[1];
   const generatorBaseline = (singboxGenerator.match(/const\s+BASELINE\s*=\s*'([^']+)'/) || [])[1];
@@ -1871,20 +1920,32 @@ function validateJsonProducts(record, baselineVersion) {
   const singboxBusinessOrder = outboundTags.filter((tag) => SINGBOX_BUSINESS_ORDER.includes(tag));
   const routeRules = ((singbox.route || {}).rules || []);
   const ruleSetCount = ((singbox.route || {}).rule_set || []).length;
-  const routeRuleCount = routeRules.length;
+  const routeRuleCount = routeRules.filter(rule => rule.action !== 'sniff').length;
   const dnsRules = ((singbox.dns || {}).rules || []);
   const dnsServers = ((singbox.dns || {}).servers || []);
   const dnsServerByTag = Object.fromEntries(dnsServers.filter((server) => server && server.tag).map((server) => [server.tag, server]));
-  record.check('singbox.baseline-meta', singbox._meta && singbox._meta.baseline === `Clash Party ${baselineVersion}`, { value: singbox._meta && singbox._meta.baseline });
-  record.check('singbox.generator-version-meta', singbox._meta && singbox._meta.version === generatorVersion, {
-    value: { meta: singbox._meta && singbox._meta.version, generator: generatorVersion },
-  });
-  record.check('singbox.generator-build-meta', singbox._meta && singbox._meta.build === generatorBuild, {
-    value: { meta: singbox._meta && singbox._meta.build, generator: generatorBuild },
-  });
-  record.check('singbox.generator-baseline-meta', singbox._meta && singbox._meta.baseline === generatorBaseline, {
-    value: { meta: singbox._meta && singbox._meta.baseline, generator: generatorBaseline },
-  });
+  const singboxReadme = readText('Sing-box内核系/SingBox/README.md');
+  record.check('singbox.no-unknown-meta', !Object.hasOwn(singbox, '_meta'));
+  record.check('singbox.generator-version-documented', Boolean(generatorVersion && generatorVersion.startsWith(`${baselineVersion}-sing.`))
+    && singboxReadme.includes(generatorVersion) && readText('Sing-box内核系/SingBox/CHANGELOG.md').includes(`## ${generatorVersion} (${generatorBuild})`));
+  record.check('singbox.generator-build-documented', /^\d{4}-\d{2}-\d{2}$/.test(generatorBuild) && singboxReadme.includes(generatorBuild));
+  record.check('singbox.generator-baseline', generatorBaseline === `Clash Party ${baselineVersion}`, { value: generatorBaseline });
+  const downloadClient = (singbox.http_clients || []).find(client => client.tag === 'rules-download');
+  record.check('singbox.named-rule-download-client', downloadClient && downloadClient.detour === '🌍 全球节点'
+    && singbox.route.rule_set.every(ruleSet => ruleSet.http_client === downloadClient.tag && !Object.hasOwn(ruleSet, 'download_detour')));
+  record.check('singbox.sniff-nonfinal-first', routeRules[0]?.action === 'sniff'
+    && JSON.stringify(routeRules[0].inbound) === JSON.stringify(['tun-in'])
+    && routeRules.filter(rule => rule.action === 'sniff').length === 1
+    && singbox.inbounds.every(inbound => !Object.hasOwn(inbound, 'sniff')));
+  record.check('singbox.compat.outbound-and-route-parity', JSON.stringify(singboxCompat.outbounds) === JSON.stringify(singbox.outbounds)
+    && JSON.stringify(singboxCompat.route.rules) === JSON.stringify(routeRules) && singboxCompat.route.final === singbox.route.final);
+  const ruleSetPayload = ({ http_client, download_detour, ...payload }) => payload;
+  record.check('singbox.compat.rule-set-payload-parity', JSON.stringify(singboxCompat.route.rule_set.map(ruleSetPayload)) === JSON.stringify(singbox.route.rule_set.map(ruleSetPayload)));
+  record.check('singbox.compat.supported-download-schema', !Object.hasOwn(singboxCompat, '_meta') && !Object.hasOwn(singboxCompat, 'http_clients')
+    && singboxCompat.route.rule_set.every(ruleSet => ruleSet.download_detour === downloadClient?.detour && !Object.hasOwn(ruleSet, 'http_client')));
+  record.check('singbox.compat.typed-dns-and-version-boundary', JSON.stringify(singboxCompat.dns.servers) === JSON.stringify(dnsServers)
+    && !singboxCompat.dns.rules.some(rule => rule.match_response || rule.action === 'evaluate')
+    && singboxCompat.dns.rules.some(rule => rule.rule_set?.includes('geoip-cn') && rule.server === 'dns_direct'));
   record.check('singbox.generator-clean-base', !/readFileSync\(['"]SingBox\/SingBox\(sing-box\)-full\.json['"]/.test(singboxGenerator));
   record.check('singbox.selector-urltest-count', selectorCount === EXPECTED_SINGBOX_GROUPS, { value: selectorCount });
   record.check('singbox.urltest-interval-selected', singboxUrltests.length === EXPECTED_SINGBOX_URLTEST_GROUPS && singboxUrltests.every((outbound) => outbound.interval === EXPECTED_SINGBOX_URLTEST_INTERVAL), {
@@ -1925,26 +1986,27 @@ function validateJsonProducts(record, baselineVersion) {
       message: 'SingBox QUIC exemptions and fallback reject must remain contiguous and ordered',
     });
     const singboxAdGuard = routeRules.findIndex((rule) => Array.isArray(rule.rule_set)
-      && rule.rule_set.includes('scki-fused-006-ad'));
+      && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`));
     record.check('singbox.quic-after-ad', singboxAdGuard !== -1 && singboxAdGuard < firstQuic, {
       message: 'SingBox ad rejection must precede dedicated UDP/443 handling',
     });
   }
   const singboxScholarGoogle = routeRules.some((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-022-google') && rule.outbound === '🔍 Google 服务'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-022-google"]}`) && rule.outbound === '🔍 Google 服务'
   ));
   record.check('singbox.scholar-target-google-fused', singboxScholarGoogle, failureMessage(singboxScholarGoogle, 'Google service fused rule_set must include scholar coverage'));
-  record.check('singbox.dns.bootstrap-doh-over-ip', dnsServerByTag.dns_bootstrap && dnsServerByTag.dns_bootstrap.address === 'https://223.5.5.5/dns-query' && dnsServerByTag.dns_bootstrap.tls && dnsServerByTag.dns_bootstrap.tls.server_name === 'dns.alidns.com', {
-    value: dnsServerByTag.dns_bootstrap && dnsServerByTag.dns_bootstrap.address,
+  record.check('singbox.dns.typed-https-only', dnsServers.every(server => server.type === 'https' && !Object.hasOwn(server, 'address') && !Object.hasOwn(server, 'address_resolver')));
+  record.check('singbox.dns.bootstrap-doh-over-ip', dnsServerByTag.dns_bootstrap && dnsServerByTag.dns_bootstrap.server === '223.5.5.5' && dnsServerByTag.dns_bootstrap.path === '/dns-query' && dnsServerByTag.dns_bootstrap.tls && dnsServerByTag.dns_bootstrap.tls.server_name === 'dns.alidns.com', {
+    value: dnsServerByTag.dns_bootstrap && dnsServerByTag.dns_bootstrap.server,
   });
-  record.check('singbox.dns.direct-doh', dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.address === 'https://dns.alidns.com/dns-query', {
-    value: dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.address,
+  record.check('singbox.dns.direct-doh', dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.server === 'dns.alidns.com' && dnsServerByTag.dns_direct.path === '/dns-query', {
+    value: dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.server,
   });
-  record.check('singbox.dns.proxy-doh', dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.address === 'https://cloudflare-dns.com/dns-query', {
-    value: dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.address,
+  record.check('singbox.dns.proxy-doh', dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.server === 'cloudflare-dns.com' && dnsServerByTag.dns_proxy.path === '/dns-query', {
+    value: dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.server,
   });
-  record.check('singbox.dns.direct-bootstrap-resolver', dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.address_resolver === 'dns_bootstrap');
-  record.check('singbox.dns.proxy-bootstrap-resolver', dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.address_resolver === 'dns_bootstrap');
+  record.check('singbox.dns.direct-bootstrap-resolver', dnsServerByTag.dns_direct && dnsServerByTag.dns_direct.domain_resolver?.server === 'dns_bootstrap');
+  record.check('singbox.dns.proxy-bootstrap-resolver', dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.domain_resolver?.server === 'dns_bootstrap');
   record.check('singbox.dns.proxy-detour-main-selector', dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.detour === '🚀 节点选择', {
     value: dnsServerByTag.dns_proxy && dnsServerByTag.dns_proxy.detour,
   });
@@ -1962,13 +2024,13 @@ function validateJsonProducts(record, baselineVersion) {
     Array.isArray(rule.rule_set) && rule.rule_set.includes('geosite-private') && rule.server === 'dns_direct'
   ));
   record.check('singbox.dns.private-direct', singboxPrivateDnsDirect, failureMessage(singboxPrivateDnsDirect, 'geosite-private DNS must use dns_direct'));
-  const singboxCnDnsDirect = dnsRules.some((rule) => (
-    Array.isArray(rule.rule_set)
-      && rule.rule_set.includes('geosite-cn')
-      && rule.rule_set.includes('geoip-cn')
-      && rule.server === 'dns_direct'
-  ));
-  record.check('singbox.dns.cn-direct', singboxCnDnsDirect, failureMessage(singboxCnDnsDirect, 'geosite-cn and geoip-cn DNS must use dns_direct'));
+  const cnQueryRule = dnsRules.findIndex(rule => rule.rule_set?.includes('geosite-cn') && rule.server === 'dns_direct' && rule.action === 'route');
+  const evaluateIndex = dnsRules.findIndex(rule => rule.action === 'evaluate' && rule.server === 'dns_direct');
+  const cnResponseRule = dnsRules[evaluateIndex + 1];
+  record.check('singbox.dns.cn-direct', cnQueryRule >= 0 && evaluateIndex > cnQueryRule && cnResponseRule?.match_response === true
+    && cnResponseRule.action === 'respond' && cnResponseRule.rule_set?.includes('geoip-cn'), {
+    message: 'CN domains route directly; evaluated direct responses are accepted only when geoip-cn matches',
+  });
   record.check('singbox.dns.final-proxy', (singbox.dns || {}).final === 'dns_proxy', { value: (singbox.dns || {}).final });
   for (const port of STUN_DIRECT_PORTS) {
     const hasPortRule = ((singbox.route || {}).rules || []).some((rule) => (
@@ -1978,25 +2040,25 @@ function validateJsonProducts(record, baselineVersion) {
   }
   const singboxRules = (singbox.route || {}).rules || [];
   const singboxCloudflareR2Index = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-002-intl-site') && rule.outbound === '🌐 国外网站'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`) && rule.outbound === '🌐 国外网站'
   ));
   const singboxAntiAdIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-006-ad') && rule.action === 'reject'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`) && rule.action === 'reject'
   ));
   record.check('singbox.cloudflarestorage-before-ads', singboxCloudflareR2Index !== -1 && singboxAntiAdIndex !== -1 && singboxCloudflareR2Index < singboxAntiAdIndex, {
     value: { cloudflarestorage: singboxCloudflareR2Index, antiAd: singboxAntiAdIndex },
   });
   const singboxDouyinIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-005-cnmedia') && rule.outbound === '📺 国内流媒体'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`) && rule.outbound === '📺 国内流媒体'
   ));
   const singboxTikTokIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-039-tiktok') && rule.outbound === '🎵 TikTok'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}`) && rule.outbound === '🎵 TikTok'
   ));
   const singboxForeignTailIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-062-intl-site') && rule.outbound === '🌐 国外网站'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}`) && rule.outbound === '🌐 国外网站'
   ));
   const singboxAmapIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-007-cn-site') && rule.outbound === '🏠 国内网站'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}`) && rule.outbound === '🏠 国内网站'
   ));
   record.check('singbox.douyin-zjcdn-cnmedia', singboxDouyinIndex !== -1, failureMessage(singboxDouyinIndex !== -1, 'zjcdn.com must route to CN media'));
   record.check('singbox.douyin-zjcdn-before-tiktok', singboxDouyinIndex !== -1 && singboxTikTokIndex !== -1 && singboxDouyinIndex < singboxTikTokIndex, {
@@ -2010,16 +2072,16 @@ function validateJsonProducts(record, baselineVersion) {
     value: { amap: singboxAmapIndex, foreignTail: singboxForeignTailIndex },
   });
   const singboxCnGameIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-060-game-cn') && rule.outbound === '🕹️ 国内游戏'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`) && rule.outbound === '🕹️ 国内游戏'
   ));
   const singboxIntlGameIndex = singboxRules.findIndex((rule) => (
-    Array.isArray(rule.rule_set) && rule.rule_set.includes('scki-fused-061-game-intl') && rule.outbound === '🎮 国外游戏'
+    Array.isArray(rule.rule_set) && rule.rule_set.includes(`${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`) && rule.outbound === '🎮 国外游戏'
   ));
   record.check('singbox.cn-game-before-intl-game-fused', singboxCnGameIndex !== -1 && singboxIntlGameIndex !== -1 && singboxCnGameIndex < singboxIntlGameIndex, {
     value: { cnGame: singboxCnGameIndex, intlGame: singboxIntlGameIndex },
   });
 
-  const v2rayn = readJson('v2rayN/v2rayN(xray).json');
+  const v2rayn = readJson('Xray内核系/v2rayN/v2rayN(xray).json');
   const allowedTags = new Set(['proxy', 'direct', 'block']);
   record.check('v2rayn.top-level-array', Array.isArray(v2rayn));
   record.check('v2rayn.rule-count', Array.isArray(v2rayn) && v2rayn.length === EXPECTED_XRAY_RULES, { value: Array.isArray(v2rayn) ? v2rayn.length : null });
@@ -2030,7 +2092,7 @@ function validateJsonProducts(record, baselineVersion) {
   record.check('v2rayn.outbound-tags', Array.isArray(v2rayn) && v2rayn.every((rule) => allowedTags.has(rule.outboundTag)), {
     value: Array.isArray(v2rayn) ? Array.from(new Set(v2rayn.map((rule) => rule.outboundTag))).sort() : null,
   });
-  for (const id of ['scki-fused-002-intl-site', 'scki-fused-005-cnmedia', 'scki-fused-006-ad', 'scki-fused-007-cn-site', 'scki-fused-022-google', 'scki-fused-060-game-cn', 'scki-fused-061-game-intl']) {
+  for (const id of [`${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`, `${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`, `${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`, `${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}`, `${CONTRACT_SEGMENTS["scki-fused-022-google"]}`, `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`, `${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`]) {
     record.check(`v2rayn.fused-rule.${id}`, Array.isArray(v2rayn) && v2rayn.some((rule) => rule.id === id), {
       message: `missing ${id}`,
     });
@@ -2045,32 +2107,33 @@ function validateJsonProducts(record, baselineVersion) {
     record.check(`v2rayn.stun-port.${port}`, hasPortRule, failureMessage(hasPortRule, `missing port ${port} -> direct`));
   }
   const v2CloudflareR2Index = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => (
-    rule.id === 'scki-fused-002-intl-site'
+    rule.id === `${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`
       && rule.outboundTag === 'proxy'
       && xrayDomainIncludes(rule, 'domain:cloudflarestorage.com')
   )) : -1;
-  const v2AdsIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === 'scki-fused-006-ad') : -1;
+  const v2AdsIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === `${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`) : -1;
   const v2DouyinIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => (
-    rule.id === 'scki-fused-005-cnmedia'
+    rule.id === `${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`
       && rule.outboundTag === 'direct'
       && DOUYIN_CNMEDIA_DOMAINS.every((domain) => xrayDomainIncludes(rule, `domain:${domain}`))
   )) : -1;
   const v2AmapIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => (
-    rule.id === 'scki-fused-007-cn-site'
+    rule.id === `${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}`
       && rule.outboundTag === 'direct'
       && PASSWALL_AMAP_REQUIRED.every((domain) => xrayDomainIncludes(rule, domain))
   )) : -1;
   const v2ScholarGoogle = Array.isArray(v2rayn) && v2rayn.some((rule) => (
-    rule.id === 'scki-fused-022-google' && rule.outboundTag === 'proxy' && xrayDomainIncludes(rule, 'domain:scholar.google.com')
+    rule.id === `${CONTRACT_SEGMENTS["scki-fused-022-google"]}` && rule.outboundTag === 'proxy' && xrayDomainIncludes(rule, 'domain:scholar.google.com')
   ));
-  const v2CnGameIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === 'scki-fused-060-game-cn') : -1;
-  const v2IntlGameIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === 'scki-fused-061-game-intl') : -1;
+  const v2CnGameIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`) : -1;
+  const v2IntlGameIndex = Array.isArray(v2rayn) ? v2rayn.findIndex((rule) => rule.id === `${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`) : -1;
   const v2CnGame = v2CnGameIndex === -1 ? null : v2rayn[v2CnGameIndex];
-  record.check('v2rayn.douyin-web-direct-guard', v2DouyinIndex !== -1, failureMessage(v2DouyinIndex !== -1, 'scki-fused-005-cnmedia must direct all Douyin Web guard domains'));
+  const v2GameGuard = v2rayn.find(rule => rule.id === GAME_CN_GUARD_ID);
+  record.check('v2rayn.douyin-web-direct-guard', v2DouyinIndex !== -1, failureMessage(v2DouyinIndex !== -1, `${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]} must direct all Douyin Web guard domains`));
   record.check('v2rayn.douyin-web-before-ads', v2DouyinIndex !== -1 && v2AdsIndex !== -1 && v2DouyinIndex < v2AdsIndex, {
     value: { douyin: v2DouyinIndex, ads: v2AdsIndex },
   });
-  record.check('v2rayn.amap-direct-guard', v2AmapIndex !== -1, failureMessage(v2AmapIndex !== -1, 'scki-fused-007-cn-site must direct all GaoDe/AMap fallback domains'));
+  record.check('v2rayn.amap-direct-guard', v2AmapIndex !== -1, failureMessage(v2AmapIndex !== -1, `${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]} must direct all GaoDe/AMap fallback domains`));
   record.check('v2rayn.amap-after-ads', v2AmapIndex !== -1 && v2AdsIndex !== -1 && v2AdsIndex < v2AmapIndex, {
     value: { amap: v2AmapIndex, ads: v2AdsIndex },
   });
@@ -2080,18 +2143,18 @@ function validateJsonProducts(record, baselineVersion) {
   for (const domain of PASSWALL_CN_GAME_REQUIRED) {
     record.check(
       `v2rayn.cn-game.${domain}`,
-      v2CnGame && xrayDomainIncludes(v2CnGame, domain),
-      failureMessage(v2CnGame && xrayDomainIncludes(v2CnGame, domain), `scki-fused-060-game-cn missing ${domain}`),
+      (domain === "domain:wegame.com" ? v2GameGuard : v2CnGame) && xrayDomainIncludes(domain === "domain:wegame.com" ? v2GameGuard : v2CnGame, domain),
+      failureMessage(v2CnGame && xrayDomainIncludes(v2CnGame, domain), `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]} missing ${domain}`),
     );
   }
-  record.check('v2rayn.scholar-target-google', v2ScholarGoogle, failureMessage(v2ScholarGoogle, 'scki-fused-022-google must include domain:scholar.google.com'));
+  record.check('v2rayn.scholar-target-google', v2ScholarGoogle, failureMessage(v2ScholarGoogle, `${CONTRACT_SEGMENTS["scki-fused-022-google"]} must include domain:scholar.google.com`));
   record.check('v2rayn.cloudflarestorage-before-ads', v2CloudflareR2Index !== -1 && v2AdsIndex !== -1 && v2CloudflareR2Index < v2AdsIndex, {
     value: { cloudflarestorage: v2CloudflareR2Index, ads: v2AdsIndex },
   });
 }
 
 function validateEgern(record, baselineVersion, options) {
-  const file = 'Egern/Egern.yaml';
+  const file = '独立内核系/Egern/Egern.yaml';
   const source = readText(file);
   const rulesStart = source.search(/\r?\nrules:\r?\n/);
   const rulesSource = rulesStart === -1 ? '' : source.slice(rulesStart);
@@ -2110,7 +2173,7 @@ function validateEgern(record, baselineVersion, options) {
   record.check('egern.not-preview', !/Preview/i.test(source), {
     message: 'Egern is a formal generated artifact, not a Preview profile',
   });
-  record.check('egern.generated-from-cmfa', source.includes('Generated from Clash Meta For Android/CMFA(mihomo).yaml.'), {
+  record.check('egern.generated-from-cmfa', source.includes('Generated from Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml.'), {
     message: 'missing CMFA generation marker',
   });
   record.check('egern.rule-parity-header', source.includes(`Rule parity: generated from CMFA ${MIN_FULL_PROVIDERS} rule-providers and ${MIN_FULL_RULES} rules.`), {
@@ -2142,7 +2205,7 @@ function validateEgern(record, baselineVersion, options) {
   if (egernGenerationManifest) {
     const generationValidation = validateEgernGenerationManifest({
       manifest: egernGenerationManifest,
-      cmfaSource: readText('Clash Meta For Android/CMFA(mihomo).yaml'),
+      cmfaSource: readText('Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml'),
       routingGraphSource: readText(SOURCE_GRAPH_FILE),
       profileSource: source,
       generatedRuleSetDirectory: generatedEgernDirectory,
@@ -2165,15 +2228,15 @@ function validateEgern(record, baselineVersion, options) {
     });
   }
   for (const fusedId of [
-    'provider-scki-fused-002-intl-site-domain',
-    'provider-scki-fused-005-cnmedia-domain',
-    'provider-scki-fused-006-ad-domain',
-    'provider-scki-fused-007-cn-site-domain',
-    'provider-scki-fused-053-google-domain',
-    'provider-scki-fused-039-tiktok-domain',
-    'provider-scki-fused-060-game-cn-domain',
-    'provider-scki-fused-061-game-intl-domain',
-    'provider-scki-fused-062-intl-site-domain',
+    `provider-${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-006-ad"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-053-google"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}-domain`,
+    `provider-${CONTRACT_SEGMENTS["scki-fused-062-intl-site"]}-domain`,
   ]) {
     const fusedFiles = generatedEgernFiles
       .filter((file) => file === `${fusedId}.yaml` || new RegExp(`^${fusedId}-part-\\d+\\.yaml$`).test(file))
@@ -2232,8 +2295,8 @@ function validatePasswall(record, baselineVersion) {
   });
 
   const specs = [
-    { id: 'passwall', file: 'Passwall/Passwall(xray+sing-box)-apply.sh', reference: 'Passwall/Passwall(xray+sing-box).conf', dir: 'Passwall/shunt-rules' },
-    { id: 'passwall2', file: 'Passwall2/Passwall2(xray+sing-box)-apply.sh', reference: 'Passwall2/Passwall2(xray+sing-box).conf', dir: 'Passwall2/shunt-rules' },
+    { id: 'passwall', file: '双内核系/Passwall/Passwall(xray+sing-box)-apply.sh', reference: '双内核系/Passwall/Passwall(xray+sing-box).conf', dir: '双内核系/Passwall/shunt-rules' },
+    { id: 'passwall2', file: '双内核系/Passwall2/Passwall2(xray+sing-box)-apply.sh', reference: '双内核系/Passwall2/Passwall2(xray+sing-box).conf', dir: '双内核系/Passwall2/shunt-rules' },
   ];
 
   for (const spec of specs) {
@@ -2255,6 +2318,10 @@ function validatePasswall(record, baselineVersion) {
     record.check(`${spec.id}.apply-script-replace-mode`, source.includes('MODE="${1:---replace}"') && source.includes('cleanup_existing_scki_rules'), {
       message: 'apply script must default to --replace and delete existing Smart-Config-Kit shunt rules before recreating them',
     });
+    record.check(`${spec.id}.singbox-backend-preflight`, source.includes('require_sing_box_shunts()')
+      && source.includes('[ "${backend}" != "sing-box" ]')
+      && source.includes('[ "${protocol}" = "_shunt" ]')
+      && source.indexOf('\nrequire_sing_box_shunts\n') < source.indexOf('\nif [ "${MODE}" = "--replace" ]; then'));
     if (!reference.includes(baselineVersion)) {
       record.warn(`${spec.id}.reference-conf.baseline`, `${spec.reference} does not advertise ${baselineVersion}; apply script plus shunt-rules are authoritative`);
     }
@@ -2275,15 +2342,15 @@ function validatePasswall(record, baselineVersion) {
       });
     }
 
-    const cnmediaJson = fusedSingBoxText('scki-fused-005-cnmedia');
-    const cnSiteJson = fusedSingBoxText('scki-fused-007-cn-site');
-    const googleJson = fusedSingBoxText('scki-fused-022-google');
-    const cnGameJson = fusedSingBoxText('scki-fused-060-game-cn');
-    const intlGameJson = fusedSingBoxText('scki-fused-061-game-intl');
-    const imJson = `${fusedSingBoxText('scki-fused-019-im')}\n${fusedSingBoxText('scki-fused-032-im')}`;
+    const cnmediaJson = fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`);
+    const cnSiteJson = fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-007-cn-site"]}`);
+    const googleJson = fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-022-google"]}`);
+    const cnGameJson = fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`) + fusedSingBoxText(GAME_CN_GUARD_ID);
+    const intlGameJson = fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`);
+    const imJson = `${fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-019-im"]}`)}\n${fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-032-im"]}`)}`;
 
-    record.check(`${spec.id}.cloudflarestorage-fused-source`, fusedSingBoxText('scki-fused-002-intl-site').includes('cloudflarestorage.com'));
-    record.check(`${spec.id}.scholar-target-google`, singBoxSourceCoversDomain('scki-fused-022-google', 'scholar.google.com'), {
+    record.check(`${spec.id}.cloudflarestorage-fused-source`, fusedSingBoxText(`${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`).includes('cloudflarestorage.com'));
+    record.check(`${spec.id}.scholar-target-google`, singBoxSourceCoversDomain(`${CONTRACT_SEGMENTS["scki-fused-022-google"]}`, 'scholar.google.com'), {
       message: 'Google fused source must semantically cover scholar.google.com',
     });
     record.check(
@@ -2300,32 +2367,32 @@ function validatePasswall(record, baselineVersion) {
       record,
       `${spec.id}.cloudflarestorage-script-before-ads`,
       source,
-      "add_fused_shunt_rule 'scki-fused-002-intl-site",
-      "add_fused_shunt_rule 'scki-fused-006-ad",
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-002-intl-site"]}`,
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-006-ad"]}`,
     );
     checkNeedleBefore(
       record,
       `${spec.id}.cnmedia-script-before-tiktok`,
       source,
-      "add_fused_shunt_rule 'scki-fused-005-cnmedia",
-      "add_fused_shunt_rule 'scki-fused-039-tiktok",
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-005-cnmedia"]}`,
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-039-tiktok"]}`,
     );
     checkNeedleBefore(
       record,
       `${spec.id}.cn-game-script-before-intl-game`,
       source,
-      "add_fused_shunt_rule 'scki-fused-060-game-cn",
-      "add_fused_shunt_rule 'scki-fused-061-game-intl",
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`,
+      `add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`,
     );
     for (const domain of PASSWALL_CN_GAME_REQUIRED) {
       const normalized = domain.replace(/^domain:/, '');
       record.check(
         `${spec.id}.cn-game-fused-source.${normalized}`,
         cnGameJson.includes(normalized),
-        failureMessage(cnGameJson.includes(normalized), `scki-fused-060-game-cn missing ${normalized}`),
+        failureMessage(cnGameJson.includes(normalized), `${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]} missing ${normalized}`),
       );
     }
-    record.check(`${spec.id}.cn-game-mihoyo-before-intl-game`, cnGameJson.includes('"mihoyo.com"') && source.indexOf("add_fused_shunt_rule 'scki-fused-060-game-cn") < source.indexOf("add_fused_shunt_rule 'scki-fused-061-game-intl"), {
+    record.check(`${spec.id}.cn-game-mihoyo-before-intl-game`, cnGameJson.includes('"mihoyo.com"') && source.indexOf(`add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-060-game-cn"]}`) < source.indexOf(`add_fused_shunt_rule '${CONTRACT_SEGMENTS["scki-fused-061-game-intl"]}`), {
       message: 'domain:mihoyo.com must be protected by an earlier CN game fused segment even if later broad game providers also contain it',
     });
     record.check(`${spec.id}.no-legacy-kakaotalk-geosite`, !activeRuleText.includes('geosite:kakaotalk'), {
@@ -2342,14 +2409,14 @@ function validatePasswall(record, baselineVersion) {
     }
   }
 
-  const passwallLists = listFiles('Passwall/shunt-rules').filter((file) => file.endsWith('.list')).map((file) => path.basename(file)).sort();
-  const passwall2Lists = listFiles('Passwall2/shunt-rules').filter((file) => file.endsWith('.list')).map((file) => path.basename(file)).sort();
+  const passwallLists = listFiles('双内核系/Passwall/shunt-rules').filter((file) => file.endsWith('.list')).map((file) => path.basename(file)).sort();
+  const passwall2Lists = listFiles('双内核系/Passwall2/shunt-rules').filter((file) => file.endsWith('.list')).map((file) => path.basename(file)).sort();
   record.check('passwall2.same-list-names-as-passwall', JSON.stringify(passwall2Lists) === JSON.stringify(passwallLists), {
     value: { passwall: passwallLists, passwall2: passwall2Lists },
   });
   for (const fileName of passwallLists) {
-    const pwRules = meaningfulRuleLines(path.join('Passwall/shunt-rules', fileName));
-    const pw2Rules = meaningfulRuleLines(path.join('Passwall2/shunt-rules', fileName));
+    const pwRules = meaningfulRuleLines(path.join('双内核系/Passwall/shunt-rules', fileName));
+    const pw2Rules = meaningfulRuleLines(path.join('双内核系/Passwall2/shunt-rules', fileName));
     record.check(`passwall2.${fileName}.same-rules-as-passwall`, JSON.stringify(pw2Rules) === JSON.stringify(pwRules), {
       message: `${fileName} differs between Passwall and Passwall2`,
     });
@@ -2418,19 +2485,19 @@ function validateDomesticAuthorityPriorityAcrossArtifacts(record) {
   const cnMihomoRule = cnId ? `RULE-SET,${cnId}-domain,🏠 国内网站` : '';
   const internationalGeoMihomoRule = internationalGeoId ? `RULE-SET,${internationalGeoId}-residual,🌐 国外网站` : '';
   for (const spec of [
-    { id: 'clash-party-smart', file: 'Clash Party/ClashParty(mihomo-smart).js' },
-    { id: 'clash-party-normal', file: 'Clash Party/ClashParty(mihomo).js' },
-    { id: 'flclash', file: 'FlClash/FlClash(mihomo).js' },
+    { id: 'clash-party-smart', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js' },
+    { id: 'clash-party-normal', file: 'Mihomo内核系/Clash Party/ClashParty(mihomo).js' },
+    { id: 'flclash', file: 'Mihomo内核系/FlClash/FlClash(mihomo).js' },
   ]) {
     const rules = extractMihomoFusedRules(spec.file);
     checkDomesticAuthorityPriorityOrder(record, spec.id, rules.indexOf(cnMihomoRule), rules.indexOf(internationalGeoMihomoRule), cnMihomoRule, internationalGeoMihomoRule);
   }
 
   const mihomoProducts = [
-    { id: 'cmfa', source: readText('Clash Meta For Android/CMFA(mihomo).yaml') },
-    { id: 'stash', source: readText('Stash/Stash.yaml') },
-    { id: 'openclash-normal', source: extractOpenClashOverride('OpenClash/OpenClash(mihomo).sh') },
-    { id: 'openclash-smart', source: extractOpenClashOverride('OpenClash/OpenClash(mihomo-smart).sh') },
+    { id: 'cmfa', source: readText('Mihomo内核系/Clash Meta For Android/CMFA(mihomo).yaml') },
+    { id: 'stash', source: readText('独立内核系/Stash/Stash.yaml') },
+    { id: 'openclash-normal', source: extractOpenClashOverride('Mihomo内核系/OpenClash/OpenClash(mihomo).sh') },
+    { id: 'openclash-smart', source: extractOpenClashOverride('Mihomo内核系/OpenClash/OpenClash(mihomo-smart).sh') },
   ];
   for (const product of mihomoProducts) {
     const rules = extractYamlBlock(product.source, 'rules');
@@ -2440,21 +2507,21 @@ function validateDomesticAuthorityPriorityAcrossArtifacts(record) {
   const cnMobileNeedle = cnId ? `${cnId}.list` : '';
   const internationalGeoMobileNeedle = internationalGeoId ? `${internationalGeoId}.list` : '';
   for (const spec of [
-    { id: 'shadowrocket', file: 'Shadowrocket/Shadowrocket.conf', section: 'Rule' },
-    { id: 'surge', file: 'Surge/Surge.conf', section: 'Rule' },
-    { id: 'loon', file: 'Loon/Loon.conf', section: 'Remote Rule' },
-    { id: 'quantumult-x', file: 'Quantumult X/QuantumultX.conf', section: 'filter_remote' },
+    { id: 'shadowrocket', file: '独立内核系/Shadowrocket/Shadowrocket.conf', section: 'Rule' },
+    { id: 'surge', file: '独立内核系/Surge/Surge.conf', section: 'Rule' },
+    { id: 'loon', file: '独立内核系/Loon/Loon.conf', section: 'Remote Rule' },
+    { id: 'quantumult-x', file: '独立内核系/Quantumult X/QuantumultX.conf', section: 'filter_remote' },
   ]) {
     const section = extractConfSection(readText(spec.file), spec.section);
     checkDomesticAuthorityPriorityOrder(record, spec.id, section.indexOf(cnMobileNeedle), section.indexOf(internationalGeoMobileNeedle), cnMobileNeedle, internationalGeoMobileNeedle);
   }
 
-  const egernRules = extractYamlBlock(readText('Egern/Egern.yaml'), 'rules');
+  const egernRules = extractYamlBlock(readText('独立内核系/Egern/Egern.yaml'), 'rules');
   const cnEgernNeedle = cnId ? `provider-${cnId}-domain.yaml` : '';
   const internationalGeoEgernNeedle = internationalGeoId ? `provider-${internationalGeoId}-residual.yaml` : '';
   checkDomesticAuthorityPriorityOrder(record, 'egern', egernRules.indexOf(cnEgernNeedle), egernRules.indexOf(internationalGeoEgernNeedle), cnEgernNeedle, internationalGeoEgernNeedle);
 
-  const singBox = readJson('SingBox/SingBox(sing-box)-full.json');
+  const singBox = readJson('Sing-box内核系/SingBox/SingBox(sing-box)-full.json');
   const singBoxRules = singBox.route && Array.isArray(singBox.route.rules) ? singBox.route.rules : [];
   const singBoxRuleIndex = (segmentId) => segmentId ? singBoxRules.findIndex((rule) => {
     const ruleSets = Array.isArray(rule.rule_set) ? rule.rule_set : [rule.rule_set];
@@ -2462,13 +2529,13 @@ function validateDomesticAuthorityPriorityAcrossArtifacts(record) {
   }) : -1;
   checkDomesticAuthorityPriorityOrder(record, 'sing-box', singBoxRuleIndex(cnId), singBoxRuleIndex(internationalGeoId), cnId, internationalGeoId);
 
-  const xrayRules = readJson('v2rayN/v2rayN(xray).json');
+  const xrayRules = readJson('Xray内核系/v2rayN/v2rayN(xray).json');
   const xrayRuleIndex = (segmentId) => segmentId ? (Array.isArray(xrayRules) ? xrayRules : []).findIndex((rule) => rule.id === segmentId) : -1;
   checkDomesticAuthorityPriorityOrder(record, 'v2rayn-xray', xrayRuleIndex(cnId), xrayRuleIndex(internationalGeoId), cnId, internationalGeoId);
 
   for (const spec of [
-    { id: 'passwall', file: 'Passwall/Passwall(xray+sing-box)-apply.sh' },
-    { id: 'passwall2', file: 'Passwall2/Passwall2(xray+sing-box)-apply.sh' },
+    { id: 'passwall', file: '双内核系/Passwall/Passwall(xray+sing-box)-apply.sh' },
+    { id: 'passwall2', file: '双内核系/Passwall2/Passwall2(xray+sing-box)-apply.sh' },
   ]) {
     const source = readText(spec.file);
     const cnNeedle = cnId ? `add_fused_shunt_rule '${cnId} | 🏠 国内网站'` : '';
@@ -2511,6 +2578,21 @@ function validateClientCapabilityMatrixContract(record) {
   }
 }
 
+function validateKaringProducts(record, baselineVersion) {
+  try {
+    const built = buildKaring(readKaringInputs(REPO_ROOT));
+    const drift = checkKaringOutputs(REPO_ROOT, built);
+    record.check('karing.source-bound-native-profile', drift.length === 0, {
+      message: drift.join('; '),
+    });
+    record.check('karing.baseline-version', built.manifest.baseline_version === baselineVersion, {
+      value: built.manifest.baseline_version,
+    });
+  } catch (error) {
+    record.check('karing.source-bound-native-profile', false, { message: error.message });
+  }
+}
+
 function buildManifest(baselineVersion) {
   return {
     generatedAt: new Date().toISOString(),
@@ -2545,6 +2627,18 @@ function printHuman(result) {
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const record = makeRecorder();
+  try {
+    const stale = prepareBusinessDnsUpdates().filter(item => item.original !== item.updated);
+    record.check('business-dns.source-bound-projections', stale.length === 0, {
+      message: stale.map(item => path.relative(REPO_ROOT, item.file)).join(', '),
+    });
+    const projection = compileBusinessDnsPolicy(require('../rulesets/source/routing-graph').getBusinessDnsPolicy(), getRawRoutingGraph());
+    record.check('stash.dns.business-policy-source', readText('独立内核系/Stash/Stash.yaml').includes(renderBusinessDnsBlock(projection.yaml, 'yaml')), {
+      message: 'Stash must inherit the source-generated business DNS policy from CMFA',
+    });
+  } catch (error) {
+    record.check('business-dns.source-bound-projections', false, { message: error.message });
+  }
   const { baselineVersion } = validateJsProducts(record);
   validateMihomoMrsRuleSets(record);
   validateFusedRuleSets(record);
@@ -2560,6 +2654,7 @@ function main() {
   validateDomesticAuthorityPriorityAcrossArtifacts(record);
   validateSubscriptionAdapterProfileContract(record);
   validateClientCapabilityMatrixContract(record);
+  validateKaringProducts(record, baselineVersion);
   const remoteAssetValidation = validateGeneratedRemoteAssetSizes();
   record.check('generated-remote-assets.size-limit', remoteAssetValidation.failures.length === 0, {
     value: { referenced_assets: remoteAssetValidation.references.size, max_bytes: MAX_JSDELIVR_ASSET_BYTES },

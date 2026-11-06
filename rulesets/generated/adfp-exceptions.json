@@ -1,0 +1,1134 @@
+{
+  "schema_version": 1,
+  "source_graph_version": "v6.0.21",
+  "registry_sha256": "f3844f5622fa0d14b085e6d41ce4986c8d36a1681c9f867b0ee52c5bc8e43f72",
+  "total_records": 38,
+  "coverage": {
+    "scki-adfp-direct": 29,
+    "scki-adfp-intl-site": 3,
+    "scki-adfp-payments": 1,
+    "scki-adfp-ai": 5
+  },
+  "ordered_provider_indices": {
+    "scki-adfp-direct": 0,
+    "scki-adfp-intl-site": 1,
+    "scki-adfp-payments": 2,
+    "scki-adfp-ai": 3
+  },
+  "anti_ad_index": 9,
+  "scope": "Registered payload coverage, matching boundaries and static early first-match probes; no live-client claim.",
+  "registry": {
+    "path": "rulesets/source/adfp-exceptions.json",
+    "sha256": "f3844f5622fa0d14b085e6d41ce4986c8d36a1681c9f867b0ee52c5bc8e43f72",
+    "bytes": 39591,
+    "text_normalization": "LF"
+  },
+  "payloads": [
+    {
+      "path": "rulesets/supplemental/clash/adfp-direct.list",
+      "sha256": "8da263ad74d2d7042b0fd5ad9ec2f2267757f87be9a696beed36e86718765716",
+      "bytes": 1251,
+      "text_normalization": "LF"
+    },
+    {
+      "path": "rulesets/supplemental/clash/adfp-intl-site.list",
+      "sha256": "c50012494511b41bdd744f4bc7d0ffd8bc3b55c861dcec1ac5cf9e364b07ee4b",
+      "bytes": 88,
+      "text_normalization": "LF"
+    },
+    {
+      "path": "rulesets/supplemental/clash/adfp-payments.list",
+      "sha256": "f52adb7e55629d4bdb8cd32b787a2d72200b5b6e20d617079403c42a130f2068",
+      "bytes": 25,
+      "text_normalization": "LF"
+    },
+    {
+      "path": "rulesets/supplemental/clash/adfp-ai.list",
+      "sha256": "7229a725d889f1672112f1d9bcbec3c1867ca2370b809973da812abccaedb5d4",
+      "bytes": 235,
+      "text_normalization": "LF"
+    }
+  ],
+  "probes": [
+    {
+      "host": "a-api.anthropic.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "claude-desktop-a-api"
+    },
+    {
+      "host": "a-cdn.anthropic.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "claude-desktop-a-cdn"
+    },
+    {
+      "host": "login.nvidia.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "nvidia-cn-login"
+    },
+    {
+      "host": "dns.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-httpdns-primary"
+    },
+    {
+      "host": "dns.weixin.qq.com.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-httpdns-cn"
+    },
+    {
+      "host": "drpf-g10.proxima.nie.netease.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "netease-game-drpf"
+    },
+    {
+      "host": "sigma-performance-g10.proxima.nie.netease.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "netease-game-sigma"
+    },
+    {
+      "host": "account.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-account"
+    },
+    {
+      "host": "login.account.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-account"
+    },
+    {
+      "host": "passport.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-passport"
+    },
+    {
+      "host": "api.passport.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-passport"
+    },
+    {
+      "host": "micloud.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-micloud"
+    },
+    {
+      "host": "api.micloud.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-micloud"
+    },
+    {
+      "host": "i.mi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-cloud-entry"
+    },
+    {
+      "host": "auth.be.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-auth-be"
+    },
+    {
+      "host": "idm.api.io.mi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-identity-api"
+    },
+    {
+      "host": "api.installer.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-installer-api"
+    },
+    {
+      "host": "flash.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-flash-service"
+    },
+    {
+      "host": "mazu.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-mazu-service"
+    },
+    {
+      "host": "ccc.sys.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-system-service"
+    },
+    {
+      "host": "register.xmpush.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-push-registration"
+    },
+    {
+      "host": "jpush.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-cn"
+    },
+    {
+      "host": "push.jpush.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-cn"
+    },
+    {
+      "host": "jpush.io",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-io"
+    },
+    {
+      "host": "api.jpush.io",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-io"
+    },
+    {
+      "host": "msg.umeng.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "umeng-message"
+    },
+    {
+      "host": "getui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-com"
+    },
+    {
+      "host": "sdk.getui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-com"
+    },
+    {
+      "host": "getui.net",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-net"
+    },
+    {
+      "host": "sdk.getui.net",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-net"
+    },
+    {
+      "host": "gepush.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "gepush-com"
+    },
+    {
+      "host": "sdk.gepush.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "gepush-com"
+    },
+    {
+      "host": "cloudflarestorage.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "cloudflare-r2-storage"
+    },
+    {
+      "host": "bucket.r2.cloudflarestorage.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "cloudflare-r2-storage"
+    },
+    {
+      "host": "paddle.com",
+      "expected_policy": "🏦 金融支付",
+      "exception_id": "paddle-payments"
+    },
+    {
+      "host": "analytics.paddle.com",
+      "expected_policy": "🏦 金融支付",
+      "exception_id": "paddle-payments"
+    },
+    {
+      "host": "browser-intake-datadoghq.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-datadog-telemetry"
+    },
+    {
+      "host": "o33249.ingest.sentry.io",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-sentry-telemetry-eu"
+    },
+    {
+      "host": "o33249.ingest.us.sentry.io",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-sentry-telemetry-us"
+    },
+    {
+      "host": "crl3.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-crl3-digicert-com"
+    },
+    {
+      "host": "crl4.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-crl4-digicert-com"
+    },
+    {
+      "host": "ocsp.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-ocsp-digicert-com"
+    },
+    {
+      "host": "ocsp.sectigo.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-ocsp-sectigo-com"
+    },
+    {
+      "host": "mail.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-mail-live-com"
+    },
+    {
+      "host": "outlook.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-outlook-live-com"
+    },
+    {
+      "host": "child.outlook.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-outlook-live-com"
+    },
+    {
+      "host": "szlong.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-szlong"
+    },
+    {
+      "host": "hklong.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-hklong"
+    },
+    {
+      "host": "hkshort.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-hkshort"
+    }
+  ],
+  "ordered_positive_probes": [
+    {
+      "host": "a-api.anthropic.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "claude-desktop-a-api",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🤖 AI 服务",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.yaml",
+        "entry": "DOMAIN,a-api.anthropic.com",
+        "entryIndex": 3,
+        "index": 3,
+        "policy": "🤖 AI 服务",
+        "provider": "scki-fused-004-ai-domain"
+      }
+    },
+    {
+      "host": "a-cdn.anthropic.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "claude-desktop-a-cdn",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🤖 AI 服务",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.yaml",
+        "entry": "DOMAIN,a-cdn.anthropic.com",
+        "entryIndex": 4,
+        "index": 3,
+        "policy": "🤖 AI 服务",
+        "provider": "scki-fused-004-ai-domain"
+      }
+    },
+    {
+      "host": "login.nvidia.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "nvidia-cn-login",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,login.nvidia.cn",
+        "entryIndex": 0,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "dns.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-httpdns-primary",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,dns.weixin.qq.com",
+        "entryIndex": 1,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "dns.weixin.qq.com.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-httpdns-cn",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,dns.weixin.qq.com.cn",
+        "entryIndex": 2,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "drpf-g10.proxima.nie.netease.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "netease-game-drpf",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,drpf-g10.proxima.nie.netease.com",
+        "entryIndex": 3,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "sigma-performance-g10.proxima.nie.netease.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "netease-game-sigma",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,sigma-performance-g10.proxima.nie.netease.com",
+        "entryIndex": 4,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "account.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-account",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,account.xiaomi.com",
+        "entryIndex": 5,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "login.account.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-account",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,account.xiaomi.com",
+        "entryIndex": 5,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "passport.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-passport",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,passport.xiaomi.com",
+        "entryIndex": 6,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "api.passport.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-passport",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,passport.xiaomi.com",
+        "entryIndex": 6,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "micloud.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-micloud",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,micloud.xiaomi.com",
+        "entryIndex": 7,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "api.micloud.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-micloud",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,micloud.xiaomi.com",
+        "entryIndex": 7,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "i.mi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-cloud-entry",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,i.mi.com",
+        "entryIndex": 8,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "auth.be.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-auth-be",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,auth.be.sec.miui.com",
+        "entryIndex": 9,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "idm.api.io.mi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-identity-api",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,idm.api.io.mi.com",
+        "entryIndex": 10,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "api.installer.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-installer-api",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,api.installer.xiaomi.com",
+        "entryIndex": 11,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "flash.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-flash-service",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,flash.sec.miui.com",
+        "entryIndex": 12,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "mazu.sec.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-mazu-service",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,mazu.sec.miui.com",
+        "entryIndex": 13,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "ccc.sys.miui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "miui-system-service",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,ccc.sys.miui.com",
+        "entryIndex": 14,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "register.xmpush.xiaomi.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "xiaomi-push-registration",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,register.xmpush.xiaomi.com",
+        "entryIndex": 15,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "jpush.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-cn",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,jpush.cn",
+        "entryIndex": 16,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "push.jpush.cn",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-cn",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,jpush.cn",
+        "entryIndex": 16,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "jpush.io",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-io",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,jpush.io",
+        "entryIndex": 17,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "api.jpush.io",
+      "expected_policy": "DIRECT",
+      "exception_id": "jpush-io",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,jpush.io",
+        "entryIndex": 17,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "msg.umeng.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "umeng-message",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,msg.umeng.com",
+        "entryIndex": 18,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "getui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,getui.com",
+        "entryIndex": 19,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "sdk.getui.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,getui.com",
+        "entryIndex": 19,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "getui.net",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-net",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,getui.net",
+        "entryIndex": 20,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "sdk.getui.net",
+      "expected_policy": "DIRECT",
+      "exception_id": "getui-net",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,getui.net",
+        "entryIndex": 20,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "gepush.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "gepush-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,gepush.com",
+        "entryIndex": 21,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "sdk.gepush.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "gepush-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,gepush.com",
+        "entryIndex": 21,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "cloudflarestorage.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "cloudflare-r2-storage",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🌐 国外网站",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,cloudflarestorage.com",
+        "entryIndex": 0,
+        "index": 1,
+        "policy": "🌐 国外网站",
+        "provider": "scki-fused-002-intl-site-domain"
+      }
+    },
+    {
+      "host": "bucket.r2.cloudflarestorage.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "cloudflare-r2-storage",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🌐 国外网站",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,cloudflarestorage.com",
+        "entryIndex": 0,
+        "index": 1,
+        "policy": "🌐 国外网站",
+        "provider": "scki-fused-002-intl-site-domain"
+      }
+    },
+    {
+      "host": "paddle.com",
+      "expected_policy": "🏦 金融支付",
+      "exception_id": "paddle-payments",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🏦 金融支付",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-003-payments-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,paddle.com",
+        "entryIndex": 0,
+        "index": 2,
+        "policy": "🏦 金融支付",
+        "provider": "scki-fused-003-payments-domain"
+      }
+    },
+    {
+      "host": "analytics.paddle.com",
+      "expected_policy": "🏦 金融支付",
+      "exception_id": "paddle-payments",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🏦 金融支付",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-003-payments-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,paddle.com",
+        "entryIndex": 0,
+        "index": 2,
+        "policy": "🏦 金融支付",
+        "provider": "scki-fused-003-payments-domain"
+      }
+    },
+    {
+      "host": "browser-intake-datadoghq.com",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-datadog-telemetry",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🤖 AI 服务",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.yaml",
+        "entry": "DOMAIN,browser-intake-datadoghq.com",
+        "entryIndex": 0,
+        "index": 3,
+        "policy": "🤖 AI 服务",
+        "provider": "scki-fused-004-ai-domain"
+      }
+    },
+    {
+      "host": "o33249.ingest.sentry.io",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-sentry-telemetry-eu",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🤖 AI 服务",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.yaml",
+        "entry": "DOMAIN,o33249.ingest.sentry.io",
+        "entryIndex": 1,
+        "index": 3,
+        "policy": "🤖 AI 服务",
+        "provider": "scki-fused-004-ai-domain"
+      }
+    },
+    {
+      "host": "o33249.ingest.us.sentry.io",
+      "expected_policy": "🤖 AI 服务",
+      "exception_id": "chatgpt-sentry-telemetry-us",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🤖 AI 服务",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-004-ai-domain.yaml",
+        "entry": "DOMAIN,o33249.ingest.us.sentry.io",
+        "entryIndex": 2,
+        "index": 3,
+        "policy": "🤖 AI 服务",
+        "provider": "scki-fused-004-ai-domain"
+      }
+    },
+    {
+      "host": "crl3.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-crl3-digicert-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,crl3.digicert.com",
+        "entryIndex": 22,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "crl4.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-crl4-digicert-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,crl4.digicert.com",
+        "entryIndex": 23,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "ocsp.digicert.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-ocsp-digicert-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,ocsp.digicert.com",
+        "entryIndex": 24,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "ocsp.sectigo.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "routing-audit-ocsp-sectigo-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,ocsp.sectigo.com",
+        "entryIndex": 25,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "mail.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-mail-live-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🌐 国外网站",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.yaml",
+        "entry": "DOMAIN,mail.live.com",
+        "entryIndex": 1,
+        "index": 1,
+        "policy": "🌐 国外网站",
+        "provider": "scki-fused-002-intl-site-domain"
+      }
+    },
+    {
+      "host": "outlook.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-outlook-live-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🌐 国外网站",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,outlook.live.com",
+        "entryIndex": 2,
+        "index": 1,
+        "policy": "🌐 国外网站",
+        "provider": "scki-fused-002-intl-site-domain"
+      }
+    },
+    {
+      "host": "child.outlook.live.com",
+      "expected_policy": "🌐 国外网站",
+      "exception_id": "routing-audit-outlook-live-com",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "🌐 国外网站",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-002-intl-site-domain.yaml",
+        "entry": "DOMAIN-SUFFIX,outlook.live.com",
+        "entryIndex": 2,
+        "index": 1,
+        "policy": "🌐 国外网站",
+        "provider": "scki-fused-002-intl-site-domain"
+      }
+    },
+    {
+      "host": "szlong.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-szlong",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,szlong.weixin.qq.com",
+        "entryIndex": 26,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "hklong.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-hklong",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,hklong.weixin.qq.com",
+        "entryIndex": 27,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    },
+    {
+      "host": "hkshort.weixin.qq.com",
+      "expected_policy": "DIRECT",
+      "exception_id": "wechat-connection-hkshort",
+      "mode": "full-static",
+      "status": "match",
+      "actual_policy": "DIRECT",
+      "evidence": {
+        "source": "rulesets/source/routing-graph.js after Mihomo MRS normalization",
+        "path": "rulesets/generated/fused/mihomo/scki-fused-001-direct-domain.yaml",
+        "entry": "DOMAIN,hkshort.weixin.qq.com",
+        "entryIndex": 28,
+        "index": 0,
+        "policy": "DIRECT",
+        "provider": "scki-fused-001-direct-domain"
+      }
+    }
+  ]
+}

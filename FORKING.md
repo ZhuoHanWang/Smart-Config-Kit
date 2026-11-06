@@ -10,7 +10,7 @@
 | `origin`：个人 GitHub Fork | 发布个人 JS、配套规则快照、脱敏 SubStore 脚本/模板及说明 |
 | 私有 SubStore | 保存真实订阅、节点凭据和 Source / Collection 数据，输出组合订阅 |
 
-主要工作目录是 `Clash Party/`、`FlClash/` 和 `SubStore/`；`tools/` 中的相关验证工具与依赖也要保留。其他客户端、规则生成管线和上游文档保留供后续合并，按需查看，无需为了个人 JS 修改同步全部产物。
+主要工作目录是 `Mihomo内核系/Clash Party/`、`Mihomo内核系/FlClash/` 和 `SubStore/`；`tools/` 中的相关验证工具与依赖也要保留。其他客户端、规则生成管线和上游文档保留供后续合并，按需查看，无需为了个人 JS 修改同步全部产物。
 
 ## 订阅与 JMS
 
@@ -56,7 +56,7 @@ git merge upstream/main
 - `AGENTS.md`、本指南及 `.gitignore`：保留个人维护范围和私有文件忽略规则。
 - 其他客户端和规则生成物：通常接受 upstream；无需重建完整生成链路。
 
-Clash Party Smart/Normal 与 FlClash 共用 `Clash Party/rulesets/active.json` 指定的个人规则快照。该目录保存复制的 `.mrs` / residual YAML、两份 Gemini YAML 和文件哈希清单；URL 指向 `ZhuoHanWang/Smart-Config-Kit@main` 下独立的版本目录。保持该目录不变时，客户端定时下载仍取得同一份规则。GeoX 数据库不属于此快照，继续沿用客户端原配置。
+Clash Party Smart/Normal 与 FlClash 共用 `Mihomo内核系/Clash Party/rulesets/active.json` 指定的个人规则快照。该目录保存复制的 `.mrs` / residual YAML、两份 Gemini YAML 和文件哈希清单；URL 指向 `ZhuoHanWang/Smart-Config-Kit` 下独立的版本目录。保持该目录不变时，客户端定时下载仍取得同一份规则。GeoX 数据库不属于此快照，继续沿用客户端原配置。
 
 合并后若暂不升级规则，恢复这三个脚本的配套规则块：
 
@@ -64,10 +64,10 @@ Clash Party Smart/Normal 与 FlClash 共用 `Clash Party/rulesets/active.json` �
 node tools/use-personal-rule-snapshot.js
 ```
 
-有意升级时，先合并三份正式 JS 中配套的上游融合 provider/rules 块及其 `rulesets/generated/fused/mihomo/` 文件，再创建新目录（例如下一个版本 `v6.0.15-fork.2`）：
+有意升级时，先合并三份正式 JS 中配套的上游融合 provider/rules 块及其 `rulesets/generated/fused/mihomo/` 文件，再创建新目录（例如下一个版本 `v6.0.21-fork.2`）：
 
 ```bash
-node tools/use-personal-rule-snapshot.js --create v6.0.15-fork.2
+node tools/use-personal-rule-snapshot.js --create v6.0.21-fork.2
 ```
 
 该命令复制本地已编译资产、下载两份 Gemini YAML 并更新三个 JS，不运行全端编译；已存在的快照禁止覆盖。仍使用本地旧 `ClashParty(mihomo-smart)-ai-gemini.js` 时，在上述命令追加 `--include-local-gemini`，该文件继续被 Git 忽略。规则内容升级后同步更新受影响 JS 的版本号和目录 CHANGELOG。
@@ -88,14 +88,14 @@ node --test tools/tests/subscription-ai-group.test.js
 
 ## 发布与导入
 
-确认 diff 和验证结果后，将个人定制单独提交到 `origin`，便于以后与上游区分。开发测试使用 `@main`，稳定使用可创建新的版本 tag（例如 `@personal-v1`），客户端固定到已验证的 tag。
-
-当前个人 Fork 的 FlClash 地址：
+确认 diff 和验证结果后，将个人定制单独提交到 `origin`，便于以后与上游区分。正式客户端导入固定到与脚本 `VERSION` 完全一致、且已经推送的 tag；不要把 `@main` 用作稳定导入地址。路径按仓库目录结构填写：
 
 ```text
-https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@v6.0.15-flclash-ai-gemini.12/FlClash/FlClash%28mihomo%29.js
+https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@<VERSION>/Mihomo%E5%86%85%E6%A0%B8%E7%B3%BB/FlClash/FlClash%28mihomo%29.js
+https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@<VERSION>/Mihomo%E5%86%85%E6%A0%B8%E7%B3%BB/Clash%20Party/ClashParty%28mihomo-smart%29.js
+https://cdn.jsdelivr.net/gh/ZhuoHanWang/Smart-Config-Kit@<VERSION>/Mihomo%E5%86%85%E6%A0%B8%E7%B3%BB/Clash%20Party/ClashParty%28mihomo%29.js
 ```
 
-其他 Fork 替换用户名和仓库名；Clash Party 使用同一前缀下的 `Clash%20Party/ClashParty%28mihomo-smart%29.js` 或 `Clash%20Party/ClashParty%28mihomo%29.js`。确认地址返回纯 JavaScript，刷新客户端后检查最终策略组及默认选项。
+`<VERSION>` 是占位符，分别替换为相应脚本中的版本号；先确认该 tag 已推送，再验证地址返回纯 JavaScript。此次合并生成的脚本尚未发布，不提供可直接导入的版本链接。
 
-发布时将个人 JS、`Clash Party/rulesets/active.json` 和对应快照目录一起提交、推送；只上传 JS 会导致新的规则 URL 返回 404。后续升级保留旧快照，以便旧客户端继续使用；无需自行编译作者已经生成的规则。更换私有 JMS 节点不需要重新发布 JS。
+发布时将个人 JS、`Mihomo内核系/Clash Party/rulesets/active.json` 和对应快照目录一起提交、推送；只上传 JS 会导致新的规则 URL 返回 404。后续升级保留旧快照，以便旧客户端继续使用；无需自行编译作者已经生成的规则。更换私有 JMS 节点不需要重新发布 JS。

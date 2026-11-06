@@ -13,3 +13,6 @@ Clash Party/*-ai*.js
 Clash Party/*-ru4.js
 MERGE-PLAN.md
 .js
+
+# 本机Cloudflare账户缓存与部署状态
+.wrangler/

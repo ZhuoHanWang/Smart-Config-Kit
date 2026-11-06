@@ -9,12 +9,12 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const SNAPSHOT_ROOT = 'Clash Party/rulesets';
+const SNAPSHOT_ROOT = 'Mihomo内核系/Clash Party/rulesets';
 const ACTIVE_FILE = path.join(REPO_ROOT, SNAPSHOT_ROOT, 'active.json');
 const CLIENT_FILES = [
-  'Clash Party/ClashParty(mihomo-smart).js',
-  'Clash Party/ClashParty(mihomo).js',
-  'FlClash/FlClash(mihomo).js',
+  'Mihomo内核系/Clash Party/ClashParty(mihomo-smart).js',
+  'Mihomo内核系/Clash Party/ClashParty(mihomo).js',
+  'Mihomo内核系/FlClash/FlClash(mihomo).js',
 ];
 const LOCAL_GEMINI_FILE = 'Clash Party/ClashParty(mihomo-smart)-ai-gemini.js';
 const GEMINI_SOURCES = {
@@ -41,7 +41,8 @@ function safeRevision(value) {
 }
 function localAsset(url) {
   const parsed = new URL(url);
-  const match = parsed.pathname.match(/^\/gh\/[^/]+\/Smart-Config-Kit@main\/(.+)$/);
+  const match = parsed.pathname.match(/^\/gh\/[^/]+\/Smart-Config-Kit@main\/(.+)$/) ||
+    parsed.pathname.match(/^\/[^/]+\/Smart-Config-Kit\/main\/(.+)$/);
   assert.ok(match, `not a compiled Smart-Config-Kit asset: ${url}`);
   const relative = decodeURIComponent(match[1]);
   assert.ok(relative.startsWith('rulesets/generated/fused/mihomo/') || relative.startsWith(`${SNAPSHOT_ROOT}/`), 'unexpected source asset directory');
@@ -54,6 +55,35 @@ function assetUrl(active, file) {
   return `https://fastly.jsdelivr.net/gh/${active.repository}@main/${relative}?scki=${active.snapshot}`;
 }
 function cachePath(active, file) { return `./ruleset/personal/${active.snapshot}/${file}`; }
+
+function declaredSupplementalSnapshotAssets(root = REPO_ROOT) {
+  const receiptPath = path.join(root, 'rulesets/generated/supplemental-patch.json');
+  if (!fs.existsSync(receiptPath)) return new Set();
+  const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
+  assert.equal(receipt.mode, 'partial-sync', 'unexpected supplemental patch receipt');
+  assert.ok(Array.isArray(receipt.changed_segments) && Array.isArray(receipt.outputs), 'incomplete supplemental patch receipt');
+  const fused = JSON.parse(fs.readFileSync(path.join(root, 'rulesets/generated/fused/manifest.json'), 'utf8'));
+  const outputByPath = new Map(receipt.outputs.map(row => [row.file, row]));
+  const files = new Set();
+  for (const change of receipt.changed_segments) {
+    const segment = fused.segments.find(row => row.id === change.id);
+    assert.ok(segment?.files?.domain?.file && segment.files.domain.source, `missing patched domain asset for ${change.id}`);
+    const relative = `rulesets/generated/fused/mihomo/${segment.files.domain.source}`;
+    const output = outputByPath.get(relative);
+    assert.ok(output, `supplemental receipt does not bind ${relative}`);
+    const bytes = fs.readFileSync(path.join(root, relative));
+    assert.equal(bytes.length, output.bytes, `${relative}: supplemental receipt size mismatch`);
+    assert.equal(sha256(bytes), output.sha256, `${relative}: supplemental receipt hash mismatch`);
+    files.add(segment.files.domain.file);
+  }
+  return files;
+}
+
+function chooseSnapshotAssetBytes({ file, snapshotBytes, generatedBytes, patchableFiles }) {
+  if (snapshotBytes.equals(generatedBytes)) return snapshotBytes;
+  assert.ok(patchableFiles.has(file), `${file} differs from the active snapshot outside a declared supplemental patch`);
+  return generatedBytes;
+}
 
 function loadSnapshot() {
   const active = JSON.parse(fs.readFileSync(ACTIVE_FILE, 'utf8'));
@@ -141,6 +171,8 @@ async function createSnapshot(revision, includeLocalGemini = false) {
   safeRevision(revision);
   const destination = path.join(REPO_ROOT, SNAPSHOT_ROOT, revision);
   assert.ok(!fs.existsSync(destination), 'snapshot already exists; use a new revision');
+  const previousSnapshot = loadSnapshot();
+  const patchableFiles = declaredSupplementalSnapshotAssets();
   const source = read(CLIENT_FILES[0]);
   const providers = jsonLine(source, 'MIHOMO_FUSED_RULE_PROVIDERS');
   const rules = jsonLine(source, 'MIHOMO_FUSED_RULES');
@@ -161,7 +193,22 @@ async function createSnapshot(revision, includeLocalGemini = false) {
   for (const [id, provider] of Object.entries(providers)) {
     const relative = localAsset(provider.url);
     const file = path.basename(relative);
-    addFile(file, fs.readFileSync(path.join(REPO_ROOT, relative)), provider.url);
+    let bytes = fs.readFileSync(path.join(REPO_ROOT, relative));
+    let sourceUrl = provider.url;
+    if (relative.startsWith(`${SNAPSHOT_ROOT}/`)) {
+      assert.equal(relative, `${SNAPSHOT_ROOT}/${previousSnapshot.active.snapshot}/${file}`, `${id}: source is not from the active personal snapshot`);
+      assert.equal(previousSnapshot.manifest.providers[id]?.file, file, `${id}: file differs from the active snapshot manifest`);
+      const generatedRelative = `rulesets/generated/fused/mihomo/${file}`;
+      if (fs.existsSync(path.join(REPO_ROOT, generatedRelative))) {
+        const generatedBytes = fs.readFileSync(path.join(REPO_ROOT, generatedRelative));
+        const snapshotBytes = bytes;
+        bytes = chooseSnapshotAssetBytes({ file, snapshotBytes: bytes, generatedBytes, patchableFiles });
+        if (!bytes.equals(snapshotBytes)) {
+          sourceUrl = `local:${generatedRelative}; receipt:rulesets/generated/supplemental-patch.json`;
+        }
+      }
+    }
+    addFile(file, bytes, sourceUrl);
     entries[id] = { file, provider };
   }
   const gemini = {};
@@ -203,4 +250,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch((error) => { console.error(error.message); process.exitCode = 1; });
-module.exports = { CLIENT_FILES, loadSnapshot, assertClientSnapshot };
+module.exports = { CLIENT_FILES, loadSnapshot, assertClientSnapshot, declaredSupplementalSnapshotAssets, chooseSnapshotAssetBytes };

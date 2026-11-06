@@ -5,6 +5,11 @@ on:
     # 每周一 05:23 JST（周日 20:23 UTC）；变更 cron 可重新激活可能已停用的 schedule。
     - cron: '23 20 * * 0'
   workflow_dispatch:
+    inputs:
+      semantic_approval_path:
+        description: 'Optional identity-bound review JSON under rulesets/source/ for this exact refresh'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -39,13 +44,22 @@ jobs:
         with:
           ruby-version: '3.3'
 
+      - name: Freeze the release baseline
+        id: baseline
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: ./.github/actions/setup-aerove-mihomo
+
       - name: Synchronize traffic presets before the full build
         run: |
           node tools/sync-traffic-options.js
           node --test tools/tests/traffic-asset-reuse.test.js
 
+      - name: Generate business DNS policy projections
+        run: node tools/sync-business-dns-policy.js
+
       - name: Sync Mihomo MRS rule providers
-        run: node tools/sync-mihomo-mrs-rule-providers.js
+        run: node tools/sync-mihomo-mrs-rule-providers.js --keep-cache
 
       - name: Apply Mihomo MRS overrides
         run: node tools/apply-mihomo-mrs-overrides.js
@@ -58,11 +72,21 @@ jobs:
           node tools/generate-stash-from-cmfa.js
           node tools/generate-egern-supplemental.js
           node tools/generate-egern-from-cmfa.js
-          node "SingBox/SingBox(sing-box)-generator.js"
+          node "Sing-box内核系/SingBox/SingBox(sing-box)-generator.js"
           node tools/generate-fused-fallback-artifacts.js
+          node tools/generate-karing.js
+          node tools/generate-aerove-rule-assets.js
+          node tools/generate-meow.js
 
       - name: Validate complete fused release chain
         run: |
+          node tools/generate-aerove-rule-assets.js --check
+          node tools/generate-meow.js --check
+          MIHOMO_BIN="$AEROVE_MIHOMO_BIN" node --test tools/tests/meow-generation.test.js tools/tests/meow-native-profile.test.js tools/tests/aerove-rule-assets.test.js tools/tests/aerove-rule-projection.test.js
+          node tools/validate-adfp-exceptions.js
+          node --test tools/tests/source-provenance.test.js tools/tests/fused-source-provenance.test.js tools/tests/ordered-rule-semantics.test.js tools/tests/adfp-exceptions.test.js tools/tests/claude-service-dependencies.test.js tools/tests/release-batch.test.js tools/tests/snapshot-supplemental-patch.test.js tools/tests/egern-supplemental-patch.test.js
+          node tools/sync-business-dns-policy.js --check
+          node --test tools/tests/business-dns-policy.test.js tools/tests/business-dns-sync.test.js
           node tools/sync-traffic-options.js --check
           node tools/validate-js-overwrites.js
           node tools/validate-process-name-direct.js
@@ -74,42 +98,82 @@ jobs:
           node tools/test-openclash-node-filter.js
           node --test tools/tests/apply-mihomo-mrs-overrides.test.js tools/tests/domestic-route-regression.test.js tools/tests/egern-generation-manifest.test.js tools/tests/fused-rule-optimizer.test.js tools/tests/fused-artifact-performance.test.js tools/tests/generated-asset-url.test.js
           node tools/validate-generated-remote-asset-size.js
+          node --test tools/tests/issue-186-asset-delivery.test.js tools/tests/rule-asset-downloads.test.js
           node tools/test-info-node-filter.js
           node tools/test-kr-boundary.js
           git diff --check
 
-      - name: Commit synchronized fused artifacts
+      - name: Review ordered semantic changes before publication
+        env:
+          SCKI_SEMANTIC_APPROVAL_PATH: ${{ inputs.semantic_approval_path }}
+          SCKI_RELEASE_BASE: ${{ steps.baseline.outputs.commit }}
+        run: |
+          approval_args=()
+          if [ -n "$SCKI_SEMANTIC_APPROVAL_PATH" ]; then
+            case "$SCKI_SEMANTIC_APPROVAL_PATH" in
+              rulesets/source/*.json) ;;
+              *) echo "Approval must be a repository-local rulesets/source JSON file"; exit 1 ;;
+            esac
+            case "$SCKI_SEMANTIC_APPROVAL_PATH" in *..*) exit 1 ;; esac
+            approval_args=(--expected-changes "$SCKI_SEMANTIC_APPROVAL_PATH")
+          fi
+          node tools/validate-ordered-rule-semantics.js --baseline-ref "$SCKI_RELEASE_BASE" --mode domain-projection --check --output rulesets/generated/semantic-diff.json "${approval_args[@]}"
+          node tools/refresh-rule-quality.js
+          node tools/generate-karing.js
+          node tools/generate-karing.js --check
+          node tools/generate-aerove-rule-assets.js
+          node tools/generate-meow.js
+          node tools/generate-meow.js --check
+          node tools/refresh-rule-quality.js --check
+          node tools/validate-claude-service-dependencies.js --check --strict-coverage
+
+      - name: Check the complete release batch before staging
+        env:
+          SCKI_RELEASE_BASE: ${{ steps.baseline.outputs.commit }}
+        run: node tools/validate-release-batch.js --baseline-ref "$SCKI_RELEASE_BASE" --output "$RUNNER_TEMP/release-batch.json"
+
+      - name: Stage, verify and publish the frozen release batch
+        env:
+          SCKI_RELEASE_BASE: ${{ steps.baseline.outputs.commit }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            "Clash Party" \
-            "Clash Meta For Android" \
-            "FlClash" \
-            "OpenClash" \
-            "Shadowrocket" \
-            "Stash" \
-            "Egern" \
-            "SingBox" \
-            "v2rayN" \
-            "Surge" \
-            "Loon" \
-            "Quantumult X" \
-            "Passwall" \
-            "Passwall2" \
-            "rulesets/source/routing-graph.js" \
-            "rulesets/source/traffic-options.json" \
-            "rulesets/generated/fused" \
-            "rulesets/generated/mihomo-mrs" \
-            "rulesets/generated/egern" \
-            "rulesets/generated/egern-traffic-snapshot.json.gz" \
-            "rulesets/supplemental/egern" \
-            "tools/runtime/traffic-options.js"
-          if git diff --cached --quiet; then
+          node -e 'const fs=require("node:fs"); const p=require("node:path"); const r=JSON.parse(fs.readFileSync(p.join(process.env.RUNNER_TEMP,"release-batch.json"))); fs.writeFileSync(p.join(process.env.RUNNER_TEMP,"release-paths.nul"),r.changedPaths.map(f=>f+"\0").join(""));'
+          if [ ! -s "$RUNNER_TEMP/release-paths.nul" ]; then
             echo "No upstream-derived fused artifact changes."
+            exit 0
+          fi
+          git --literal-pathspecs add --pathspec-from-file="$RUNNER_TEMP/release-paths.nul" --pathspec-file-nul
+          node tools/validate-release-batch.js --check --receipt "$RUNNER_TEMP/release-batch.json" --mode staged --baseline-ref "$SCKI_RELEASE_BASE"
+          if git diff --cached --quiet; then
+            echo "The approved batch has no Git content changes."
             exit 0
           fi
           git diff --cached --check
           git commit -m "定时同步全量融合规则集"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          node tools/validate-release-batch.js --check --receipt "$RUNNER_TEMP/release-batch.json" --mode committed --baseline-ref "$SCKI_RELEASE_BASE"
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$SCKI_RELEASE_BASE" ]; then
+            echo "main moved after validation; rebuild against its new baseline."
+            exit 1
+          fi
+          push_status=0
+          git push origin HEAD:main || push_status=$?
+          remote_commit=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$remote_commit" != "$(git rev-parse HEAD)" ]; then
+            echo "Published main could not be confirmed (push status: $push_status)."
+            exit 1
+          fi
+
+      - name: Retain quality and release evidence even when review fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rule-quality-evidence
+          path: |
+            rulesets/generated/source-ledger.json
+            rulesets/generated/adfp-exceptions.json
+            rulesets/generated/semantic-diff.json
+            rulesets/generated/claude-service-dependencies.json
+            rulesets/generated/supplemental-patch.json
+            ${{ runner.temp }}/release-batch.json

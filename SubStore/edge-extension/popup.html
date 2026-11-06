@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>订阅链接同步</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>订阅链接同步</h1>
+  <p class="intro">自动识别、自动同步：首次允许此网站后，日常打开仪表盘即可。</p>
+  <p class="hint">仅在你明确允许的网站中识别机场名称，自动匹配已有订阅，无需填写名称映射。</p>
+  <p id="currentSite" class="site">正在识别当前网站…</p>
+  <section id="trustPanel" aria-live="polite" aria-labelledby="trustStatus">
+    <strong id="trustStatus">正在读取网站许可…</strong>
+    <p id="trustTarget"></p>
+    <p>首次许可后，此网站日常自动识别与同步。历史识别记录不代表已获准访问。</p>
+    <button id="trust" type="button" disabled>允许此网站自动同步</button>
+  </section>
+  <label for="site">当前网站与已识别记录</label>
+  <select id="site" disabled></select>
+  <p id="automatic" class="automatic">正在读取自动同步状态…</p>
+  <p id="notice" role="status" aria-live="polite" hidden></p>
+  <section aria-live="polite" aria-labelledby="status">
+    <strong id="status">读取状态…</strong>
+    <dl class="identity">
+      <dt>识别机场名</dt><dd id="siteName">等待识别</dd>
+      <dt>匹配 Sub-Store 条目</dt><dd id="subscriptionName">等待自动匹配</dd>
+    </dl>
+    <p id="pageStage" class="diagnostic"></p>
+    <small id="pageTime"></small>
+    <p id="detail"></p>
+    <div class="targetResults" aria-label="同步目标结果">
+      <p id="localResult">本机：等待同步</p>
+      <p id="cloudResult">Cloudflare：未启用</p>
+    </div>
+    <small id="time"></small>
+    <p id="pending" class="hint"></p>
+    <p id="backup" class="hint"></p>
+  </section>
+  <details id="advanced">
+    <summary>高级设置与排查</summary>
+    <p class="hint">正常使用无需操作下列表单或按钮。站点访问范围由浏览器的扩展权限管理。</p>
+    <label class="toggle"><input id="enabled" type="checkbox" disabled> 全局自动同步</label>
+    <label for="backend">本机 Sub-Store 后端</label>
+    <input id="backend" type="url" spellcheck="false" autocomplete="off" disabled>
+    <label for="frontend">本机 Sub-Store 前端</label>
+    <input id="frontend" type="url" spellcheck="false" autocomplete="off" disabled>
+    <p class="hint">前后端均使用 http://127.0.0.1:端口。</p>
+    <label class="toggle"><input id="cloudEnabled" type="checkbox" disabled> 同时同步独立 Cloudflare Sub-Store</label>
+    <label for="cloudBackend">Cloudflare 完整 HTTPS 后端地址</label>
+    <input id="cloudBackend" type="password" spellcheck="false" autocomplete="off" autocapitalize="off" disabled>
+    <p class="hint">填写含私密管理前缀的后端地址，无需云端前端。地址仅保存在本机扩展中；保存时另行申请后端访问权限，不会将其设为机场信任网站。</p>
+    <button id="importConnection" class="secondary" type="button" disabled>导入连接配置</button>
+    <input id="connectionFile" type="file" accept=".json,application/json" hidden disabled>
+    <p id="dirty" class="hint" hidden></p>
+    <button id="save" class="secondary" type="button" disabled>保存全局设置</button>
+    <div class="actions">
+      <button id="sync" type="button" disabled>手动重试当前网站</button>
+      <button id="check" class="secondary" type="button" disabled>只验证，不写入</button>
+    </div>
+    <button id="restore" class="text" type="button" disabled>撤销本机上次替换</button>
+    <button id="restoreCloud" class="text" type="button" disabled>撤销 Cloudflare 上次替换</button>
+    <button id="untrust" class="text" type="button" disabled>撤销所选网站信任</button>
+  </details>
+  <p class="foot">两端独立验证与写入；部分成功请分别核对。链接更新不代表 Gist 已发布或手机已刷新。扩展不读取机场密码、Cookie 或登录 Token。</p>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
